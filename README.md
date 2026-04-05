@@ -1,52 +1,253 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hospital Management System (ProfClinic)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive Laravel-based hospital and clinic management system for managing patients, prescriptions, appointments, admissions, and medical records.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Patient Management**: Create, update, and search patient records
+- **Appointments**: Schedule and manage patient appointments
+- **Prescriptions**: Manage medical prescriptions with multiple templates
+- **Admissions**: Track hospital admissions and discharge records
+- **Master Data**: Configure medical specialties, medicines, investigations, diagnoses, and complaints
+- **User Management**: Role-based access control and user assignment
+- **Menu Management**: Dynamic menu creation for different user roles
+- **Nursing Module**: Post-surgery care and patient round management
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 7.2 or higher
+- MySQL/MariaDB 5.7 or higher
+- Composer
+- Node.js & npm (for frontend assets)
 
-## Learning Laravel
+## Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Clone the Repository
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone https://github.com/Hssazzad/Hospital-software.git
+cd profclinic
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Install Dependencies
 
-## Laravel Sponsors
+```bash
+composer install
+npm install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 3. Environment Configuration
 
-### Premium Partners
+```bash
+cp .env.example .env
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+Edit `.env` and configure your database:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=profclinic
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 4. Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+### 5. Create Database
+
+```bash
+mysql -u root -p
+CREATE DATABASE profclinic;
+EXIT;
+```
+
+### 6. Run Database Migrations
+
+The project includes a migration that imports the complete SQL dump with all hospital management tables:
+
+```bash
+php artisan migrate
+```
+
+This will:
+- Create the `migrations` table
+- Execute `2026_04_05_000000_import_sql_dump.php`
+- Import all tables from `database/sql/u972011074_vzeTw.sql`
+- Populate initial data for patients, appointments, medicines, investigations, diagnoses, and more
+
+**Troubleshooting Migration:**
+- If you get "Table 'profclinic.users' doesn't exist", run: `php artisan migrate --fresh`
+- Ensure MySQL is running and accessible
+- Check database credentials in `.env`
+
+### 7. Build Frontend Assets
+
+```bash
+npm run dev
+```
+
+For production:
+
+```bash
+npm run build
+```
+
+### 8. Start Development Server
+
+```bash
+php artisan serve
+```
+
+Visit `http://localhost:8000` in your browser.
+
+## Database Structure
+
+The SQL dump includes the following key tables:
+
+### Core Tables
+- `users` - System users and authentication
+- `patients` - Patient information and records
+- `doctors` - Doctor profiles and specialties
+
+### Clinical Tables
+- `admissions` - Patient admission records
+- `appointments` - Appointment scheduling
+- `prescriptions` - Medical prescriptions
+- `prescription_complains` - Patient complaints linked to prescriptions
+
+### Master Data Tables
+- `common_medicine` - Medicine catalog
+- `common_investigation` - Lab investigations and tests
+- `common_diagnosis` - Diagnosis codes and descriptions
+- `common_complain` - Common patient complaints
+- `configspeciality` - Medical specialties
+- `configdistrict` - District configuration
+- `configunion` - Union/area configuration
+
+### System Tables
+- `parent_menu` - Menu category system
+- `cache` - Application cache storage
+- `cache_locks` - Cache lock management
+
+## Project Structure
+
+```
+profclinic/
+├── app/
+│   ├── Http/Controllers/
+│   ├── Models/
+│   └── Providers/
+├── config/
+├── database/
+│   ├── migrations/
+│   │   └── 2026_04_05_000000_import_sql_dump.php
+│   └── sql/
+│       └── u972011074_vzeTw.sql
+├── public/
+├── resources/
+│   ├── css/
+│   ├── js/
+│   └── views/
+├── routes/
+├── storage/
+├── tests/
+└── .env
+```
+
+## Key Route Files
+
+- `routes/web.php` - Main application routes
+- `routes/patient.php` - Patient management routes
+- `routes/prescriptions.php` - Prescription routes
+- `routes/appointment.php` - Appointment routes
+- `routes/nursing.php` - Nursing module routes
+- `routes/auth.php` - Authentication routes
+
+## Configuration Files
+
+- `.env` - Environment variables and database credentials
+- `config/database.php` - Database configuration
+- `config/app.php` - Application settings
+- `config/auth.php` - Authentication configuration
+- `tailwind.config.js` - Tailwind CSS configuration
+- `vite.config.js` - Vite build configuration
+
+## Troubleshooting
+
+### Common Issues
+
+**Error: "Table 'profclinic.users' doesn't exist"**
+```bash
+php artisan migrate
+```
+
+**Error: "Connection refused" or "Access Denied"**
+- Verify MySQL is running
+- Check `.env` database credentials
+- Ensure the `profclinic` database exists
+
+**Permission Denied on Storage**
+```bash
+chmod -R 775 storage bootstrap/cache
+```
+
+**Clear Application Cache**
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+```
+
+## Git Branches
+
+- `main` - Production-ready code
+- `hospital-management` - Active development branch with latest features
+
+## Development
+
+### Running Tests
+```bash
+php artisan test
+```
+
+### Running Migrations
+```bash
+# Run all pending migrations
+php artisan migrate
+
+# Fresh migration (drops all tables and re-runs)
+php artisan migrate:fresh
+
+# Rollback last batch
+php artisan migrate:rollback
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Create a feature branch: `git checkout -b feature/your-feature`
+2. Commit changes: `git commit -am 'Add feature'`
+3. Push to branch: `git push origin feature/your-feature`
+4. Submit a pull request
+
+## License
+
+This project is proprietary and confidential.
+
+## Support
+
+For issues or questions, please contact the development team.
+
+---
+
+**Last Updated**: April 5, 2026  
+**Version**: 1.0.0  
+**Deployed Branch**: hospital-management
 
 ## Code of Conduct
 
