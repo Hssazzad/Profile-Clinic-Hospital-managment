@@ -1,0 +1,19 @@
+ssh -p 65002 u972011074@157.173.216.198
+cd domains/erpbd.org/public_html/profclinic
+
+
+composer require laravel/breeze --dev
+php artisan breeze:install
+npm install && npm run build
+composer install --no-dev --optimize-autoloader
+
+php artisan config:clear
+php artisan optimize:clear
+php artisan optimize
+
+php artisan view:clear
+php artisan route:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan optimize:clear
+

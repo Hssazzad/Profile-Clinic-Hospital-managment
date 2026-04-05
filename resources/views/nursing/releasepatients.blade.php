@@ -1,0 +1,1279 @@
+@extends('adminlte::page')
+
+@section('title', 'Release Patient | Professor Clinic')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="m-0 page-main-title">
+                <span class="page-title-icon"><i class="fas fa-sign-out-alt"></i></span>
+                Release Patient
+            </h1>
+            <ol class="breadcrumb mt-1 p-0" style="background:transparent; font-size:12px;">
+                <li class="breadcrumb-item"><a href="{{ url('/') }}"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('nursing.index') }}">Nursing</a></li>
+                <li class="breadcrumb-item active" id="breadcrumb-current">Select Patient</li>
+            </ol>
+        </div>
+        <div>
+            <a href="{{ route('nursing.index') }}" class="btn btn-back-modern btn-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Back
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+
+{{-- ══ STEP INDICATOR ══ --}}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="step-track-card">
+            <div class="step-track-inner">
+                <div class="step-item">
+                    <div class="step-circle step-active" id="step1-circle">1</div>
+                    <div class="step-text ml-2">
+                        <div class="step-label-main step-label-active">Step 1</div>
+                        <div class="step-label-sub">Select Patient</div>
+                    </div>
+                </div>
+                <div class="step-connector-line" id="step-connector-12"></div>
+                <div class="step-item">
+                    <div class="step-circle step-inactive" id="step2-circle">2</div>
+                    <div class="step-text ml-2">
+                        <div class="step-label-main step-label-inactive" id="step2-label">Step 2</div>
+                        <div class="step-label-sub step-label-inactive" id="step2-sublabel">Bill & Release</div>
+                    </div>
+                </div>
+                <div class="step-connector-line" id="step-connector-23"></div>
+                <div class="step-item">
+                    <div class="step-circle step-inactive" id="step3-circle">3</div>
+                    <div class="step-text ml-2">
+                        <div class="step-label-main step-label-inactive" id="step3-label">Step 3</div>
+                        <div class="step-label-sub step-label-inactive" id="step3-sublabel">Summary</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ══ SAVE ALERT ══ --}}
+<div id="save-alert" class="alert d-none mb-3 modern-alert" role="alert"></div>
+
+{{-- ══════════════════════════════════════════
+     STEP 1 — SELECT PATIENT
+══════════════════════════════════════════ --}}
+<div id="panel-step1">
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="modern-card-title">
+                <span class="card-title-icon bg-teal-soft"><i class="fas fa-users text-teal"></i></span>
+                <div>
+                    <h5 class="mb-0 font-weight-bold">Select Patient for Release</h5>
+                    <small class="text-muted">Search and choose a patient to proceed with release</small>
+                </div>
+            </div>
+            <span class="release-count-badge">
+                <i class="fas fa-bed mr-1"></i>
+                {{ $patients->total() }} Admitted
+            </span>
+        </div>
+
+        {{-- ══ STICKY SEARCH BAR ══ --}}
+        <div class="patient-sticky-bar" id="patient-sticky-bar">
+            <div class="row align-items-center">
+                <div class="col-md-7">
+                    <div class="search-input-group">
+                        <span class="search-icon"><i class="fas fa-search"></i></span>
+                        <input type="text" id="patientSearch" class="search-input"
+                            placeholder="Search by name, code, or mobile number...">
+                        <button class="search-btn search-btn-teal" type="button" onclick="filterTable()">
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-5 mt-2 mt-md-0">
+                    <div class="d-flex align-items-center justify-content-md-end">
+                        <span class="sticky-bar-info sticky-bar-info-teal">
+                            <i class="fas fa-bed mr-1"></i>
+                            <strong>{{ $patients->total() }}</strong> patients ready for release
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="sticky-bar-spacer" id="sticky-bar-spacer"></div>
+
+        <div class="modern-card-body pt-0">
+            <div class="table-responsive">
+                <table class="table modern-table" id="patientTable">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">#</th>
+                            <th style="width:80px;">Code</th>
+                            <th>Name</th>
+                            <th style="width:65px;">Age</th>
+                            <th style="width:55px;">Gender</th>
+                            <th style="width:130px;">Mobile</th>
+                            <th>Address / Upazila</th>
+                            <th style="width:110px;">Admission Date</th>
+                            <th style="width:100px;">Status</th>
+                            <th style="width:80px; text-align:center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($patients as $patient)
+                            <tr>
+                                <td class="text-muted small">{{ $patient->id }}</td>
+                                <td><span class="patient-code-badge">{{ $patient->patientcode ?? '—' }}</span></td>
+                                <td>
+                                    <div class="patient-name-cell">
+                                        <div class="patient-mini-avatar patient-mini-avatar-teal">{{ strtoupper(substr($patient->patientname ?? 'P', 0, 1)) }}</div>
+                                        <div>
+                                            <strong>{{ $patient->patientname ?? '—' }}</strong>
+                                            @if($patient->patientfather ?? null)
+                                                <br><small class="text-muted"><i class="fas fa-user-tie fa-xs"></i> {{ $patient->patientfather }}</small>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ $patient->age ?? '—' }}</td>
+                                <td>
+                                    @php $g = strtolower($patient->gender ?? ''); @endphp
+                                    @if($g === 'male') <span class="gender-badge gender-male"><i class="fas fa-mars mr-1"></i>M</span>
+                                    @elseif($g === 'female') <span class="gender-badge gender-female"><i class="fas fa-venus mr-1"></i>F</span>
+                                    @else <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td class="text-monospace small">{{ $patient->mobile_no ?? '—' }}</td>
+                                <td class="text-muted small">
+                                    {{ $patient->address ?? '' }}
+                                    @if($patient->upozila ?? null)<span class="text-muted">, {{ $patient->upozila }}</span>@endif
+                                </td>
+                                <td class="small">
+                                    @if($patient->admission_date ?? null)
+                                        <span class="date-badge"><i class="fas fa-calendar-alt mr-1"></i>{{ \Carbon\Carbon::parse($patient->admission_date)->format('d M Y') }}</span>
+                                    @else —
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="status-badge status-discharged">
+                                        <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
+                                        Discharged
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button"
+                                        class="btn-select-patient btn-select-teal"
+                                        onclick="selectPatient(this)"
+                                        data-id="{{ $patient->id }}"
+                                        data-name="{{ $patient->patientname ?? '' }}"
+                                        data-age="{{ $patient->age ?? '' }}"
+                                        data-code="{{ $patient->patientcode ?? '' }}"
+                                        data-mobile="{{ $patient->mobile_no ?? '' }}"
+                                        data-upozila="{{ $patient->upozila ?? '' }}"
+                                        data-blood="{{ $patient->blood_group ?? '' }}"
+                                        data-gender="{{ $patient->gender ?? '' }}"
+                                        data-admission-id="{{ $patient->admission_id ?? '' }}"
+                                        data-admission-date="{{ $patient->admission_date ?? '' }}">
+                                        <i class="fas fa-arrow-right mr-1"></i> Select
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-slash"></i>
+                                        <p>No patients found for release.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if(method_exists($patients, 'links'))
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <small class="text-muted">
+                    <i class="fas fa-list-ul mr-1"></i>
+                    Showing {{ $patients->firstItem() ?? 0 }}–{{ $patients->lastItem() ?? 0 }}
+                    of <strong>{{ $patients->total() }}</strong> patients
+                </small>
+                {{ $patients->links('pagination::bootstrap-4') }}
+            </div>
+            @endif
+        </div>
+
+        <div class="modern-card-footer">
+            <small class="text-muted">
+                <i class="fas fa-info-circle mr-1 text-teal"></i>
+                Click <strong>Select</strong> on a patient row to proceed to Bill & Release.
+                Release submit করলে manager approval এর পর released হবে।
+            </small>
+        </div>
+    </div>
+</div>
+
+{{-- ══════════════════════════════════════════
+     STEP 2 — BILL & RELEASE FORM
+══════════════════════════════════════════ --}}
+<div id="panel-step2" style="display:none;">
+
+    <div class="patient-selected-bar patient-selected-bar-teal mb-4">
+        <div class="psb-left">
+            <div class="psb-avatar" id="spb-avatar">A</div>
+            <div class="psb-info">
+                <div class="psb-name" id="spb-name"></div>
+                <div class="psb-meta" id="spb-meta"></div>
+            </div>
+        </div>
+        <div class="psb-right">
+            <span class="psb-status-dot psb-status-dot-teal"></span>
+            <span class="psb-status-label">Release Process</span>
+            <button type="button" class="btn btn-psb-change" onclick="backToStep1()">
+                <i class="fas fa-exchange-alt mr-1"></i> Change Patient
+            </button>
+        </div>
+    </div>
+
+    <div id="release-form-card">
+        <div class="row">
+
+            {{-- LEFT COLUMN --}}
+            <div class="col-lg-8">
+
+                {{-- Release Info --}}
+                <div class="modern-card mb-4">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-teal-soft"><i class="fas fa-user-check text-teal"></i></span>
+                            <div>
+                                <h5 class="mb-0 font-weight-bold">Release Information</h5>
+                                <small class="text-muted">Patient discharge details</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modern-card-body">
+                        <input type="hidden" id="f-patient-id">
+                        <input type="hidden" id="f-admission-id">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Patient Code</label>
+                                    <input type="text" class="modern-input" id="f-patient-code" readonly>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Patient Name</label>
+                                    <input type="text" class="modern-input" id="f-patient-name" readonly>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Age / Gender</label>
+                                    <input type="text" class="modern-input" id="f-patient-age-gender" readonly>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Mobile</label>
+                                    <input type="text" class="modern-input" id="f-patient-mobile" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Admission Date</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-calendar-plus input-icon text-teal"></i>
+                                        <input type="date" class="modern-input with-icon" id="f-admission-date" readonly>
+                                    </div>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Release Date <span class="text-danger">*</span></label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-calendar-check input-icon text-teal"></i>
+                                        <input type="date" class="modern-input with-icon" id="f-release-date">
+                                    </div>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Total Days Stay</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-clock input-icon text-teal"></i>
+                                        <input type="text" class="modern-input with-icon" id="f-total-days" readonly placeholder="Auto calculated">
+                                    </div>
+                                </div>
+                                <div class="modern-field-group">
+                                    <label class="modern-label">Discharge Condition</label>
+                                    <select class="modern-input" id="f-condition" onchange="updateConditionLabel()">
+                                        <option value="recovered">Recovered / ভালো হয়েছেন</option>
+                                        <option value="improved">Improved / উন্নতি হয়েছে</option>
+                                        <option value="referred">Referred / রেফার করা হয়েছে</option>
+                                        <option value="lama">LAMA / নিজ দায়িত্বে</option>
+                                        <option value="absconded">Absconded / পালিয়ে গেছেন</option>
+                                        <option value="expired">Expired / মৃত্যু</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modern-field-group">
+                            <label class="modern-label">Release Notes / Remarks</label>
+                            <textarea class="modern-input" id="f-notes" rows="2"
+                                placeholder="Any additional notes about the release..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- BILL SECTION --}}
+                <div class="modern-card mb-4">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-orange-soft"><i class="fas fa-file-invoice-dollar text-orange"></i></span>
+                            <div>
+                                <h5 class="mb-0 font-weight-bold">Hospital Bill</h5>
+                                <small class="text-muted">Add all charges before release</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-med-action btn-add-bill-row" onclick="addBillRow()">
+                            <i class="fas fa-plus mr-1"></i> Add Row
+                        </button>
+                    </div>
+                    <div class="modern-card-body p-0">
+                        <div style="overflow-x:auto;">
+                            <table class="table bill-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:35px;">#</th>
+                                        <th>Description / বিবরণ</th>
+                                        <th style="width:80px;">Qty</th>
+                                        <th style="width:110px;">Unit Price (৳)</th>
+                                        <th style="width:120px;">Total (৳)</th>
+                                        <th style="width:42px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bill-tbody"></tbody>
+                                <tfoot>
+                                    <tr class="bill-subtotal-row">
+                                        <td colspan="4" class="text-right font-weight-bold" style="padding:10px 16px;">Subtotal:</td>
+                                        <td class="font-weight-bold text-teal" style="padding:10px 8px;" id="bill-subtotal">৳ 0.00</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="bill-discount-row">
+                                        <td colspan="3" class="text-right font-weight-bold" style="padding:8px 16px;">Discount:</td>
+                                        <td style="padding:6px 8px;">
+                                            <select class="modern-input" id="discount-type" onchange="recalcBill()" style="padding:5px 8px;font-size:12px;">
+                                                <option value="flat">৳ Flat</option>
+                                                <option value="percent">% Percent</option>
+                                            </select>
+                                        </td>
+                                        <td style="padding:6px 8px;">
+                                            <input type="number" class="modern-input" id="bill-discount" value="0" min="0" oninput="recalcBill()" style="padding:5px 8px;font-size:12px;">
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="bill-paid-row">
+                                        <td colspan="4" class="text-right font-weight-bold" style="padding:8px 16px;">Advance Paid:</td>
+                                        <td style="padding:6px 8px;">
+                                            <input type="number" class="modern-input" id="bill-advance" value="0" min="0" oninput="recalcBill()" style="padding:5px 8px;font-size:12px;" placeholder="0">
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="bill-grand-row">
+                                        <td colspan="4" class="text-right" style="padding:14px 16px;font-size:15px;font-weight:800;color:#2c3e50;">Grand Total:</td>
+                                        <td style="padding:14px 8px;" id="bill-grand"><span class="grand-total-value">৳ 0.00</span></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr class="bill-due-row">
+                                        <td colspan="4" class="text-right" style="padding:8px 16px;font-size:14px;font-weight:700;color:#c62828;">Due Amount:</td>
+                                        <td style="padding:8px 8px;" id="bill-due"><span class="due-amount-value">৳ 0.00</span></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PRESCRIPTION HISTORY --}}
+                <div class="modern-card mb-4" id="prescription-summary-card" style="display:none;">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-indigo-soft"><i class="fas fa-notes-medical text-indigo"></i></span>
+                            <div>
+                                <h5 class="mb-0 font-weight-bold">Prescription History</h5>
+                                <small class="text-muted">During admission</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-toggle-rx" onclick="toggleRxHistory()">
+                            <i class="fas fa-eye mr-1"></i> <span id="rx-toggle-label">Show</span>
+                        </button>
+                    </div>
+                    <div id="rx-history-body" style="display:none;">
+                        <div class="modern-card-body">
+                            <div id="fresh-rx-list"></div>
+                            <div id="round-rx-list"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>{{-- /col-lg-8 --}}
+
+            {{-- RIGHT COLUMN --}}
+            <div class="col-lg-4">
+
+                {{-- Admission Summary --}}
+                <div class="modern-card mb-4">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-blue-soft"><i class="fas fa-clipboard-list text-blue"></i></span>
+                            <div><h5 class="mb-0 font-weight-bold">Admission Summary</h5></div>
+                        </div>
+                    </div>
+                    <div class="modern-card-body p-0">
+                        <div class="summary-list">
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-id-card mr-2 text-teal"></i>Patient Code</span><span class="summary-value" id="sum-code">—</span></div>
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-user mr-2 text-teal"></i>Name</span><span class="summary-value" id="sum-name">—</span></div>
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-calendar-plus mr-2 text-teal"></i>Admitted</span><span class="summary-value" id="sum-admit">—</span></div>
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-calendar-check mr-2 text-orange"></i>Release</span><span class="summary-value" id="sum-release">—</span></div>
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-moon mr-2 text-blue"></i>Total Days</span><span class="summary-value font-weight-bold" id="sum-days">—</span></div>
+                            <div class="summary-item"><span class="summary-label"><i class="fas fa-heartbeat mr-2 text-red"></i>Condition</span><span class="summary-value" id="sum-condition">—</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Bill Summary --}}
+                <div class="modern-card mb-4">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-orange-soft"><i class="fas fa-receipt text-orange"></i></span>
+                            <div><h5 class="mb-0 font-weight-bold">Bill Summary</h5></div>
+                        </div>
+                    </div>
+                    <div class="modern-card-body p-0">
+                        <div class="summary-list">
+                            <div class="summary-item"><span class="summary-label">Subtotal</span><span class="summary-value" id="sb-subtotal">৳ 0.00</span></div>
+                            <div class="summary-item"><span class="summary-label">Discount</span><span class="summary-value text-danger" id="sb-discount">- ৳ 0.00</span></div>
+                            <div class="summary-item"><span class="summary-label">Advance Paid</span><span class="summary-value text-success" id="sb-advance">৳ 0.00</span></div>
+                            <div class="summary-item summary-item-grand"><span class="summary-label font-weight-bold" style="font-size:14px;">Grand Total</span><span class="summary-value font-weight-bold text-teal" style="font-size:15px;" id="sb-grand">৳ 0.00</span></div>
+                            <div class="summary-item summary-item-due"><span class="summary-label font-weight-bold text-danger" style="font-size:14px;">Due Amount</span><span class="summary-value font-weight-bold text-danger" style="font-size:15px;" id="sb-due">৳ 0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Doctor --}}
+                <div class="modern-card mb-4">
+                    <div class="modern-card-header">
+                        <div class="modern-card-title">
+                            <span class="card-title-icon bg-teal-soft"><i class="fas fa-user-md text-teal"></i></span>
+                            <div><h5 class="mb-0 font-weight-bold">Attending Doctor</h5></div>
+                        </div>
+                    </div>
+                    <div class="modern-card-body">
+                        <div class="modern-field-group mb-0">
+                            <label class="modern-label">Select Doctor</label>
+                            <select class="modern-input" id="f-doctor">
+                                @forelse($doctors as $doc)
+                                    <option value="{{ $doc->id }}">{{ $doc->name }}</option>
+                                @empty
+                                    <option value="">No doctors found</option>
+                                @endforelse
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Action Buttons --}}
+                <div class="modern-card action-card">
+                    <div class="modern-card-body">
+                        <div class="pending-approval-notice mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Submit করলে manager approval এর পর patient released হবে।
+                        </div>
+                        <button type="button" class="btn-release-action btn-release-save" id="btn-release" onclick="processRelease()">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Submit for Approval
+                        </button>
+                        <button type="button" class="btn-release-action btn-release-print-bill mt-2" onclick="printBillOnly()">
+                            <i class="fas fa-print mr-2"></i>
+                            Print Bill Only
+                        </button>
+                        <button type="button" class="btn-release-action btn-release-back mt-2" onclick="backToStep1()">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to List
+                        </button>
+                    </div>
+                </div>
+
+            </div>{{-- /col-lg-4 --}}
+        </div>
+    </div>
+</div>{{-- /#panel-step2 --}}
+
+{{-- ══════════════════════════════════════════
+     STEP 3 — SUBMITTED CONFIRMATION
+══════════════════════════════════════════ --}}
+<div id="panel-step3" style="display:none;">
+
+    <div class="row mb-4">
+        <div class="col-lg-3 col-sm-6 mb-3 mb-lg-0">
+            <div class="rx-summary-card rx-card-teal">
+                <div class="rx-summary-icon"><i class="fas fa-user"></i></div>
+                <div class="rx-summary-content">
+                    <div class="rx-summary-label">Patient</div>
+                    <div class="rx-summary-value" id="ib-name">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-3 mb-lg-0">
+            <div class="rx-summary-card rx-card-orange">
+                <div class="rx-summary-icon"><i class="fas fa-moon"></i></div>
+                <div class="rx-summary-content">
+                    <div class="rx-summary-label">Total Days</div>
+                    <div class="rx-summary-value" id="ib-days">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-3 mb-lg-0">
+            <div class="rx-summary-card rx-card-blue">
+                <div class="rx-summary-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="rx-summary-content">
+                    <div class="rx-summary-label">Grand Total</div>
+                    <div class="rx-summary-value" id="ib-total">—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="rx-summary-card rx-card-red">
+                <div class="rx-summary-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="rx-summary-content">
+                    <div class="rx-summary-label">Due Amount</div>
+                    <div class="rx-summary-value" id="ib-due">৳ 0.00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <div class="modern-card-title">
+                <span class="card-title-icon bg-teal-soft"><i class="fas fa-file-alt text-teal"></i></span>
+                <div>
+                    <h5 class="mb-0 font-weight-bold">Release Summary & Bill</h5>
+                    <small class="text-muted">Ready to print</small>
+                </div>
+            </div>
+            <span class="rx-saved-badge rx-saved-badge-orange">
+                <i class="fas fa-hourglass-half mr-1"></i> Pending Approval
+                <span class="ml-1" id="rx-badge-name">—</span>
+            </span>
+        </div>
+        <div class="modern-card-body p-0">
+            <div id="release-print-area">
+                <div class="release-wrapper">
+
+                    <div class="release-header">
+                        <div class="release-header-left">
+                            <div class="release-logo-row">
+                                <div class="release-cp-logo"><span class="release-cp-c">C</span><span class="release-cp-p">P</span></div>
+                                <div>
+                                    <div class="release-clinic-bn">প্রফেসর ক্লিনিক</div>
+                                    <div class="release-clinic-address">মাঝিড়া, শাজাহানপুর, বগুড়া।</div>
+                                    <div class="release-clinic-phones">মোবাঃ ০১৭২০-০৩৯০০৫, ০১৭২০-০৩৯০০৬</div>
+                                    <div class="release-clinic-phones">০১৭২০-০৩৯০০৭, ০১৭২০-০৩৯০০৮</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="release-header-right">
+                            <div class="release-doc-badge">RELEASE CERTIFICATE</div>
+                            <div class="release-doc-sub">& HOSPITAL BILL</div>
+                            <div class="release-serial mt-2" id="print-release-date">Date: —</div>
+                        </div>
+                    </div>
+
+                    <div class="release-patient-row">
+                        <div class="release-patient-field"><span class="rpf-label">Code :</span><span class="rpf-value" id="print-code">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Name :</span><span class="rpf-value" id="print-name">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Age :</span><span class="rpf-value" id="print-age">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Mobile :</span><span class="rpf-value" id="print-mobile">—</span></div>
+                    </div>
+                    <div class="release-patient-row" style="border-top:none;padding-top:2px;">
+                        <div class="release-patient-field"><span class="rpf-label">Admitted :</span><span class="rpf-value" id="print-admit-date">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Released :</span><span class="rpf-value" id="print-rel-date">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Days :</span><span class="rpf-value font-weight-bold" id="print-days">—</span></div>
+                        <div class="release-patient-field"><span class="rpf-label">Condition :</span><span class="rpf-value" id="print-condition">—</span></div>
+                    </div>
+                    <div class="release-patient-row" style="border-top:none;padding-top:2px;padding-bottom:8px;">
+                        <div class="release-patient-field"><span class="rpf-label">Doctor :</span><span class="rpf-value font-weight-bold" id="print-doctor">—</span></div>
+                        <div class="release-patient-field">
+                            <span class="rpf-label">Status :</span>
+                            <span class="rpf-value"><span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">Pending Manager Approval</span></span>
+                        </div>
+                    </div>
+
+                    <div class="release-body">
+                        <div class="release-section-label">HOSPITAL BILL / চার্জ বিবরণী</div>
+                        <div class="release-bill-table-wrap">
+                            <table class="release-bill-table" id="print-bill-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:35px;">#</th>
+                                        <th>Description / বিবরণ</th>
+                                        <th style="width:60px;text-align:center;">Qty</th>
+                                        <th style="width:100px;text-align:right;">Unit Price</th>
+                                        <th style="width:110px;text-align:right;">Amount (৳)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="print-bill-tbody"></tbody>
+                                <tfoot>
+                                    <tr class="print-total-row"><td colspan="4" class="text-right font-weight-bold">Subtotal:</td><td class="text-right font-weight-bold" id="print-subtotal">৳ 0.00</td></tr>
+                                    <tr class="print-discount-row"><td colspan="4" class="text-right">Discount:</td><td class="text-right text-danger" id="print-discount-val">- ৳ 0.00</td></tr>
+                                    <tr class="print-total-row print-grand-row"><td colspan="4" class="text-right font-weight-bold" style="font-size:13px;">Grand Total:</td><td class="text-right font-weight-bold" style="font-size:13px;" id="print-grand-total">৳ 0.00</td></tr>
+                                    <tr class="print-advance-row"><td colspan="4" class="text-right">Advance Paid:</td><td class="text-right text-success" id="print-advance-val">৳ 0.00</td></tr>
+                                    <tr class="print-due-row"><td colspan="4" class="text-right font-weight-bold text-danger" style="font-size:14px;">Due Amount:</td><td class="text-right font-weight-bold text-danger" style="font-size:14px;" id="print-due-val">৳ 0.00</td></tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div class="release-notes" id="print-notes"></div>
+                        <div class="release-signature-row">
+                            <div class="release-sig-box"><div class="release-sig-line"></div><div class="release-sig-label">Patient / Attendant Signature</div></div>
+                            <div class="release-sig-box" style="text-align:right;"><div class="release-sig-line"></div><div class="release-sig-label">Authorized Signature</div></div>
+                        </div>
+                    </div>
+
+                    <div class="release-footer">
+                        <span>Submitted by: <strong id="print-released-by">—</strong></span>
+                        <span>Generated: <span id="gen-time">—</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modern-card-footer">
+            <small class="text-muted">
+                <i class="fas fa-clock mr-1"></i> Generated: <span id="gen-time-display">—</span>
+            </small>
+            <div style="display:flex; gap:8px;">
+                <button onclick="window.print()" class="btn-rx-action btn-rx-print">
+                    <i class="fas fa-print mr-1"></i> Print
+                </button>
+                <button type="button" class="btn-rx-action btn-rx-new" onclick="backToStep1()">
+                    <i class="fas fa-plus mr-1"></i> New Release
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>{{-- /#panel-step3 --}}
+
+@stop
+
+@section('css')
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --teal-deep:    #00695C;
+    --teal-mid:     #00897B;
+    --teal-light:   #E0F2F1;
+    --teal-soft:    #B2DFDB;
+    --orange:       #E65100;
+    --orange-light: #FFF3E0;
+    --orange-soft:  #FFCCBC;
+    --blue-deep:    #1565C0;
+    --blue-mid:     #1976D2;
+    --blue-light:   #E3F2FD;
+    --blue-soft:    #BBDEFB;
+    --red-mid:      #c62828;
+    --indigo-mid:   #3949AB;
+    --indigo-light: #E8EAF6;
+    --text-primary: #1a2332;
+    --text-muted:   #6b7a90;
+    --border:       #e4e9f0;
+    --radius-sm:    6px;
+    --radius-md:    10px;
+    --radius-lg:    16px;
+    --shadow-sm:    0 1px 4px rgba(0,0,0,.06);
+    --shadow-md:    0 4px 16px rgba(0,0,0,.08);
+    --font-base:    'DM Sans', 'Hind Siliguri', Arial, sans-serif;
+}
+body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-base); }
+.text-teal   { color:var(--teal-mid)   !important; }
+.text-orange { color:var(--orange)     !important; }
+.text-blue   { color:var(--blue-mid)   !important; }
+.text-red    { color:var(--red-mid)    !important; }
+.text-indigo { color:var(--indigo-mid) !important; }
+
+/* PAGE HEADER */
+.page-main-title { font-size:22px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:10px; }
+.page-title-icon { width:38px;height:38px;border-radius:10px;background:var(--teal-light);display:inline-flex;align-items:center;justify-content:center;color:var(--teal-mid);font-size:17px; }
+.btn-back-modern { background:#fff;border:1.5px solid var(--border);color:var(--text-primary);border-radius:var(--radius-sm);font-weight:500;padding:6px 14px;font-size:13px;transition:all .2s;text-decoration:none; }
+.btn-back-modern:hover { background:var(--teal-light);border-color:var(--teal-mid);color:var(--teal-deep); }
+.release-count-badge { background:var(--teal-light);color:var(--teal-deep);border:1.5px solid var(--teal-soft);border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:700; }
+
+/* STEP INDICATOR */
+.step-track-card { background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:16px 24px; }
+.step-track-inner { display:flex;align-items:center; }
+.step-item { display:flex;align-items:center; }
+.step-text { margin-left:10px; }
+.step-circle { width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;transition:all .35s ease;border:2.5px solid transparent; }
+.step-active   { background:var(--teal-mid);color:#fff;border-color:var(--teal-mid);box-shadow:0 0 0 4px rgba(0,137,123,.15); }
+.step-done     { background:var(--teal-deep);color:#fff;border-color:var(--teal-deep); }
+.step-inactive { background:#fff;color:#ccc;border-color:#ddd; }
+.step-label-main   { font-size:13px;font-weight:700;line-height:1.2; }
+.step-label-sub    { font-size:11px;color:var(--text-muted); }
+.step-label-active   { color:var(--teal-mid); }
+.step-label-inactive { color:#bbb; }
+.step-connector-line { flex:1;max-width:100px;height:3px;background:#e8ecf0;margin:0 18px;border-radius:2px;transition:background .4s; }
+.step-connector-line.done { background:var(--teal-deep); }
+
+/* ALERT */
+.modern-alert { border-radius:var(--radius-md);border:none;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-sm); }
+
+/* CARD */
+.modern-card { background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);border:1px solid var(--border);overflow:hidden;margin-bottom:24px; }
+.modern-card-header { padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafbfd; }
+.modern-card-title { display:flex;align-items:center;gap:12px; }
+.card-title-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+.bg-teal-soft   { background:var(--teal-light); }
+.bg-orange-soft { background:var(--orange-light); }
+.bg-blue-soft   { background:var(--blue-light); }
+.bg-indigo-soft { background:var(--indigo-light); }
+.modern-card-body { padding:24px; }
+.modern-card-footer { padding:14px 24px;border-top:1px solid var(--border);background:#fafbfd;display:flex;align-items:center;justify-content:space-between; }
+.action-card { border:2px solid var(--teal-soft); }
+
+/* STICKY BAR */
+.patient-sticky-bar { padding:14px 24px;background:#fff;border-bottom:2px solid var(--teal-soft);z-index:999;transition:box-shadow .25s,border-color .25s; }
+.patient-sticky-bar.is-sticky { position:fixed;top:57px;left:0;right:0;border-bottom-color:var(--teal-mid);box-shadow:0 4px 18px rgba(0,137,123,.13); }
+.sticky-bar-spacer { display:none; }
+.sticky-bar-spacer.active { display:block; }
+.sticky-bar-info { font-size:13px;color:var(--text-muted);padding:6px 14px;border-radius:20px;font-weight:500; }
+.sticky-bar-info-teal { background:var(--teal-light);color:var(--teal-deep); }
+.sticky-bar-info-teal strong { color:var(--teal-deep); }
+
+/* SEARCH */
+.search-input-group { display:flex;align-items:center;background:#fff;border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;box-shadow:var(--shadow-sm); }
+.search-input-group:focus-within { border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(0,137,123,.1); }
+.search-icon { padding:0 12px;color:#aab;font-size:15px; }
+.search-input { flex:1;border:none;outline:none;padding:10px 6px;font-size:14px;background:transparent;color:var(--text-primary); }
+.search-btn { border:none;padding:10px 22px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .2s; }
+.search-btn-teal { background:var(--teal-mid);color:#fff; }
+.search-btn-teal:hover { background:var(--teal-deep); }
+
+/* TABLE */
+.modern-table { border-collapse:separate;border-spacing:0;width:100%; }
+.modern-table thead tr th { background:#f0f8f7;color:var(--text-primary);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:11px 14px;border-bottom:2px solid var(--teal-soft);white-space:nowrap;position:sticky;top:0;z-index:10; }
+.modern-table tbody tr { transition:background .15s; }
+.modern-table tbody tr:hover { background:#f0f8f7; }
+.modern-table tbody td { padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-primary);vertical-align:middle; }
+.patient-code-badge { background:var(--teal-light);color:var(--teal-deep);border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;font-family:monospace; }
+.patient-name-cell { display:flex;align-items:center;gap:8px; }
+.patient-mini-avatar { width:28px;height:28px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.patient-mini-avatar-teal { background:linear-gradient(135deg,var(--teal-deep),#4db6ac); }
+.gender-badge { display:inline-flex;align-items:center;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700; }
+.gender-male   { background:#e3f2fd;color:var(--blue-deep); }
+.gender-female { background:#fce4ec;color:#880e4f; }
+.date-badge { font-size:12px;color:var(--text-muted); }
+.status-badge { display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700; }
+.status-discharged { background:#e8f5e9;color:#2e7d32; }
+.btn-select-patient { border:none;border-radius:var(--radius-sm);padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s; }
+.btn-select-teal { background:var(--teal-mid);color:#fff;box-shadow:0 2px 6px rgba(0,137,123,.25); }
+.btn-select-teal:hover { background:var(--teal-deep);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,137,123,.32); }
+.empty-state { text-align:center;padding:40px;color:#b0bec5; }
+.empty-state i { font-size:36px;margin-bottom:10px;display:block; }
+.empty-state p { font-size:14px;margin:0; }
+
+/* SELECTED PATIENT BAR */
+.patient-selected-bar { border-radius:var(--radius-md);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px; }
+.patient-selected-bar-teal { background:linear-gradient(135deg,#00695C 0%,#00897B 100%);box-shadow:0 4px 18px rgba(0,105,92,.18); }
+.psb-left { display:flex;align-items:center;gap:14px; }
+.psb-avatar { width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.22);border:2.5px solid rgba(255,255,255,.55);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.psb-name { color:#fff;font-size:16px;font-weight:700;line-height:1.2; }
+.psb-meta { color:rgba(255,255,255,.78);font-size:12px;margin-top:2px; }
+.psb-right { display:flex;align-items:center;gap:12px; }
+.psb-status-dot { width:8px;height:8px;border-radius:50%;display:inline-block; }
+.psb-status-dot-teal { background:#80cbc4;box-shadow:0 0 0 3px rgba(128,203,196,.3); }
+.psb-status-label { color:rgba(255,255,255,.85);font-size:12.5px;font-weight:500; }
+.btn-psb-change { background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.45);color:#fff;border-radius:var(--radius-sm);padding:7px 16px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s; }
+.btn-psb-change:hover { background:rgba(255,255,255,.28); }
+
+/* FORM */
+.modern-field-group { margin-bottom:16px; }
+.modern-label { display:block;font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px; }
+.modern-input { width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13.5px;color:var(--text-primary);background:#fff;transition:border-color .2s,box-shadow .2s;outline:none;font-family:var(--font-base); }
+.modern-input:focus { border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(0,137,123,.1); }
+.modern-input[readonly] { background:#f8fafb;color:var(--text-muted); }
+.input-with-icon { position:relative; }
+.input-icon { position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none; }
+.modern-input.with-icon { padding-left:30px; }
+
+/* BILL TABLE */
+.btn-med-action { border-radius:var(--radius-sm);padding:6px 14px;font-size:12px;font-weight:600;border:1.5px solid transparent;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center; }
+.btn-add-bill-row { background:var(--teal-light);color:var(--teal-deep);border-color:var(--teal-soft); }
+.btn-add-bill-row:hover { background:var(--teal-mid);color:#fff; }
+.bill-table { border-collapse:collapse;width:100%; }
+.bill-table thead tr th { background:#f0f8f7;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);padding:10px 14px;border-bottom:2px solid var(--teal-soft);white-space:nowrap; }
+.bill-table tbody td { padding:7px 10px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle; }
+.bill-table tfoot td { border-top:none; }
+.bill-subtotal-row td { background:#f9fafb;border-top:2px solid var(--border); }
+.bill-discount-row td, .bill-paid-row td { background:#fafbfb; }
+.bill-grand-row td { background:#e0f2f1 !important;-webkit-print-color-adjust:exact; }
+.bill-due-row td { background:#ffebee !important;-webkit-print-color-adjust:exact; }
+.grand-total-value { font-size:15px;font-weight:800;color:var(--teal-deep); }
+.due-amount-value  { font-size:14px;font-weight:800;color:var(--red-mid); }
+.bill-table .form-control { padding:4px 8px !important;font-size:12.5px !important;border:1.5px solid var(--border);border-radius:5px; }
+.btn-rm-bill { width:26px;height:26px;border-radius:6px;background:#ffebee;color:#c62828;border:1.5px solid #ffcdd2;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .18s; }
+.btn-rm-bill:hover { background:#c62828;color:#fff; }
+
+/* SUMMARY LIST */
+.summary-list { padding:0; }
+.summary-item { display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--border);font-size:13px; }
+.summary-item:last-child { border-bottom:none; }
+.summary-item-grand { background:#e0f2f1 !important;-webkit-print-color-adjust:exact; }
+.summary-item-due   { background:#ffebee !important;-webkit-print-color-adjust:exact; }
+.summary-label { color:var(--text-muted);font-size:12.5px; }
+.summary-value { font-weight:600;color:var(--text-primary); }
+
+/* PENDING NOTICE */
+.pending-approval-notice { background:var(--orange-light);color:var(--orange);border:1.5px solid var(--orange-soft);border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;font-weight:600;line-height:1.5; }
+
+/* ACTION BUTTONS */
+.btn-release-action { width:100%;border-radius:var(--radius-sm);padding:13px 22px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center; }
+.btn-release-save { background:linear-gradient(135deg,#00695C,#00897B);color:#fff;box-shadow:0 4px 14px rgba(0,105,92,.28); }
+.btn-release-save:hover { background:linear-gradient(135deg,#004d40,#00695C);transform:translateY(-1px); }
+.btn-release-print-bill { background:var(--blue-light);color:var(--blue-deep);border:1.5px solid var(--blue-soft); }
+.btn-release-print-bill:hover { background:var(--blue-mid);color:#fff; }
+.btn-release-back { background:#fff;color:var(--text-muted);border:1.5px solid var(--border); }
+.btn-release-back:hover { background:#f0f4f8; }
+.btn-toggle-rx { background:var(--indigo-light);color:var(--indigo-mid);border:1.5px solid #c5cae9;border-radius:var(--radius-sm);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s; }
+
+/* RX SUMMARY CARDS */
+.rx-summary-card { border-radius:var(--radius-md);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm);height:100%; }
+.rx-card-teal   { background:linear-gradient(135deg,#00695C,#00897B); }
+.rx-card-orange { background:linear-gradient(135deg,#E65100,#F57C00); }
+.rx-card-blue   { background:linear-gradient(135deg,#1565C0,#1976D2); }
+.rx-card-red    { background:linear-gradient(135deg,#c62828,#e53935); }
+.rx-summary-icon { width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.22);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.rx-summary-label { color:rgba(255,255,255,.75);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600; }
+.rx-summary-value { color:#fff;font-size:14px;font-weight:700;margin-top:2px; }
+.rx-saved-badge { border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center; }
+.rx-saved-badge-teal   { background:var(--teal-light);color:var(--teal-deep);border:1.5px solid var(--teal-soft); }
+.rx-saved-badge-orange { background:var(--orange-light);color:var(--orange);border:1.5px solid var(--orange-soft); }
+.btn-rx-action { border-radius:var(--radius-sm);padding:8px 18px;font-size:13px;font-weight:600;border:1.5px solid transparent;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center; }
+.btn-rx-print { background:var(--blue-deep);color:#fff;border-color:var(--blue-deep); }
+.btn-rx-print:hover { background:var(--blue-mid); }
+.btn-rx-new   { background:#f0f4f8;color:var(--text-primary);border-color:var(--border); }
+.btn-rx-new:hover { background:#e8ecf2; }
+
+/* RX HISTORY */
+.rx-history-item { background:#f9fafb;border-radius:var(--radius-sm);border:1px solid var(--border);padding:10px 14px;margin-bottom:8px; }
+.rx-history-label { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px; }
+.rx-history-line { font-size:12px;color:var(--text-primary);padding:2px 0;border-bottom:1px dashed var(--border); }
+.rx-history-line:last-child { border-bottom:none; }
+
+/* PAGINATION */
+.pagination { margin-bottom:0; }
+.page-link { border-radius:var(--radius-sm) !important;border-color:var(--border);color:var(--teal-mid);font-size:13px; }
+.page-item.active .page-link { background:var(--teal-mid);border-color:var(--teal-mid); }
+
+/* PRINT LAYOUT */
+#release-print-area { padding:0;background:#fff; }
+.release-wrapper { width:100%;max-width:780px;margin:0 auto;background:#fff;border:1px solid #ccc;font-family:'Hind Siliguri',Arial,sans-serif;font-size:12px; }
+.release-header { display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#e0f2f1 0%,#b2dfdb 100%) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:2px solid #00897b;padding:12px 16px 10px;gap:10px; }
+.release-header-left { flex:1; }
+.release-header-right { text-align:right;border-left:2px solid #00897b;padding-left:16px; }
+.release-logo-row { display:flex;align-items:center;gap:10px; }
+.release-cp-logo { width:46px;height:46px;border-radius:50%;border:2px solid #c0392b;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;background:#fff !important;-webkit-print-color-adjust:exact; }
+.release-cp-c { color:#c0392b; } .release-cp-p { color:#00897b; }
+.release-clinic-bn { font-size:22px;font-weight:700;color:#2c3e50;line-height:1.1; }
+.release-clinic-address { font-size:11px;color:#444;margin-top:2px; }
+.release-clinic-phones { font-size:10px;color:#555; }
+.release-doc-badge { font-size:16px;font-weight:800;color:#00695c;letter-spacing:.5px; }
+.release-doc-sub   { font-size:11px;color:#555;margin-top:2px; }
+.release-serial    { font-size:11px;color:#333; }
+.release-patient-row { display:flex;flex-wrap:wrap;background:#e8f5e9 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:6px 16px;border-bottom:1px solid #b2dfdb;gap:6px 10px; }
+.release-patient-field { display:flex;align-items:center;gap:6px;flex:1;min-width:140px; }
+.rpf-label { font-weight:700;font-size:12px;white-space:nowrap; }
+.rpf-value { border-bottom:1px dotted #999;flex:1;padding:0 4px;font-size:12px;min-width:60px; }
+.release-body { padding:12px 16px; }
+.release-section-label { text-align:center;font-weight:700;font-size:13px;text-decoration:underline;margin:4px 0 10px 0;color:#00695c; }
+.release-bill-table-wrap { overflow-x:auto; }
+.release-bill-table { width:100%;border-collapse:collapse;font-size:12px; }
+.release-bill-table th,.release-bill-table td { border:1px solid #ccc;padding:5px 8px;vertical-align:middle; }
+.release-bill-table thead th { background:#f0f8f7 !important;-webkit-print-color-adjust:exact;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px; }
+.print-total-row td { background:#e0f2f1 !important;-webkit-print-color-adjust:exact;font-weight:700; }
+.print-grand-row td { background:#b2dfdb !important;-webkit-print-color-adjust:exact;font-size:14px; }
+.print-discount-row td { background:#fff8f0 !important;-webkit-print-color-adjust:exact; }
+.print-advance-row td { background:#e8f5e9 !important;-webkit-print-color-adjust:exact; }
+.print-due-row td { background:#ffebee !important;-webkit-print-color-adjust:exact;font-size:15px; }
+.release-notes { font-size:11px;color:#444;white-space:pre-wrap;margin-top:10px;padding:6px 0;border-top:1px dashed #ccc; }
+.release-signature-row { display:flex;justify-content:space-between;margin-top:30px;padding:0 20px; }
+.release-sig-box { width:40%; }
+.release-sig-line { border-bottom:1px solid #333;margin-bottom:6px; }
+.release-sig-label { font-size:10px;color:#666;text-align:center; }
+.release-footer { display:flex;justify-content:space-between;border-top:1px solid #ccc;padding:6px 16px;font-size:11px;background:#e0f2f1 !important;-webkit-print-color-adjust:exact;color:#555; }
+
+@media print {
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+    body *{visibility:hidden !important;}
+    #release-print-area,#release-print-area *{visibility:visible !important;}
+    #release-print-area{position:fixed;top:0;left:0;width:100%;background:white !important;}
+    .release-wrapper{border:none !important;max-width:100% !important;box-shadow:none !important;}
+    .patient-sticky-bar { display:none !important; }
+}
+</style>
+@stop
+
+@section('js')
+<script>
+var CSRF_TOKEN        = '{{ csrf_token() }}';
+var RELEASE_STORE_URL = '{{ url("/nursing/releasepatients/store") }}';
+var PATIENT_DATA_URL  = '{{ url("/nursing/releasepatients/patient-data") }}'; // ✅ fixed URL
+
+var DEFAULT_BILL_ITEMS = [
+    { description:'Cabin / Ward Charge',       qty:1, unit_price:0 },
+    { description:'Doctor Visit Fee',           qty:1, unit_price:0 },
+    { description:'Nursing Charge',             qty:1, unit_price:0 },
+    { description:'Medicine Charge',            qty:1, unit_price:0 },
+    { description:'Investigation / Lab Charge', qty:1, unit_price:0 },
+    { description:'Operation Theatre Charge',   qty:1, unit_price:0 },
+    { description:'Miscellaneous Charge',       qty:1, unit_price:0 },
+];
+
+var billItems = [];
+
+/* ══ HELPERS ══ */
+function todayISO(){ return new Date().toISOString().split('T')[0]; }
+function fmtDateBD(iso){ if(!iso) return '—'; var p=String(iso).slice(0,10).split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function gVal(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+function setText(id,txt){ var el=document.getElementById(id); if(el) el.textContent=(txt!==null&&txt!==undefined&&txt!=='')?String(txt):'—'; }
+function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function taka(n){ return '৳ '+parseFloat(n||0).toFixed(2); }
+
+function showAlert(type,msg){
+    var el=document.getElementById('save-alert');
+    el.className='alert alert-'+type+' modern-alert';
+    el.innerHTML=msg;
+    el.classList.remove('d-none');
+    window.scrollTo({top:0,behavior:'smooth'});
+    setTimeout(function(){ el.classList.add('d-none'); },6000);
+}
+function showToast(msg,type){
+    var bg=type==='success'?'#00695C':(type==='error'?'#c62828':'#1565C0');
+    var t=document.createElement('div');
+    t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;background:'+bg+';color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:320px;';
+    t.innerHTML='<i class="fas fa-check-circle mr-2"></i>'+msg;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){ t.remove(); },300); },3000);
+}
+
+/* ══ STICKY BAR ══ */
+(function initStickyBar(){
+    var bar    = document.getElementById('patient-sticky-bar');
+    var spacer = document.getElementById('sticky-bar-spacer');
+    if(!bar||!spacer) return;
+    var NAVBAR_H=57, barOffsetTop=0, barHeight=0;
+    function measure(){
+        bar.classList.remove('is-sticky'); spacer.classList.remove('active'); spacer.style.height='';
+        barOffsetTop=bar.getBoundingClientRect().top+window.scrollY; barHeight=bar.offsetHeight;
+    }
+    function onScroll(){
+        if(document.getElementById('panel-step1').style.display==='none') return;
+        if(window.scrollY+NAVBAR_H>=barOffsetTop){ bar.classList.add('is-sticky'); spacer.classList.add('active'); spacer.style.height=barHeight+'px'; }
+        else { bar.classList.remove('is-sticky'); spacer.classList.remove('active'); spacer.style.height=''; }
+    }
+    window.addEventListener('load', function(){ measure(); onScroll(); });
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', function(){ measure(); onScroll(); });
+})();
+
+/* ══ BILL TABLE ══ */
+function renderBillTable(){
+    var tbody=document.getElementById('bill-tbody');
+    if(!billItems.length){
+        tbody.innerHTML='<tr><td colspan="6" class="text-center text-muted py-3"><i class="fas fa-plus-circle mr-1"></i> Add bill items above</td></tr>';
+        recalcBill(); return;
+    }
+    tbody.innerHTML=billItems.map(function(item,i){
+        return '<tr>'+
+            '<td class="text-muted small">'+(i+1)+'</td>'+
+            '<td><input type="text" class="form-control form-control-sm" value="'+esc(item.description)+'" onchange="billItems['+i+'].description=this.value" placeholder="Description..."></td>'+
+            '<td><input type="number" class="form-control form-control-sm text-center" value="'+item.qty+'" min="1" onchange="billItems['+i+'].qty=parseFloat(this.value)||1;recalcBill()"></td>'+
+            '<td><input type="number" class="form-control form-control-sm text-right" value="'+item.unit_price+'" min="0" step="0.01" onchange="billItems['+i+'].unit_price=parseFloat(this.value)||0;recalcBill()"></td>'+
+            '<td class="font-weight-bold text-teal" style="background:#f0faf9;">'+taka(item.qty*item.unit_price)+'</td>'+
+            '<td class="text-center"><button type="button" class="btn-rm-bill" onclick="removeBillRow('+i+')"><i class="fas fa-times"></i></button></td>'+
+        '</tr>';
+    }).join('');
+    recalcBill();
+}
+
+function addBillRow(){ billItems.push({description:'',qty:1,unit_price:0}); renderBillTable(); }
+function removeBillRow(idx){ billItems.splice(idx,1); renderBillTable(); }
+
+function recalcBill(){
+    var subtotal=billItems.reduce(function(s,item){ return s+(item.qty*item.unit_price); },0);
+    var discountVal=parseFloat(document.getElementById('bill-discount').value)||0;
+    var discountType=document.getElementById('discount-type').value;
+    var advance=parseFloat(document.getElementById('bill-advance').value)||0;
+    var discountAmt=discountType==='percent'?(subtotal*discountVal/100):discountVal;
+    var grand=Math.max(0,subtotal-discountAmt);
+    var due=Math.max(0,grand-advance);
+
+    var el;
+    el=document.getElementById('bill-subtotal'); if(el) el.textContent=taka(subtotal);
+    el=document.getElementById('bill-grand');    if(el) el.querySelector('.grand-total-value').textContent=taka(grand);
+    el=document.getElementById('bill-due');      if(el) el.querySelector('.due-amount-value').textContent=taka(due);
+    setText('sb-subtotal', taka(subtotal));
+    setText('sb-discount',  '- '+taka(discountAmt));
+    setText('sb-advance',   taka(advance));
+    setText('sb-grand',     taka(grand));
+    setText('sb-due',       taka(due));
+    setText('ib-total', taka(grand));
+    setText('ib-due',   taka(due));
+    return { subtotal:subtotal, discountAmt:discountAmt, grand:grand, due:due, advance:advance };
+}
+
+/* ══ DAYS CALC ══ */
+function calcDays(){
+    var admitDate=gVal('f-admission-date'), relDate=gVal('f-release-date');
+    if(!admitDate||!relDate){ document.getElementById('f-total-days').value=''; return 0; }
+    var diff=Math.round((new Date(relDate)-new Date(admitDate))/(1000*60*60*24));
+    var days=Math.max(0,diff);
+    document.getElementById('f-total-days').value=days+' day'+(days!==1?'s':'');
+    setText('sum-days', days+' day'+(days!==1?'s':''));
+    return days;
+}
+
+/* ══ SELECT PATIENT ══ */
+function selectPatient(btn){
+    var d=btn.dataset;
+    document.getElementById('f-patient-id').value           = d.id;
+    document.getElementById('f-admission-id').value         = d.admissionId||'';
+    document.getElementById('f-patient-code').value         = d.code;
+    document.getElementById('f-patient-name').value         = d.name;
+    document.getElementById('f-patient-age-gender').value   = [d.age,d.gender].filter(Boolean).join(' / ');
+    document.getElementById('f-patient-mobile').value       = d.mobile;
+    document.getElementById('f-release-date').value         = todayISO();
+    if(d.admissionDate) document.getElementById('f-admission-date').value = d.admissionDate.slice(0,10);
+
+    document.getElementById('spb-avatar').textContent = (d.name||'P').charAt(0).toUpperCase();
+    document.getElementById('spb-name').textContent   = d.name;
+    document.getElementById('spb-meta').textContent   = [d.code,d.age,d.gender,d.mobile,d.upozila,d.blood].filter(Boolean).join(' · ');
+
+    setText('sum-code',    d.code||'—');
+    setText('sum-name',    d.name||'—');
+    setText('sum-admit',   d.admissionDate ? fmtDateBD(d.admissionDate) : '—');
+    setText('sum-release', fmtDateBD(todayISO()));
+
+    billItems=DEFAULT_BILL_ITEMS.map(function(item){ return Object.assign({},item); });
+    renderBillTable();
+    calcDays();
+    updateConditionLabel();
+
+    document.getElementById('step1-circle').className='step-circle step-done';
+    document.getElementById('step1-circle').innerHTML='<i class="fas fa-check" style="font-size:11px;"></i>';
+    document.getElementById('step-connector-12').classList.add('done');
+    document.getElementById('step2-circle').className='step-circle step-active';
+    document.getElementById('step2-label').className='step-label-main step-label-active';
+    document.getElementById('step2-sublabel').className='step-label-sub';
+    document.getElementById('breadcrumb-current').textContent='Bill & Release';
+
+    document.getElementById('panel-step1').style.display='none';
+    document.getElementById('panel-step2').style.display='block';
+    document.getElementById('panel-step3').style.display='none';
+
+    loadPatientData(d.id);
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ LOAD PATIENT DATA (AJAX) ══ */
+function loadPatientData(patientId){
+    fetch(PATIENT_DATA_URL+'/'+patientId, { // ✅ fixed URL
+        headers:{'Accept':'application/json','X-CSRF-TOKEN':CSRF_TOKEN}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+        if(data.success){
+            renderPrescriptionHistory(data.fresh_prescriptions||[], data.round_prescriptions||[]);
+        }
+    })
+    .catch(function(e){ console.warn('AJAX load failed:', e); });
+}
+
+function renderPrescriptionHistory(fresh, round){
+    if(!fresh.length&&!round.length) return;
+    document.getElementById('prescription-summary-card').style.display='block';
+    document.getElementById('fresh-rx-list').innerHTML=fresh.map(function(rx){
+        return '<div class="rx-history-item">'+
+            '<div class="rx-history-label text-teal"><i class="fas fa-capsules mr-1"></i>Fresh Rx — '+esc(rx.date||'')+(rx.doctor?' · Dr. '+esc(rx.doctor):'')+'</div>'+
+            rx.lines.map(function(l){ return '<div class="rx-history-line">• '+esc(l)+'</div>'; }).join('')+
+        '</div>';
+    }).join('');
+    document.getElementById('round-rx-list').innerHTML=round.map(function(rx){
+        return '<div class="rx-history-item">'+
+            '<div class="rx-history-label text-blue"><i class="fas fa-sync-alt mr-1"></i>Round Rx — '+esc(rx.date||'')+(rx.doctor?' · Dr. '+esc(rx.doctor):'')+'</div>'+
+            rx.lines.map(function(l){ return '<div class="rx-history-line">• '+esc(l)+'</div>'; }).join('')+
+        '</div>';
+    }).join('');
+}
+
+function toggleRxHistory(){
+    var body=document.getElementById('rx-history-body'), label=document.getElementById('rx-toggle-label');
+    var hidden=body.style.display==='none';
+    body.style.display=hidden?'block':'none';
+    label.textContent=hidden?'Hide':'Show';
+}
+
+function updateConditionLabel(){
+    var sel=document.getElementById('f-condition');
+    setText('sum-condition', sel?sel.options[sel.selectedIndex].text:'—');
+}
+
+/* ══ PROCESS RELEASE ══ */
+function processRelease(){
+    var patientId=gVal('f-patient-id'), admissionId=gVal('f-admission-id'), releaseDate=gVal('f-release-date');
+    if(!patientId){ showAlert('warning','Please select a patient first.'); return; }
+    if(!releaseDate){ showAlert('warning','Please set a release date.'); return; }
+    if(!confirm('এই patient কে release এর জন্য submit করবেন?\nManager approval পেলে তবেই released হবে।')) return;
+
+    var billData=recalcBill();
+    var doctorSel=document.getElementById('f-doctor');
+    var doctorName=doctorSel&&doctorSel.options.length?doctorSel.options[doctorSel.selectedIndex].text:'';
+
+    var payload={
+        patient_id    : patientId,
+        admission_id  : admissionId,
+        release_date  : releaseDate,
+        notes         : gVal('f-notes'),
+        condition     : gVal('f-condition'),
+        doctor_name   : doctorName,
+        bill_items    : billItems.filter(function(item){ return item.description.trim()!==''; }),
+        bill_subtotal : billData.subtotal,
+        bill_discount : billData.discountAmt,
+        bill_grand    : billData.grand,
+        bill_advance  : billData.advance,
+        bill_due      : billData.due,
+    };
+
+    var btn=document.getElementById('btn-release');
+    btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i> Submitting...';
+
+    fetch(RELEASE_STORE_URL, {
+        method:'POST',
+        headers:{'X-CSRF-TOKEN':CSRF_TOKEN,'Accept':'application/json','Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+        btn.disabled=false;
+        btn.innerHTML='<i class="fas fa-paper-plane mr-2"></i> Submit for Approval';
+        if(data.success){
+            showToast(data.message||'Release request submitted! Waiting for manager approval.','success');
+            showAlert('success','<i class="fas fa-check-circle mr-2"></i>'+(data.message||'Submitted for approval. Manager approval এর পর patient released হবে।'));
+            // ✅ Show summary then go back after 3s
+            generateReleaseSummary(billData, doctorName);
+            setTimeout(function(){ backToStep1(); }, 4000);
+        } else {
+            showAlert('danger','<i class="fas fa-exclamation-circle mr-2"></i>'+(data.message||'Release failed.'));
+        }
+    })
+    .catch(function(e){
+        btn.disabled=false;
+        btn.innerHTML='<i class="fas fa-paper-plane mr-2"></i> Submit for Approval';
+        showAlert('danger','<i class="fas fa-exclamation-circle mr-2"></i> Network error: '+e.message);
+    });
+}
+
+/* ══ GENERATE SUMMARY (STEP 3) ══ */
+function generateReleaseSummary(billData, doctorName){
+    var pName=gVal('f-patient-name')||'—', pCode=gVal('f-patient-code')||'—';
+    var pAge=gVal('f-patient-age-gender')||'—', pMobile=gVal('f-patient-mobile')||'—';
+    var admDate=gVal('f-admission-date'), relDate=gVal('f-release-date');
+    var days=calcDays();
+    var condSel=document.getElementById('f-condition');
+    var condText=condSel?condSel.options[condSel.selectedIndex].text:'—';
+    var notes=gVal('f-notes');
+
+    setText('ib-name', pName); setText('ib-days', days+' day'+(days!==1?'s':''));
+    setText('ib-total', taka(billData.grand)); setText('ib-due', taka(billData.due));
+    setText('rx-badge-name', pName);
+    setText('print-code', pCode); setText('print-name', pName);
+    setText('print-age', pAge); setText('print-mobile', pMobile);
+    setText('print-admit-date', fmtDateBD(admDate)); setText('print-rel-date', fmtDateBD(relDate));
+    setText('print-days', days+' দিন'); setText('print-condition', condText);
+    setText('print-doctor', doctorName||'—'); setText('print-release-date','Date: '+fmtDateBD(relDate));
+    setText('print-subtotal', taka(billData.subtotal));
+    setText('print-discount-val', '- '+taka(billData.discountAmt));
+    setText('print-grand-total', taka(billData.grand));
+    setText('print-advance-val', taka(billData.advance));
+    setText('print-due-val', taka(billData.due));
+
+    var validItems=billItems.filter(function(item){ return item.description.trim()&&item.unit_price>0; });
+    document.getElementById('print-bill-tbody').innerHTML=validItems.length
+        ?validItems.map(function(item,i){
+            return '<tr><td>'+(i+1)+'</td><td>'+esc(item.description)+'</td>'+
+                '<td style="text-align:center;">'+item.qty+'</td>'+
+                '<td style="text-align:right;">'+taka(item.unit_price)+'</td>'+
+                '<td style="text-align:right;">'+taka(item.qty*item.unit_price)+'</td></tr>';
+          }).join('')
+        :'<tr><td colspan="5" class="text-center text-muted py-2">No charges added.</td></tr>';
+
+    var notesEl=document.getElementById('print-notes');
+    if(notesEl) notesEl.textContent=notes?'Notes: '+notes:'';
+
+    var now=new Date().toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    setText('gen-time', now); setText('gen-time-display', now);
+    setText('print-released-by','Nursing Staff');
+
+    document.getElementById('step2-circle').className='step-circle step-done';
+    document.getElementById('step2-circle').innerHTML='<i class="fas fa-check" style="font-size:11px;"></i>';
+    document.getElementById('step-connector-23').classList.add('done');
+    document.getElementById('step3-circle').className='step-circle step-active';
+    document.getElementById('step3-label').className='step-label-main step-label-active';
+    document.getElementById('step3-sublabel').className='step-label-sub';
+    document.getElementById('breadcrumb-current').textContent='Summary';
+
+    document.getElementById('panel-step2').style.display='none';
+    document.getElementById('panel-step3').style.display='block';
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function printBillOnly(){
+    var billData=recalcBill();
+    var doctorSel=document.getElementById('f-doctor');
+    var doctorName=doctorSel&&doctorSel.options.length?doctorSel.options[doctorSel.selectedIndex].text:'';
+    generateReleaseSummary(billData, doctorName);
+    setTimeout(function(){ window.print(); },400);
+}
+
+/* ══ NAVIGATION ══ */
+function backToStep1(){
+    ['step1-circle','step2-circle','step3-circle'].forEach(function(id,i){
+        document.getElementById(id).className=i===0?'step-circle step-active':'step-circle step-inactive';
+        document.getElementById(id).innerHTML=String(i+1);
+    });
+    document.getElementById('step-connector-12').classList.remove('done');
+    document.getElementById('step-connector-23').classList.remove('done');
+    document.getElementById('step2-label').className='step-label-main step-label-inactive';
+    document.getElementById('step2-sublabel').className='step-label-sub step-label-inactive';
+    document.getElementById('step3-label').className='step-label-main step-label-inactive';
+    document.getElementById('step3-sublabel').className='step-label-sub step-label-inactive';
+    document.getElementById('breadcrumb-current').textContent='Select Patient';
+    document.getElementById('panel-step1').style.display='block';
+    document.getElementById('panel-step2').style.display='none';
+    document.getElementById('panel-step3').style.display='none';
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══ TABLE FILTER ══ */
+function filterTable(){
+    var q=document.getElementById('patientSearch').value.toLowerCase();
+    document.querySelectorAll('#patientTable tbody tr').forEach(function(row){
+        row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
+    });
+}
+document.getElementById('patientSearch').addEventListener('keyup', filterTable);
+document.getElementById('f-release-date').addEventListener('change', function(){
+    calcDays(); setText('sum-release', fmtDateBD(this.value));
+});
+document.getElementById('f-condition').addEventListener('change', updateConditionLabel);
+document.addEventListener('DOMContentLoaded', function(){ renderBillTable(); });
+</script>
+@stop
