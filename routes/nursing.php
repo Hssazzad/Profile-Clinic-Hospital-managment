@@ -9,6 +9,7 @@ use App\Http\Controllers\Nursing\RoundPrescriptionController;
 use App\Http\Controllers\Nursing\DischargeController;
 use App\Http\Controllers\Nursing\ReleaseController;
 use App\Http\Controllers\Nursing\ReleaseApprovalController;
+use App\Http\Controllers\Nursing\InvestigationPaymentController;
 use App\Http\Controllers\TemplateController;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -44,12 +45,8 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/roundprescription/data',                          [RoundPrescriptionController::class, 'getData'])->name('nursing.round_prescription.data');
         Route::get('/roundprescription/patient-admission/{patientId}', [RoundPrescriptionController::class, 'getPatientAdmissionData'])->name('nursing.round_prescription.patient');
         Route::post('/roundprescription/store',                        [RoundPrescriptionController::class, 'store'])->name('nursing.round_prescription.store');
-        
-        // ✅ roundprescription/detail/{id} — for viewing prescription details
-        Route::get('/roundprescription/detail/{id}', [RoundPrescriptionController::class, 'detail'])->name('nursing.round_prescription.detail');
-        
-        // ✅ roundprescription/patient-history/{patientId} — for patient history
-        Route::get('/roundprescription/patient-history/{patientId}', [RoundPrescriptionController::class, 'patientHistory'])->name('nursing.round_prescription.patient_history');
+        Route::get('/roundprescription/detail/{id}',                   [RoundPrescriptionController::class, 'detail'])->name('nursing.round_prescription.detail');
+        Route::get('/roundprescription/patient-history/{patientId}',   [RoundPrescriptionController::class, 'patientHistory'])->name('nursing.round_prescription.patient_history');
 
         // ── Discharge ────────────────────────────────────────────────────────
         Route::get('/Discharge',                           [DischargeController::class, 'index'])->name('nursing.discharge');
@@ -68,8 +65,20 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/release-approval/approve', [ReleaseApprovalController::class, 'approve'])->name('nursing.release_approval.approve');
         Route::post('/release-approval/reject',  [ReleaseApprovalController::class, 'reject'])->name('nursing.release_approval.reject');
 
+        // ── Investigation Payment (X-Ray, ECG, Pathology) ───────────────────
+        // NOTE: specific sub-routes BEFORE generic /{id} to avoid conflicts
+        Route::get('/InvestigationPayment',                              [InvestigationPaymentController::class, 'index'])->name('nursing.investigation_payment');
+        Route::get('/investigationpayment',                              [InvestigationPaymentController::class, 'index']);
+        Route::post('/InvestigationPayment/store',                       [InvestigationPaymentController::class, 'store'])->name('nursing.investigation_payment.store');
+        Route::get('/InvestigationPayment/detail/{id}',                  [InvestigationPaymentController::class, 'detail'])->name('nursing.investigation_payment.detail');
+        Route::get('/InvestigationPayment/patient-payments/{patientId}', [InvestigationPaymentController::class, 'patientPayments'])->name('nursing.investigation_payment.patient_payments');
+        Route::get('/InvestigationPayment/patient-data/{patientId}',     [InvestigationPaymentController::class, 'getPatientData'])->name('nursing.investigation_payment.patient');
+        Route::get('/InvestigationPayment/investigations/{patientId}',   [InvestigationPaymentController::class, 'getInvestigations'])->name('nursing.investigation_payment.investigations');
+        Route::post('/InvestigationPayment/record-payment',              [InvestigationPaymentController::class, 'recordPayment'])->name('nursing.investigation_payment.record');
+        Route::get('/InvestigationPayment/payment-history/{patientId}',  [InvestigationPaymentController::class, 'getPaymentHistory'])->name('nursing.investigation_payment.history');
+        Route::delete('/InvestigationPayment/delete/{id}',               [InvestigationPaymentController::class, 'destroy'])->name('nursing.investigation_payment.destroy');
+
         // ── On Admission ─────────────────────────────────────────────────────
-		
         Route::get('/Onaddmission',              [AdmissionController::class, 'index'])->name('nursing.on_admission');
         Route::get('/onaddmission',              [AdmissionController::class, 'index']);
         Route::get('/admission/select',          [AdmissionController::class, 'selectPatient'])->name('nursing.admission.select');
@@ -80,12 +89,11 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/admission/template',            [AdmissionController::class, 'template'])->name('nursing.admission.template');
         Route::get('/admission/template/data/{id?}', [AdmissionController::class, 'getTemplateData'])->name('nursing.admission.template.data');
 
-        // ✅ admission/detail/{id} — 404 fix
-        Route::get('/admission/detail/{id}',         [AdmissionController::class, 'detail'])->name('nursing.admission.detail');
-        Route::get('/admission/{id}',                [AdmissionController::class, 'show'])->name('nursing.admission.show');
-        Route::get('/admission/data/{patientId}',    [AdmissionController::class, 'getAdmissionData'])->name('nursing.admission.data');
-        Route::put('/admission/{id}',                [AdmissionController::class, 'update'])->name('nursing.admission.update');
-        Route::delete('/admission/{id}',             [AdmissionController::class, 'destroy'])->name('nursing.admission.destroy');
+        Route::get('/admission/detail/{id}',      [AdmissionController::class, 'detail'])->name('nursing.admission.detail');
+        Route::get('/admission/{id}',             [AdmissionController::class, 'show'])->name('nursing.admission.show');
+        Route::get('/admission/data/{patientId}', [AdmissionController::class, 'getAdmissionData'])->name('nursing.admission.data');
+        Route::put('/admission/{id}',             [AdmissionController::class, 'update'])->name('nursing.admission.update');
+        Route::delete('/admission/{id}',          [AdmissionController::class, 'destroy'])->name('nursing.admission.destroy');
 
         Route::get('/template/medicine/{id}', [TemplateController::class, 'getTemplateMedicines'])->name('nursing.template.medicine.get');
 
@@ -105,9 +113,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/postsurgery/apply-template',         [PostSurgeryController::class, 'applyTemplate'])->name('nursing.postsurgery.apply_template');
         Route::get('/postsurgery/template/{id}',           [PostSurgeryController::class, 'getTemplateData'])->name('nursing.postsurgery.template.data');
         Route::get('/postsurgery/pre-operation-medicines', [PostSurgeryController::class, 'getPreOperationMedicines'])->name('nursing.postsurgery.pre-operation-medicines');
-        
-        // ✅ postsurgery/detail/{id} — for viewing prescription details
-        Route::get('/postsurgery/detail/{id}', [PostSurgeryController::class, 'detail'])->name('nursing.postsurgery.detail');
+        Route::get('/postsurgery/detail/{id}',             [PostSurgeryController::class, 'detail'])->name('nursing.postsurgery.detail');
 
         // ── Fresh ────────────────────────────────────────────────────────────
         Route::get('/Fresh', [FreshController::class, 'index'])->name('nursing.fresh');
@@ -119,14 +125,12 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/fresh/patient-admission/{patientId}', [FreshController::class, 'getPatientAdmissionData'])->name('nursing.fresh.patient_admission');
         Route::get('/fresh/post-operation-medicines',      [FreshController::class, 'getPostOperationMedicines'])->name('nursing.fresh.post-operation-medicines');
         Route::get('/fresh/template/{id}',                 [FreshController::class, 'getTemplateData'])->name('nursing.fresh.template.data');
-        
-        // ✅ fresh/detail/{id} — for viewing prescription details
-        Route::get('/fresh/detail/{id}', [FreshController::class, 'detail'])->name('nursing.fresh.detail');
+        Route::get('/fresh/detail/{id}',                   [FreshController::class, 'detail'])->name('nursing.fresh.detail');
 
     }); // end prefix nursing
 
     // ─────────────────────────────────────────────────────────────────────────
-    // ✅ admission/detail — prefix ছাড়া direct route (browser console এ এই URL দেখা যাচ্ছে)
+    // admission/detail — prefix ছাড়া direct route
     // ─────────────────────────────────────────────────────────────────────────
     Route::prefix('admission')->group(function () {
         Route::get('/detail/{id}',      [AdmissionController::class, 'detail'])->name('admission.detail');
@@ -148,9 +152,11 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::get('/RoundPrescription', [RoundPrescriptionController::class, 'index']);
         Route::get('/Discharge',         [DischargeController::class, 'index']);
         Route::get('/Releasepatients',   [ReleaseController::class, 'index']);
-        Route::get('/ReleaseApproval',          [ReleaseApprovalController::class, 'index']);
-        Route::post('/ReleaseApproval/approve', [ReleaseApprovalController::class, 'approve']);
-        Route::post('/ReleaseApproval/reject',  [ReleaseApprovalController::class, 'reject']);
+        Route::get('/ReleaseApproval',            [ReleaseApprovalController::class, 'index']);
+        Route::post('/ReleaseApproval/approve',   [ReleaseApprovalController::class, 'approve']);
+        Route::post('/ReleaseApproval/reject',    [ReleaseApprovalController::class, 'reject']);
+        Route::get('/InvestigationPayment',       [InvestigationPaymentController::class, 'index']);
+        Route::post('/InvestigationPayment/store',[InvestigationPaymentController::class, 'store']);
     });
 
 }); // end auth middleware group

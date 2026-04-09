@@ -34,6 +34,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('medicine/ajax/add', [TemplateController::class, 'ajaxAddMedicine'])->name('templates.medicine.ajax.add');
         Route::get('medicine/ajax/list', [TemplateController::class, 'ajaxListMedicine'])->name('templates.medicine.ajax.list');
         Route::delete('medicine/ajax/{id}', [TemplateController::class, 'ajaxDeleteMedicine'])->name('templates.medicine.ajax.delete');
+        Route::get('medicine/ajax/{id}', [TemplateController::class, 'ajaxGetMedicine'])->name('templates.medicine.ajax.get');
+        Route::put('medicine/ajax/{id}', [TemplateController::class, 'ajaxUpdateMedicine'])->name('templates.medicine.ajax.update');
 		
 		// Advice Section
         Route::get('addadvice', [TemplateController::class, 'addAdvice'])->name('templates.addadvice');

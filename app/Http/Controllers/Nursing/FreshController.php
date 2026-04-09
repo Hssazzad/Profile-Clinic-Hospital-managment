@@ -85,7 +85,12 @@ class FreshController extends Controller
         
         $FreshPatients = $freshQuery->paginate(20)->withQueryString();
         
-        $medicines      = DB::table('template_medicine')->orderBy('name')->get();
+        // Only load fresh prescription medicines
+        $medicines = DB::table('template_medicine')
+            ->where('order_type', 'fresh prescription')
+            ->orderBy('name')
+            ->get();
+        
         $investigations = DB::table('template_investigations')->orderBy('id')->get();
         $templates      = DB::table('tbl_template')->where('status', 1)->orderBy('title')->get();
         $doctors        = DB::table('doctors')

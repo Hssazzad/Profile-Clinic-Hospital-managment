@@ -12,17 +12,125 @@ class Patient extends Model
     protected $table = 'patients';
     protected $primaryKey = 'id';
 
-	protected $fillable = [
-    'patientcode','patientname','patientfather','patienthusband','age',
-    'upozila','district','village','photo','union',
-    'spomobile_no','date_of_birth','mobile_no','relmobile_no','nid_number','email',
-    'gender','blood_group','notes',
-    'reference_type','reference_person','reference_name'
-];
+    protected $fillable = [
+        // ✅ Required fields
+        'patientcode',
+        'patientname',
+        'patientfather',
+        'mobile_no',
+        'date_of_birth',
+        'age',
+        'gender',
+
+        // ✅ Optional personal info
+        'patienthusband',
+        'photo',
+        'nid_number',
+        'email',
+
+        // ✅ Optional contact
+        'spomobile_no',
+        'relmobile_no',
+
+        // ✅ Optional address
+        'district',
+        'upozila',
+        'union',
+        'village',
+        'address',
+
+        // ✅ Optional health info
+        'blood_group',
+
+        // ✅ Optional reference
+        'reference_type',
+        'reference_person',
+        'reference_name',
+
+        // ✅ Optional notes
+        'notes',
+    ];
 
     protected $casts = [
-        'operationdate' => 'date',
-        'operationtime' => 'datetime:H:i',
         'date_of_birth' => 'date',
+        'created_at'    => 'datetime',
+        'updated_at'    => 'datetime',
     ];
+
+    /**
+     * Get patient's admission history
+     */
+    public function admissions()
+    {
+        return $this->hasMany('App\Models\NursingAdmission', 'patient_id', 'id');
+    }
+
+    /**
+     * Get patient's latest admission
+     */
+    public function latestAdmission()
+    {
+        return $this->hasOne('App\Models\NursingAdmission', 'patient_id', 'id')
+                    ->latest('id');
+    }
+
+    /**
+     * Get full address
+     */
+    public function getFullAddressAttribute()
+    {
+        $parts = array_filter([
+            $this->village,
+            $this->union,
+            $this->upozila,
+            $this->district,
+        ]);
+        return implode(', ', $parts) ?: 'N/A';
+    }
+
+    /**
+     * Get formatted mobile
+     */
+    public function getFormattedMobileAttribute()
+    {
+        return $this->mobile_no ? '+88' . substr($this->mobile_no, 1) : 'N/A';
+    }
+
+    /**
+     * Get patient status badge
+     */
+    public function getStatusBadgeAttribute()
+    {
+        if (!$this->latestAdmission) {
+            return ['text' => 'No Admission', 'class' => 'secondary'];
+        }
+
+        $status = $this->latestAdmission->status;
+
+        return match ($status) {
+            1 => ['text' => 'On Admission', 'class' => 'warning'],
+            2 => ['text' => 'Post Surgery', 'class' => 'info'],
+            3 => ['text' => 'Fresh', 'class' => 'success'],
+            default => ['text' => 'Unknown', 'class' => 'secondary'],
+        };
+    }
+
+    /**
+     * Calculate age from date of birth
+     */
+    public function getCalculatedAgeAttribute()
+    {
+        if (!$this->date_of_birth) {
+            return null;
+        }
+
+        $birthDate = $this->date_of_birth;
+        $today = now();
+
+        $years = $today->diffInYears($birthDate);
+        $months = $today->copy()->subYears($years)->diffInMonths($birthDate);
+        $days = $today->copy()->subYears($years)->subMonths($months)->diffInDays($birthDate);
+
+        return "{$years} Years {$months} Months {$days} Days";
+    }
 }

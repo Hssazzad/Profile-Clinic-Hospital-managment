@@ -63,17 +63,17 @@ class TemplateController extends Controller
     {
         try {
             $request->validate([
-                'templateid'   => 'required',
-                'patient_name' => 'required|string|max:255',
+                'templateid'     => 'required',
+                'patient_name'   => 'required|string|max:255',
                 'admission_date' => 'required|date',
             ]);
 
             $admission = Admission::create($request->all());
 
             return response()->json([
-                'ok' => true,
+                'ok'      => true,
                 'message' => 'Admission Record Saved!',
-                'id' => $admission->id
+                'id'      => $admission->id
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -92,7 +92,7 @@ class TemplateController extends Controller
         try {
             $admission = Admission::findOrFail($id);
             $pdf = Pdf::loadView('templates.pdf', compact('admission'))->setPaper('a4', 'portrait');
-            return $pdf->stream('Admission_Record_'.$admission->reg_no.'.pdf');
+            return $pdf->stream('Admission_Record_' . $admission->reg_no . '.pdf');
         } catch (\Exception $e) {
             return "Error: " . $e->getMessage();
         }
@@ -140,8 +140,8 @@ class TemplateController extends Controller
      */
     public function addDiagnosis()
     {
-        $templates = Template::orderBy('title')->get();
-        $diagnosis_list = $this->getDistinctList('prescriptions_diagnosis');
+        $templates       = Template::orderBy('title')->get();
+        $diagnosis_list  = $this->getDistinctList('prescriptions_diagnosis');
         return view('templates.diagnosis.create', compact('templates', 'diagnosis_list'));
     }
 
@@ -187,7 +187,7 @@ class TemplateController extends Controller
      */
     public function addInvestigation()
     {
-        $templates = Template::orderBy('title')->get();
+        $templates          = Template::orderBy('title')->get();
         $investigation_list = $this->getDistinctList('prescriptions_investigations');
         return view('templates.investigation.create', compact('templates', 'investigation_list'));
     }
@@ -234,7 +234,7 @@ class TemplateController extends Controller
      */
     public function addMedicine()
     {
-        $templates = Template::orderBy('title')->get();
+        $templates    = Template::orderBy('title')->get();
         $medicine_list = $this->getDistinctList('prescriptions_medicine');
         return view('templates.medicine.create', compact('templates', 'medicine_list'));
     }
@@ -253,27 +253,107 @@ class TemplateController extends Controller
             $row = TemplateMedicine::create([
                 'templeteid' => $request->templateid,
                 'name'       => $request->name,
-                'dose'       => $request->dosage,
+                'strength'   => $request->strength,
+                'dose'       => $request->dose ?? $request->dosage,
+                'route'      => $request->route,
+                'frequency'  => $request->frequency,
                 'duration'   => $request->duration,
+                'timing'     => $request->timing,
+                'meal_timing'=> $request->meal_timing,
                 'order_type' => $request->order_type,
+                'note'       => $request->note,
+                'group'      => $request->group,
                 'active'     => 1,
             ]);
 
             return response()->json([
-                'ok' => true,
+                'ok'      => true,
                 'message' => 'Medicine Added Successfully',
-                'row' => $row
+                'row'     => $row
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => 'Validation Error',
-                'errors' => $e->errors()
+                'errors'  => $e->errors()
             ], 422);
         } catch (\Exception $e) {
             Log::error('Medicine Add Error: ' . $e->getMessage());
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ৭ক. Medicine একটি নির্দিষ্ট row এর data ফেরত দেওয়া (Edit Modal এর জন্য)
+     */
+    public function ajaxGetMedicine($id)
+    {
+        try {
+            $row = TemplateMedicine::findOrFail($id);
+            return response()->json([
+                'ok'  => true,
+                'row' => $row
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'ok'      => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ৭খ. Medicine Update (Ajax)
+     * Route: POST /templates/medicine/update/{id}
+     *
+     * সব editable columns update হবে:
+     * name, strength, dose, route, frequency, duration, timing, order_type, note, group
+     */
+    public function ajaxUpdateMedicine(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'name'       => 'required|string|max:100',
+                'order_type' => 'required|in:admit,preorder,postorder',
+            ]);
+
+            $medicine = TemplateMedicine::findOrFail($id);
+
+            $medicine->update([
+                'name'       => trim($request->name),
+                'strength'   => $request->strength,
+                'dose'       => $request->dose ?? $request->dosage,
+                'route'      => $request->route,
+                'frequency'  => $request->frequency,
+                'duration'   => $request->duration,
+                'timing'     => $request->timing,
+                'meal_timing'=> $request->meal_timing,
+                'order_type' => $request->order_type,
+                'note'       => $request->note,
+                'group'      => $request->group,
+            ]);
+
+            Log::info('Medicine Updated:', ['id' => $id, 'data' => $request->all()]);
+
+            return response()->json([
+                'ok'      => true,
+                'message' => 'Medicine Updated Successfully',
+                'row'     => $medicine->fresh()
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'ok'      => false,
+                'message' => 'Validation Error',
+                'errors'  => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Medicine Update Error: ' . $e->getMessage());
+            return response()->json([
+                'ok'      => false,
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
@@ -287,12 +367,12 @@ class TemplateController extends Controller
                 ->get();
 
             return response()->json([
-                'ok' => true,
+                'ok'   => true,
                 'rows' => $rows
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -306,7 +386,7 @@ class TemplateController extends Controller
                 ->get();
 
             return response()->json([
-                'success' => true,
+                'success'   => true,
                 'medicines' => $medicines
             ]);
         } catch (\Exception $e) {
@@ -322,12 +402,12 @@ class TemplateController extends Controller
         try {
             TemplateMedicine::where('id', $id)->delete();
             return response()->json([
-                'ok' => true,
+                'ok'      => true,
                 'message' => 'Deleted Successfully'
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => $e->getMessage()
             ], 500);
         }
@@ -411,10 +491,10 @@ class TemplateController extends Controller
      */
     public function addFreshPrescription()
     {
-        $templates = Template::orderBy('title')->get();
-        $medicine_list = $this->getDistinctList('prescriptions_medicine');
+        $templates          = Template::orderBy('title')->get();
+        $medicine_list      = $this->getDistinctList('prescriptions_medicine');
         $investigation_list = $this->getDistinctList('prescriptions_investigations');
-        $diagnosis_list = $this->getDistinctList('prescriptions_diagnosis');
+        $diagnosis_list     = $this->getDistinctList('prescriptions_diagnosis');
 
         return view('templates.fresh_prescription.create', compact(
             'templates', 'medicine_list', 'investigation_list', 'diagnosis_list'
@@ -426,53 +506,53 @@ class TemplateController extends Controller
         try {
             $request->validate([
                 'templateid' => 'required',
-                'order_type' => 'required|in:admit,preorder,postorder',
+                'order_type' => 'required|in:admit,preorder,postorder,fresh prescription',
                 'name'       => 'required|string',
             ]);
 
             Log::info('Fresh Prescription Request:', [
                 'templateid' => $request->templateid,
                 'order_type' => $request->order_type,
-                'name' => $request->name,
-                'dosage' => $request->dosage,
-                'duration' => $request->duration
+                'name'       => $request->name,
+                'dosage'     => $request->dosage,
+                'duration'   => $request->duration
             ]);
 
             $data = [
                 'templeteid' => $request->templateid,
                 'name'       => $request->name,
+                'dose'       => $request->dosage,
+                'morning'    => $request->morning,
+                'noon'       => $request->noon,
+                'night'     => $request->night,
+                'meal_timing'=> $request->meal_timing,
+                'duration'   => $request->duration,
+                'route'      => $request->route,
+                'instruction'=> $request->instruction,
                 'order_type' => $request->order_type,
                 'active'     => 1,
             ];
-
-            if ($request->has('dosage') && !empty($request->dosage)) {
-                $data['dose'] = $request->dosage;
-            }
-
-            if ($request->has('duration') && !empty($request->duration)) {
-                $data['duration'] = $request->duration;
-            }
 
             $row = TemplateMedicine::create($data);
 
             Log::info('Prescription saved successfully:', ['id' => $row->id, 'order_type' => $row->order_type]);
 
             return response()->json([
-                'ok' => true,
+                'ok'      => true,
                 'message' => 'Item Saved Successfully',
-                'row' => $row
+                'row'     => $row
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => 'Validation Error',
-                'errors' => $e->errors()
+                'errors'  => $e->errors()
             ], 422);
         } catch (\Exception $e) {
             Log::error('Prescription save error: ' . $e->getMessage());
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
@@ -533,14 +613,14 @@ class TemplateController extends Controller
                 ->delete();
 
             return response()->json([
-                'ok' => true,
+                'ok'      => true,
                 'message' => $deleted . ' prescription(s) deleted successfully'
             ]);
 
         } catch (\Exception $e) {
             Log::error('Delete error: ' . $e->getMessage());
             return response()->json([
-                'ok' => false,
+                'ok'      => false,
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
@@ -551,7 +631,7 @@ class TemplateController extends Controller
      */
     public function displayTemplate()
     {
-        $templates = Template::with(['medicines' => function($query) {
+        $templates = Template::with(['medicines' => function ($query) {
             $query->orderBy('order_type')->orderBy('id');
         }])->orderBy('id', 'desc')->get();
 
@@ -563,7 +643,7 @@ class TemplateController extends Controller
      */
     public function displaySingleTemplate($templateid)
     {
-        $template = Template::with(['medicines' => function($query) {
+        $template = Template::with(['medicines' => function ($query) {
             $query->orderBy('order_type')->orderBy('id');
         }])->where('templateid', $templateid)->firstOrFail();
 
@@ -583,7 +663,7 @@ class TemplateController extends Controller
             }
 
             return response()->json([
-                'ok' => true,
+                'ok'       => true,
                 'template' => $template
             ]);
         } catch (\Exception $e) {
@@ -598,7 +678,7 @@ class TemplateController extends Controller
     {
         try {
             $data = [
-                'total_medicines' => TemplateMedicine::count(),
+                'total_medicines'  => TemplateMedicine::count(),
                 'order_type_stats' => TemplateMedicine::select('order_type', DB::raw('count(*) as total'))
                     ->groupBy('order_type')
                     ->get(),
@@ -606,8 +686,8 @@ class TemplateController extends Controller
                     ->orderBy('id', 'desc')
                     ->limit(10)
                     ->get(),
-                'model_fillable' => (new TemplateMedicine())->getFillable(),
-                'table_columns' => Schema::getColumnListing((new TemplateMedicine())->getTable()),
+                'model_fillable'   => (new TemplateMedicine())->getFillable(),
+                'table_columns'    => Schema::getColumnListing((new TemplateMedicine())->getTable()),
             ];
 
             return response()->json($data);
@@ -633,24 +713,7 @@ class TemplateController extends Controller
         return response()->json(['oe' => null]);
     }
 
-    /**
-     * ✅ ২০. প্রেসক্রিপশন ভিউ - ফিক্সড (এখন কাজ করবে)
-     */
-    public function prescriptionView()
-    {
-        // Templates ডাটা আনুন
-        $templates = Template::orderBy('title')->get();
-
-        // ✅ ডাক্তার ডাটা আনুন - সরাসরি SQL (নিশ্চিত কাজ করবে)
-        $doctors = DB::select("SELECT id, reg_no, doctor_name, speciality, contact, Posting, RateCode FROM doctors");
-
-        // ✅ ডাটা এসেছে কিনা চেক করুন
-        if(empty($doctors)) {
-            Log::warning('No doctors found in database');
-        }
-
-        return view('templates.fresh_prescription.create.blade', compact('templates', 'doctors'));
-    }
+    // ✅ NOTE: prescriptionView() method সরানো হয়েছে (removed as requested)
 
     /**
      * হেল্পার মেথড
@@ -671,6 +734,4 @@ class TemplateController extends Controller
         }
         return collect();
     }
-
-
 }

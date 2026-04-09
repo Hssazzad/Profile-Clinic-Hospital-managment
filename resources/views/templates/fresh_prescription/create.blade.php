@@ -19,7 +19,9 @@
 @stop
 
 @section('css')
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
     .card {
         border-radius: 8px;
@@ -449,7 +451,7 @@
                                     <div class="form-group mb-2">
                                         <label class="small">Order Type</label>
                                         <select id="medicine_order_type" class="form-control form-control-sm">
-                                            <option value="admit" selected>📋 Fresh Prescription</option>
+                                            <option value="fresh prescription" selected> Fresh Prescription</option>
                                         </select>
                                     </div>
                                 </div>
@@ -509,12 +511,158 @@
                 </div>
             </div>
         </div>
+
+        {{-- EDIT MODAL --}}
+        <div class="modal fade" id="editMedicineModal" tabindex="-1" role="dialog" aria-labelledby="editMedicineModalLabel">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning py-2">
+                        <h5 class="modal-title font-weight-bold" id="editMedicineModalLabel">
+                            <i class="fas fa-edit mr-2"></i>Edit Medicine
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <input type="hidden" id="edit_medicine_id">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Medicine Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="edit_medicine" list="edit_medicine_list"
+                                           class="form-control form-control-sm" placeholder="Type or select medicine...">
+                                    <datalist id="edit_medicine_list">
+                                        <option value="Almivas 40">
+                                        <option value="Rosu 5mg">
+                                        <option value="Lopimol 75mg">
+                                        <option value="Metformin 500mg">
+                                        <option value="Amlodipine 5mg">
+                                        <option value="Atorvastatin 10mg">
+                                        <option value="Omeprazole 20mg">
+                                        <option value="Paracetamol 500mg">
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Route</label>
+                                    <select id="edit_route" class="form-control form-control-sm">
+                                        <option value="Oral">Oral (mouth)</option>
+                                        <option value="IV">IV (vein)</option>
+                                        <option value="IM">IM (muscle)</option>
+                                        <option value="SC">SC (under skin)</option>
+                                        <option value="Topical">Topical</option>
+                                        <option value="Inhalation">Inhalation</option>
+                                        <option value="Tablet">Tablet</option>
+                                        <option value="Injection">Injection</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Morning</label>
+                                    <select id="edit_morning" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Noon</label>
+                                    <select id="edit_noon" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Night</label>
+                                    <select id="edit_night" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Before/After Meal</label>
+                                    <select id="edit_meal_timing" class="form-control form-control-sm">
+                                        <option value="">-- Select --</option>
+                                        <option value="before">Before</option>
+                                        <option value="after">After</option>
+                                        <option value="with">With</option>
+                                        <option value="empty">Empty Stomach</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Duration</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" id="edit_duration_num" class="form-control form-control-sm"
+                                               placeholder="0" min="0" style="max-width:70px;">
+                                        <select id="edit_duration_type" class="form-control form-control-sm">
+                                            <option value="">--</option>
+                                            <option value="days">Days</option>
+                                            <option value="months">Months</option>
+                                            <option value="ongoing">Ongoing</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="small font-weight-bold">Special Instructions</label>
+                            <select id="edit_instruction" class="form-control form-control-sm">
+                                <option value="">-- None --</option>
+                                <option value="Before Food">Before Food</option>
+                                <option value="After Food">After Food</option>
+                                <option value="With Food">With Food</option>
+                                <option value="At Bed Time">At Bed Time</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" id="btnUpdateMedicine">
+                            <i class="fas fa-save mr-1"></i> Update Medicine
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 @stop
 
 @section('js')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
@@ -604,6 +752,7 @@ function loadExistingMedicines(templateid) {
                     noon: med.noon || '',
                     night: med.night || '',
                     meal_timing: med.meal_timing || '',
+                    duration: med.duration || '', // Add this line
                     duration_num: med.duration_num || '',
                     duration_type: med.duration_type || '',
                     route: med.route || 'Oral',
@@ -619,32 +768,86 @@ function loadExistingMedicines(templateid) {
 
 // Add medicine
 function addMedicine() {
+    let templateid = $('#templateid').val();
     let medicineName = $('#medicine_name').val();
+    
+    if(!templateid) {
+        alert('Please select a template first');
+        return;
+    }
+    
     if(!medicineName) {
         alert('Please enter medicine name');
         return;
     }
     
-    let medicine = {
-        id: Date.now(),
-        name: medicineName,
-        company: $('#medicine_company').val() || '',
-        morning: $('#medicine_morning').val() || '-',
-        noon: $('#medicine_noon').val() || '-',
-        night: $('#medicine_night').val() || '-',
-        meal_timing: $('#medicine_meal_timing').val() || '-',
-        duration_num: $('#medicine_duration_num').val() || '0',
-        duration_type: $('#medicine_duration_type').val() || '',
-        route: $('#medicine_route').val() || 'Oral',
-        order_type: 'admit',
-        instruction: $('#medicine_instruction').val() || ''
-    };
+    // Build dosage from morning/noon/night
+    let morning = $('#medicine_morning').val() || '';
+    let noon = $('#medicine_noon').val() || '';
+    let night = $('#medicine_night').val() || '';
+    let dosage = (morning || '-') + '+' + (noon || '-') + '+' + (night || '-');
     
-    medicines.push(medicine);
-    updateMedicineTable();
-    updateCount();
-    clearForm();
-    alert('Medicine added successfully');
+    // Build duration
+    let dnum = $('#medicine_duration_num').val();
+    let dtype = $('#medicine_duration_type').val();
+    let duration = '';
+
+    console.log('Duration debug - dnum:', dnum, 'dtype:', dtype); // Debug line
+
+    if (dtype === 'days' && dnum) {
+        duration = dnum + ' days';
+    } else if (dtype === 'months' && dnum) {
+        duration = dnum + ' months';
+    } else if (dtype === 'ongoing') {
+        duration = 'ongoing';
+    } else if (dnum && dtype) {
+        duration = dnum + ' ' + dtype;
+    } else if (dtype) {
+        duration = dtype;
+    }
+
+    console.log('Final duration:', duration); // Debug line
+    
+    let btn = $('.btnAddMedicine');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+
+    $.ajax({
+        url: "{{ route('templates.fresh.ajax.store') }}",
+        type: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            templateid: templateid,
+            name: medicineName,
+            dosage: dosage,
+            morning: morning,
+            noon: noon,
+            night: night,
+            meal_timing: $('#medicine_meal_timing').val(),
+            duration: duration,
+            route: $('#medicine_route').val(),
+            order_type: 'fresh prescription',
+            instruction: $('#medicine_instruction').val(),
+            company: $('#medicine_company').val()
+        },
+        success: function(res) {
+            if (res.ok) {
+                showAlert('Medicine added successfully!', 'success');
+                clearForm();
+                loadExistingMedicines(templateid); // Reload from database
+            } else {
+                showAlert('Error: ' + res.message, 'error');
+            }
+        },
+        error: function(xhr) {
+            let msg = xhr.responseJSON && xhr.responseJSON.message
+                ? xhr.responseJSON.message
+                : 'Server error (HTTP ' + xhr.status + ')';
+            showAlert('Error: ' + msg, 'error');
+        },
+        complete: function() {
+            btn.prop('disabled', false).html('<i class="fas fa-plus"></i> Add Medicine');
+        }
+    });
 }
 
 // Update table
@@ -656,24 +859,42 @@ function updateMedicineTable() {
     
     let rows = '';
     medicines.forEach((med, index) => {
-        let duration = med.duration_num + ' ' + med.duration_type;
-        if(med.duration_num === '0' || !med.duration_type) duration = '-';
+        // Handle duration display
+        let duration = med.duration || '';
+        if (!duration && med.duration_num && med.duration_type) {
+            duration = med.duration_num + ' ' + med.duration_type;
+        }
+        if (!duration) duration = '-';
+        
+        console.log('Table display - duration from DB:', duration); // Debug line
+        
+        // Handle meal timing display
+        let mealTimingDisplay = med.meal_timing || '-';
+        if (mealTimingDisplay === 'before') mealTimingDisplay = 'Before';
+        else if (mealTimingDisplay === 'after') mealTimingDisplay = 'After';
+        else if (mealTimingDisplay === 'with') mealTimingDisplay = 'With';
+        else if (mealTimingDisplay === 'empty') mealTimingDisplay = 'Empty';
         
         rows += `<tr>
             <td>${index + 1}</td>
             <td>
                 <strong>${med.name}</strong><br>
-                <small class="text-muted">${med.company}</small>
+                <small class="text-muted">${med.company || ''}</small>
             </td>
-            <td class="text-center">${med.morning}</td>
-            <td class="text-center">${med.noon}</td>
-            <td class="text-center">${med.night}</td>
-            <td class="text-center">${med.meal_timing}</td>
+            <td class="text-center">${med.morning || '-'}</td>
+            <td class="text-center">${med.noon || '-'}</td>
+            <td class="text-center">${med.night || '-'}</td>
+            <td class="text-center">${mealTimingDisplay}</td>
             <td class="text-center">${duration}</td>
             <td class="text-center">
-                <button class="btn btn-danger btn-xs" onclick="removeMedicine(${index})">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <div class="btn-action-group" style="display: flex; gap: 4px; justify-content: center;">
+                    <button class="btn btn-warning btn-xs" onclick="editMedicine(${index})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-xs" onclick="removeMedicine(${index})" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </td>
         </tr>`;
     });
@@ -681,6 +902,187 @@ function updateMedicineTable() {
     $('#medicineBody').html(rows);
 }
 
+// Edit medicine function
+window.editMedicine = function(index) {
+    console.log('Edit medicine called with index:', index);
+    console.log('Medicines array:', medicines);
+    
+    let med = medicines[index];
+    if (!med) {
+        alert('Medicine not found!');
+        return;
+    }
+
+    console.log('Medicine data:', med);
+
+    // Populate modal fields
+    $('#edit_medicine_id').val(index);
+    $('#edit_medicine').val(med.name || '');
+    $('#edit_route').val(med.route || 'Oral');
+    $('#edit_morning').val(med.morning || '');
+    $('#edit_noon').val(med.noon || '');
+    $('#edit_night').val(med.night || '');
+    $('#edit_meal_timing').val(med.meal_timing || '');
+    
+    // Parse duration - fresh prescription uses separate fields
+    if (med.duration_num && med.duration_type) {
+        $('#edit_duration_num').val(med.duration_num);
+        $('#edit_duration_type').val(med.duration_type);
+    } else {
+        $('#edit_duration_num').val('');
+        $('#edit_duration_type').val('');
+    }
+    
+    $('#edit_instruction').val(med.instruction || '');
+
+    $('#editMedicineModal').modal('show');
+};
+
+// Update medicine function
+window.updateMedicine = function() {
+    let index = $('#edit_medicine_id').val();
+    if (index === '') return;
+
+    let med = medicines[index];
+    if (!med) {
+        alert('Medicine not found!');
+        return;
+    }
+
+    let name = $('#edit_medicine').val().trim();
+    if (!name) {
+        alert('Medicine name is required!');
+        return;
+    }
+
+    let morning = $('#edit_morning').val();
+    let noon = $('#edit_noon').val();
+    let night = $('#edit_night').val();
+    let dosage = (morning || '-') + '+' + (noon || '-') + '+' + (night || '-');
+    
+    let dnum = $('#edit_duration_num').val();
+    let dtype = $('#edit_duration_type').val();
+    let duration = '';
+    if (dtype === 'ongoing') duration = 'ongoing';
+    else if (dtype === 'days') duration = dnum + ' days';
+    else if (dtype === 'months') duration = dnum + ' months';
+    else if (dnum && dtype) duration = dnum + ' ' + dtype;
+    else if (dtype) duration = dtype;
+
+    let btn = $('#btnUpdateMedicine');
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Updating...');
+
+    // If medicine has database ID, update via AJAX
+    if (med.id) {
+        $.ajax({
+            url: `/templates/medicine/ajax/${med.id}`,
+            type: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}",
+                _method: 'PUT',
+                name: name,
+                dosage: dosage,
+                morning: morning,
+                noon: noon,
+                night: night,
+                meal_timing: $('#edit_meal_timing').val(),
+                duration: duration,
+                route: $('#edit_route').val(),
+                instruction: $('#edit_instruction').val(),
+                order_type: 'admit'
+            },
+            success: function(res) {
+                if (res.ok || res.success) {
+                    showAlert('Medicine updated successfully!', 'success');
+                    $('#editMedicineModal').modal('hide');
+                    loadExistingMedicines($('#templateid').val()); // Reload from database
+                } else {
+                    showAlert('Update failed: ' + (res.message || 'Unknown error'), 'error');
+                }
+            },
+            error: function(xhr) {
+                let msg = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Server error (HTTP ' + xhr.status + ')';
+                showAlert('Error: ' + msg, 'error');
+            },
+            complete: function() {
+                btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Update Medicine');
+            }
+        });
+    } else {
+        // For local-only medicines, just update the array
+        medicines[index] = {
+            ...medicines[index],
+            name: name,
+            morning: morning,
+            noon: noon,
+            night: night,
+            meal_timing: $('#edit_meal_timing').val(),
+            duration_num: dnum,
+            duration_type: dtype,
+            route: $('#edit_route').val(),
+            instruction: $('#edit_instruction').val()
+        };
+
+        updateMedicineTable();
+        updateCount();
+        $('#editMedicineModal').modal('hide');
+        showAlert('Medicine updated successfully!', 'success');
+    }
+};
+
+// Update button click handler
+$(document).ready(function() {
+    $('#btnUpdateMedicine').on('click', function() {
+        updateMedicine();
+    });
+});
+
+// Remove medicine function
+window.removeMedicine = function(index) {
+    if (confirm('Delete this medicine?')) {
+        let med = medicines[index];
+        if (med && med.id) {
+            // If medicine has database ID, delete from database
+            $.ajax({
+                url: `/templates/medicine/ajax/${med.id}`,
+                type: 'DELETE',
+                data: { _token: "{{ csrf_token() }}" },
+                success: function(res) {
+                    if (res.ok || res.success) {
+                        showAlert('Deleted!', 'success');
+                        loadExistingMedicines($('#templateid').val()); // Reload from database
+                    }
+                },
+                error: function() { 
+                    showAlert('Delete failed!', 'error'); 
+                }
+            });
+        } else {
+            // If it's a local-only medicine, just remove from array
+            medicines.splice(index, 1);
+            updateMedicineTable();
+            updateCount();
+            showAlert('Deleted!', 'success');
+        }
+    }
+};
+
+// Alert helper function
+function showAlert(message, type) {
+    let cls = type === 'success' ? 'alert-success' : 'alert-danger';
+    let icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    $('#alertMessage').html(`
+        <div class="alert ${cls} alert-dismissible fade show" role="alert">
+            <i class="fas ${icon}"></i> ${message}
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    `);
+    setTimeout(function() {
+        $('.alert').fadeOut('slow', function() { $(this).remove(); });
+    }, 3000);
+}
 
 // Update count
 function updateCount() {

@@ -1,3 +1,4 @@
+{{-- resources/views/patients/create.blade.php --}}
 @extends('adminlte::page')
 
 @section('title', 'Add Patient')
@@ -141,61 +142,98 @@
             <tr>
               <td class="fw-semibold">Patient Name (নাম) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
-              <td><input type="text" name="patientname" class="form-control" required value="{{ old('patientname') }}"></td>
+              <td>
+                <input type="text" name="patientname" class="form-control @error('patientname') is-invalid @enderror" required value="{{ old('patientname') }}">
+                @error('patientname') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- Father --}}
             <tr>
               <td class="fw-semibold">Patient father Name (পিতার নাম) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
-              <td><input type="text" name="patientfather" class="form-control" required value="{{ old('patientfather') }}"></td>
+              <td>
+                <input type="text" name="patientfather" class="form-control @error('patientfather') is-invalid @enderror" required value="{{ old('patientfather') }}">
+                @error('patientfather') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
+            </tr>
+
+            {{-- Husband --}}
+            <tr>
+              <td class="fw-semibold">Husband Name (স্বামীর নাম)</td>
+              <td>:</td>
+              <td>
+                <input type="text" name="patienthusband" class="form-control @error('patienthusband') is-invalid @enderror" value="{{ old('patienthusband') }}">
+                @error('patienthusband') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- Mobiles --}}
             <tr>
               <td class="fw-semibold">Own Mobile (নিজের মোবাইল) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
-              <td><input type="text" id="mobile_no" name="mobile_no" class="form-control" value="{{ old('mobile_no') }}"></td>
+              <td>
+                <input type="text" id="mobile_no" name="mobile_no" class="form-control @error('mobile_no') is-invalid @enderror" required value="{{ old('mobile_no') }}">
+                @error('mobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             <tr>
               <td class="fw-semibold">Spouse Mobile (স্বামী/স্ত্রীর মোবাইল)</td>
               <td>:</td>
-              <td><input type="text" id="spomobile_no" name="spomobile_no" class="form-control" value="{{ old('spomobile_no') }}"></td>
+              <td>
+                <input type="text" id="spomobile_no" name="spomobile_no" class="form-control @error('spomobile_no') is-invalid @enderror" value="{{ old('spomobile_no') }}">
+                @error('spomobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             <tr>
               <td class="fw-semibold">Relative Mobile (আত্মীয়ের মোবাইল)</td>
               <td>:</td>
-              <td><input type="text" id="relmobile_no" name="relmobile_no" class="form-control" value="{{ old('relmobile_no') }}"></td>
+              <td>
+                <input type="text" id="relmobile_no" name="relmobile_no" class="form-control @error('relmobile_no') is-invalid @enderror" value="{{ old('relmobile_no') }}">
+                @error('relmobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- Email --}}
             <tr>
               <td class="fw-semibold">Email</td>
               <td>:</td>
-              <td><input type="email" name="email" class="form-control" value="{{ old('email') }}"></td>
+              <td>
+                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}">
+                @error('email') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- DOB --}}
             <tr>
               <td class="fw-semibold">Date of Birth (জন্মতারিখ) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
-              <td><input type="date" name="date_of_birth" id="dob" class="form-control" value="{{ old('date_of_birth') }}"></td>
+              <td>
+                <input type="date" name="date_of_birth" id="dob" class="form-control @error('date_of_birth') is-invalid @enderror" required value="{{ old('date_of_birth') }}">
+                @error('date_of_birth') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- Age --}}
             <tr>
-              <td class="fw-semibold">Age (বয়স) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
+              <td class="fw-semibold">Age (বয়স) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
-              <td><input type="text" name="age" id="age" class="form-control" value="{{ old('age') }}" required></td>
+              <td>
+                <input type="text" name="age" id="age" class="form-control @error('age') is-invalid @enderror" required value="{{ old('age') }}">
+                @error('age') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- NID --}}
             <tr>
               <td class="fw-semibold">NID Number</td>
               <td>:</td>
-              <td><input type="text" name="nid_number" class="form-control" value="{{ old('nid_number') }}"></td>
+              <td>
+                <input type="text" name="nid_number" class="form-control @error('nid_number') is-invalid @enderror" value="{{ old('nid_number') }}">
+                @error('nid_number') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
             {{-- Gender --}}
@@ -207,12 +245,13 @@
               <td>:</td>
               <td>
                 @php($g = old('gender'))
-                <select name="gender" class="form-select select2" required>
+                <select name="gender" class="form-select select2 @error('gender') is-invalid @enderror" required>
                   <option value="">-- Select --</option>
                   <option value="Male"   {{ $g === 'Male' ? 'selected' : '' }}>Male</option>
                   <option value="Female" {{ $g === 'Female' ? 'selected' : '' }}>Female</option>
                   <option value="Other"  {{ $g === 'Other' ? 'selected' : '' }}>Other</option>
                 </select>
+                @error('gender') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
               </td>
             </tr>
 
@@ -221,12 +260,13 @@
               <td class="fw-semibold">Blood Group (রক্তের গ্রুপ)</td>
               <td>:</td>
               <td>
-                <select name="blood_group" class="form-control select2" required>
+                <select name="blood_group" class="form-control select2 @error('blood_group') is-invalid @enderror">
                   <option value="">-- Select Blood Group --</option>
                   @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
                     <option value="{{ $bg }}" {{ old('blood_group')===$bg ? 'selected' : '' }}>{{ $bg }}</option>
                   @endforeach
                 </select>
+                @error('blood_group') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
               </td>
             </tr>
 
@@ -235,7 +275,7 @@
               <td class="fw-semibold">District (জেলা)</td>
               <td>:</td>
               <td class="d-flex gap-2 align-items-center">
-                <select id="district" name="district" class="form-control select2" required>
+                <select id="district" name="district" class="form-control select2 @error('district') is-invalid @enderror">
                   <option value="">-- Select District --</option>
                   @foreach($districts as $d)
                     <option value="{{ $d->code }}" {{ old('district') == $d->code ? 'selected' : '' }}>
@@ -328,7 +368,10 @@
             <tr>
               <td class="fw-semibold">Notes (অন্যান্য)</td>
               <td>:</td>
-              <td><textarea name="notes" rows="3" class="form-control">{{ old('notes') }}</textarea></td>
+              <td>
+                <textarea name="notes" rows="3" class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
+                @error('notes') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+              </td>
             </tr>
 
           </tbody>
@@ -715,9 +758,9 @@ $(function () {
   // Mobile validation (needs ids on inputs - already added)
   document.getElementById('patientForm').addEventListener('submit', function (e) {
     const fields = [
-      { id: 'mobile_no',     name: 'Mobile No' },
-      { id: 'spomobile_no',  name: 'Spouse Mobile No' },
-      { id: 'relmobile_no',  name: 'Relative Mobile No' }
+      { id: 'mobile_no',     name: 'Mobile No', required: true },
+      { id: 'spomobile_no',  name: 'Spouse Mobile No', required: false },
+      { id: 'relmobile_no',  name: 'Relative Mobile No', required: false }
     ];
 
     for (let i = 0; i < fields.length; i++) {
@@ -725,9 +768,12 @@ $(function () {
       if (!el) continue;
 
       const val = el.value.trim();
-      if (val === '') continue;
+      
+      // Skip if empty and not required
+      if (val === '' && !fields[i].required) continue;
 
-      if (!/^[0-9]{11}$/.test(val)) {
+      // If required or has value, validate format
+      if (val !== '' && !/^[0-9]{11}$/.test(val)) {
         alert(fields[i].name + ' must be exactly 11 digit number');
         el.focus();
         e.preventDefault();

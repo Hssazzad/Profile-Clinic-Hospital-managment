@@ -19,6 +19,12 @@ class TemplateMedicine extends Model
         'frequency',
         'duration',
         'timing',
+        'meal_timing',
+        'morning',
+        'noon',
+        'night',
+        'instruction',
+        'company',
         'order_type',  // এই লাইনটি নিশ্চিত করুন
         'note',
         'active',

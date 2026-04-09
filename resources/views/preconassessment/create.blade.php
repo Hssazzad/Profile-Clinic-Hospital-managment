@@ -28,9 +28,6 @@
                         </h3>
                         <div class="card-tools">
                             <span class="badge badge-primary px-3 py-2 mr-2"><i class="far fa-calendar-alt mr-1"></i> {{ date('d M, Y') }}</span>
-                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                                <i class="fas fa-expand"></i>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -196,7 +193,7 @@
                             </div>
                         </div>
 
-                        {{-- RIGHT: INSIGHTS & HISTORY --}}
+                        {{-- RIGHT: HISTORY & INSIGHTS --}}
                         <div class="col-lg-5 mt-4 mt-lg-0">
                             <div class="card border-0 shadow-sm mb-4">
                                 <div class="card-header bg-white py-3">
@@ -207,7 +204,7 @@
                                 <div class="card-body">
                                     @if(isset($selectedPatient))
                                     <div class="patient-mini-profile d-flex align-items-center p-3 mb-4 rounded bg-dark shadow">
-                                        <img class="rounded-circle border border-2 border-white" width="55" height="55" src="https://ui-avatars.com/api/?name={{ urlencode($selectedPatient->patientname) }}&background=007bff&color=fff&bold=true" alt="Avatar">
+                                        <img class="rounded-circle border border-2 border-white" width="55" height="55" src="https://ui-avatars.com/api/?name={{ urlencode($selectedPatient->patientname) }}">
                                         <div class="ml-3">
                                             <p class="mb-0 text-white font-weight-bold h6">{{ $selectedPatient->patientname }}</p>
                                             <span class="badge badge-info small">PID: {{ $selectedPatient->patientcode }}</span>
@@ -240,57 +237,18 @@
                                     {{-- HISTORY BOX --}}
                                     <div class="history-card mt-4 border rounded overflow-hidden shadow-sm bg-white">
                                         <div class="bg-light p-2 px-3 border-bottom d-flex justify-content-between align-items-center">
-                                            <span class="small font-weight-bold text-uppercase text-muted"><i class="fas fa-history mr-1"></i> Recent Assessment Logs</span>
+                                            <span class="small font-weight-bold text-uppercase text-muted">
+                                                <i class="fas fa-history mr-1"></i> Recent Assessment Logs
+                                                <span id="recordCount" class="badge badge-secondary ml-2">0</span>
+                                            </span>
                                         </div>
-                                        <div class="history-content" style="max-height: 400px; overflow-y: auto;">
-                                            @if(isset($assessmentHistory) && $assessmentHistory->count() > 0)
-                                                @foreach($assessmentHistory as $record)
-                                                <div class="p-3 border-bottom history-item transition-all">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="text-primary font-weight-bold small">
-                                                            <i class="far fa-calendar-check mr-1"></i> {{ $record->created_at->format('d M Y, h:i A') }}
-                                                        </span>
-                                                        <span class="badge badge-light border">Single Entry</span>
-                                                    </div>
-                                                    <div class="row no-gutters text-center bg-light rounded p-2">
-                                                        <div class="col-4 border-right mb-2">
-                                                            <div class="text-muted" style="font-size: 9px;">WEIGHT</div>
-                                                            <div class="font-weight-bold small">{{ $record->weight ?? '--' }} kg</div>
-                                                        </div>
-                                                        <div class="col-4 border-right mb-2">
-                                                            <div class="text-muted" style="font-size: 9px;">HEIGHT</div>
-                                                            <div class="font-weight-bold small">{{ $record->height ?? '--' }} cm</div>
-                                                        </div>
-                                                        <div class="col-4 mb-2">
-                                                            <div class="text-muted" style="font-size: 9px;">BP (S/D)</div>
-                                                            <div class="font-weight-bold small text-danger">{{ $record->bp_sys ?? '--' }}/{{ $record->bp_dia ?? '--' }}</div>
-                                                        </div>
-                                                        <div class="col-4 border-right">
-                                                            <div class="text-muted" style="font-size: 9px;">PULSE</div>
-                                                            <div class="font-weight-bold small">{{ $record->pulse ?? '--' }}</div>
-                                                        </div>
-                                                        <div class="col-4 border-right">
-                                                            <div class="text-muted" style="font-size: 9px;">SPO2</div>
-                                                            <div class="font-weight-bold small text-info">{{ $record->spo2 ?? '--' }}%</div>
-                                                        </div>
-                                                        <div class="col-4">
-                                                            <div class="text-muted" style="font-size: 9px;">TEMP</div>
-                                                            <div class="font-weight-bold small">{{ $record->temp ?? '--' }}°</div>
-                                                        </div>
-                                                    </div>
-                                                    @if($record->notes)
-                                                    <div class="mt-2 small text-muted italic">
-                                                        <i class="fas fa-comment-medical mr-1"></i> {{ Str::limit($record->notes, 50) }}
-                                                    </div>
-                                                    @endif
-                                                </div>
-                                                @endforeach
-                                            @else
+                                        <div class="history-content" style="max-height: 600px; overflow-y: auto;">
+                                            <div id="historyList">
                                                 <div class="text-center py-5">
                                                     <i class="fas fa-folder-open text-muted opacity-25 fa-3x mb-3"></i>
-                                                    <p class="small text-muted mt-2">No historical clinical data found for this patient.</p>
+                                                    <p class="small text-muted mt-2">Select a patient to view assessment history</p>
                                                 </div>
-                                            @endif
+                                            </div>
                                         </div>
                                     </div>
 
@@ -305,7 +263,6 @@
 </div>
 
 <style>
-    /* Clinical Aesthetic */
     .bg-light-gray { background-color: #f8fafc; }
     .bg-info-light { background-color: #eef9fd; }
     .border-left-primary { border-left: 5px solid #007bff !important; }
@@ -319,12 +276,10 @@
     .transition-all { transition: all 0.3s ease; }
     .font-weight-600 { font-weight: 600; }
     
-    /* Risk Levels */
     .bg-risk-high { background-color: #e53e3e !important; }
     .bg-risk-mod { background-color: #dd6b20 !important; }
     .bg-risk-normal { background-color: #38a169 !important; }
 
-    /* Custom Input Group */
     .input-group-custom .input-group-text { border-radius: 0 8px 8px 0; border: 1px solid #dae1e7; color: #94a3b8; font-weight: bold; }
     .table thead th { border-top: 0; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; color: #64748b; background: #f8fafc; }
 </style>
@@ -332,22 +287,118 @@
 @push('js')
 <script>
 $(document).ready(function() {
-    // Search Button Logic
+    let currentPatientCode = "{{ request('patientcode') }}";
+
+    // ----------------------------------------------------------------
+    // SEARCH LOGIC
+    // ----------------------------------------------------------------
     $('#btnSearch').on('click', function() {
         let q = $('#q').val();
         if(q.length < 2) return alert('Please enter at least 2 characters');
         window.location.href = "?q=" + encodeURIComponent(q);
     });
 
-    // Handle Enter Key in Search
     $('#q').keypress(function(e) {
         if(e.which == 13) $('#btnSearch').click();
     });
 
-    // Live Insight Logic
+    // ----------------------------------------------------------------
+    // LOAD HISTORY VIA AJAX WHEN PATIENT IS SELECTED
+    // ----------------------------------------------------------------
+    if(currentPatientCode) {
+        loadAssessmentHistory(currentPatientCode);
+    }
+
+    function loadAssessmentHistory(patientcode) {
+        $.ajax({
+            url: `/preconassessment/history/${patientcode}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if(response.success && response.data.length > 0) {
+                    renderHistoryTable(response.data);
+                    $('#recordCount').text(response.total);
+                } else {
+                    $('#historyList').html(`
+                        <div class="text-center py-5">
+                            <i class="fas fa-folder-open text-muted opacity-25 fa-3x mb-3"></i>
+                            <p class="small text-muted mt-2">No assessment records found for this patient</p>
+                        </div>
+                    `);
+                    $('#recordCount').text('0');
+                }
+            },
+            error: function(error) {
+                console.error('Error loading history:', error);
+                $('#historyList').html(`
+                    <div class="alert alert-danger m-3">
+                        <i class="fas fa-exclamation-circle mr-2"></i> Error loading history
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function renderHistoryTable(records) {
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="bg-light" style="position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th style="font-size: 11px;">Date & Time</th>
+                            <th style="font-size: 11px;">Weight</th>
+                            <th style="font-size: 11px;">Height</th>
+                            <th style="font-size: 11px;">BMI</th>
+                            <th style="font-size: 11px;">BP</th>
+                            <th style="font-size: 11px;">Pulse</th>
+                            <th style="font-size: 11px;">SpO2</th>
+                            <th style="font-size: 11px;">Temp</th>
+                            <th style="font-size: 11px;">RR</th>
+                            <th style="font-size: 11px;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        records.forEach(function(record, index) {
+            // Alternate row colors
+            let rowClass = index % 2 === 0 ? 'bg-white' : 'bg-light';
+            
+            html += `
+                <tr class="${rowClass}">
+                    <td style="font-size: 12px;" class="font-weight-bold">
+                        <i class="fas fa-calendar-check mr-1 text-primary"></i> ${record.datetime}
+                    </td>
+                    <td style="font-size: 12px;">${record.weight} <span class="text-muted">kg</span></td>
+                    <td style="font-size: 12px;">${record.height} <span class="text-muted">cm</span></td>
+                    <td style="font-size: 12px;" class="font-weight-bold text-info">${record.bmi}</td>
+                    <td style="font-size: 12px;" class="font-weight-bold text-danger">${record.bp} <span class="text-muted">mmHg</span></td>
+                    <td style="font-size: 12px;">${record.pulse} <span class="text-muted">bpm</span></td>
+                    <td style="font-size: 12px;" class="font-weight-bold text-info">${record.spo2}%</td>
+                    <td style="font-size: 12px;">${record.temp}°C</td>
+                    <td style="font-size: 12px;">${record.rr}</td>
+                    <td style="font-size: 11px;" class="text-muted">
+                        <small>${record.notes === 'No notes' ? '—' : record.notes.substring(0, 20) + '...'}</small>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        $('#historyList').html(html);
+    }
+
+    // ----------------------------------------------------??-----------
+    // LIVE INSIGHT CALCULATION
+    // ----------------------------------------------------------------
     function updateInsights() {
         let weight = parseFloat($('#weight').val());
-        let height = parseFloat($('#height').val()) / 100; // cm to m
+        let height = parseFloat($('#height').val()) / 100;
         let sys = parseInt($('#bp_sys').val());
         let dia = parseInt($('#bp_dia').val());
         let spo2 = parseInt($('#spo2').val());
@@ -385,6 +436,13 @@ $(document).ready(function() {
     }
 
     $('.vital-input').on('input', updateInsights);
+
+    // ----------------------------------------------------------------
+    // REFRESH HISTORY AFTER FORM SUBMISSION
+    // ----------------------------------------------------------------
+    $('#vitalsForm').on('submit', function(e) {
+        // ???? submitted ???, ??? reload ???, ????? history automatically load ???
+    });
 });
 </script>
 @endpush

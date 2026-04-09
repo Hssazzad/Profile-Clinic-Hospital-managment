@@ -87,7 +87,7 @@ class PostSurgeryController extends Controller
         
         $PostSurgeryPatients = $postSurgeryQuery->paginate(20)->withQueryString();
         
-        $medicines = DB::table('template_medicine')->orderBy('group')->get();
+        $medicines = DB::table('template_medicine')->where('order_type', 'preorder')->orderBy('group')->get();
         $templates = DB::table('tbl_template')
                         ->where('status', 1)
                         ->orderBy('title')

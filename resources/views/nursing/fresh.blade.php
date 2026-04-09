@@ -378,99 +378,10 @@
     {{-- Loading bar --}}
     <div id="history-loading" class="admission-status-bar admission-loading-bar" style="display:none;">
         <i class="fas fa-spinner fa-spin mr-2"></i>
-        রোগীর ইতিহাস লোড হচ্ছে...
+        Patient history loading...
     </div>
 
-    {{-- ══ ON ADMISSION INFO BOX ══ --}}
-    <div id="admission-info-box" class="modern-card mb-4" style="display:none; border-left:4px solid #1a237e;">
-        <div style="background:linear-gradient(135deg,#1a237e 0%,#283593 100%);padding:12px 20px;">
-            <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:8px;">
-                <div class="d-flex align-items-center" style="gap:10px;">
-                    <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-hospital-alt text-white" style="font-size:16px;"></i>
-                    </div>
-                    <div>
-                        <div style="color:#fff;font-weight:700;font-size:14px;">
-                            On Admission Record
-                            <span class="badge badge-warning ml-2" id="adm-record-id" style="font-size:11px;"></span>
-                        </div>
-                        <div style="color:rgba(255,255,255,0.7);font-size:11px;">রোগীর ভর্তির সময়ের তথ্য ও ওষুধ</div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-sm"
-                    style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);font-size:11px;"
-                    onclick="toggleAdmDetails()">
-                    <i class="fas fa-chevron-down mr-1" id="adm-toggle-icon"></i>
-                    <span id="adm-toggle-text">Details Hide</span>
-                </button>
-            </div>
-        </div>
-        <div style="background:#f8f9ff;padding:12px 20px;border-bottom:1px solid #e8eaf6;">
-            <div class="row">
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-calendar-check mr-1 text-primary"></i>Admission</div><div class="hist-stat-value text-primary" id="adm-date">—</div><div class="hist-stat-sub" id="adm-time">—</div></div></div>
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-heartbeat mr-1 text-danger"></i>Pulse</div><div class="hist-stat-value" id="adm-pulse">—</div></div></div>
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-tachometer-alt mr-1 text-warning"></i>BP</div><div class="hist-stat-value" id="adm-bp">—</div></div></div>
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-clock mr-1 text-danger"></i>OT Time</div><div class="hist-stat-value text-danger" id="adm-ot-time">—</div></div></div>
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-baby mr-1"></i>Baby</div><div class="hist-stat-value" id="adm-baby-sex">—</div><div class="hist-stat-sub"><span id="adm-baby-weight">—</span> kg · <span id="adm-baby-time">—</span></div></div></div>
-                <div class="col-6 col-md-2 mb-2 mb-md-0"><div class="hist-stat-box"><div class="hist-stat-label"><i class="fas fa-calendar-week mr-1 text-success"></i>Preg. Wks</div><div class="hist-stat-value text-success" id="adm-preg-weeks">—</div></div></div>
-            </div>
-        </div>
-        <div id="adm-details-body" style="background:#fff;padding:16px 20px;">
-            <div id="adm-medicines-wrap" style="display:none;margin-bottom:14px;">
-                <div class="hist-section-title"><i class="fas fa-pills mr-2 text-primary"></i>On Admission ওষুধ <span class="badge badge-primary ml-1" id="adm-med-count">0</span></div>
-                <table class="table table-sm table-bordered mt-2 mb-0" style="font-size:12px;background:#f0f4ff;">
-                    <thead style="background:#1a237e;color:#fff;">
-                        <tr><th style="width:30px;">#</th><th>Medicine</th><th style="width:80px;">Dose</th><th style="width:80px;">Route</th><th style="width:110px;">Frequency</th><th style="width:80px;">Duration</th><th style="width:80px;">Timing</th></tr>
-                    </thead>
-                    <tbody id="adm-medicines-tbody"></tbody>
-                </table>
-            </div>
-            <div id="adm-no-med-msg" style="display:none;" class="text-center py-2">
-                <span class="text-muted" style="font-size:12px;"><i class="fas fa-info-circle mr-1"></i> On Admission এ কোনো ওষুধ নেই।</span>
-            </div>
-            <div id="ps-medicines-wrap" style="display:none;margin-bottom:14px;">
-                <div class="hist-section-title" style="border-left-color:#c62828;"><i class="fas fa-pills mr-2 text-danger"></i>Post-Surgery ওষুধ <span class="badge badge-danger ml-1" id="ps-med-count">0</span></div>
-                <table class="table table-sm table-bordered mt-2 mb-0" style="font-size:12px;background:#fff0f0;">
-                    <thead style="background:#c62828;color:#fff;">
-                        <tr><th style="width:30px;">#</th><th>Medicine</th><th style="width:80px;">Strength</th><th style="width:80px;">Dose</th><th style="width:80px;">Route</th><th style="width:110px;">Frequency</th><th style="width:80px;">Duration</th></tr>
-                    </thead>
-                    <tbody id="ps-medicines-tbody"></tbody>
-                </table>
-            </div>
-            <div id="ps-no-med-msg" style="display:none;" class="text-center py-2">
-                <span class="text-muted" style="font-size:12px;"><i class="fas fa-info-circle mr-1"></i> Post-Surgery এ কোনো ওষুধ নেই।</span>
-            </div>
-            <div id="adm-history-wrap" style="display:none;margin-bottom:10px;">
-                <div class="hist-section-title mt-2"><i class="fas fa-notes-medical mr-2 text-primary"></i>On Admission Prescription History</div>
-                <div id="adm-history-list" class="mt-2"></div>
-            </div>
-        </div>
-    </div>
-
-    {{-- ══ POST-SURGERY HISTORY BOX ══ --}}
-    <div id="postsurgery-info-box" class="modern-card mb-4" style="display:none; border-left:4px solid #b71c1c;">
-        <div style="background:linear-gradient(135deg,#b71c1c 0%,#c62828 100%);padding:12px 20px;">
-            <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:8px;">
-                <div class="d-flex align-items-center" style="gap:10px;">
-                    <div style="width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-procedures text-white" style="font-size:16px;"></i>
-                    </div>
-                    <div>
-                        <div style="color:#fff;font-weight:700;font-size:14px;">Post-Surgery Records <span class="badge badge-warning ml-2" id="ps-count-badge" style="font-size:11px;"></span></div>
-                        <div style="color:rgba(255,255,255,0.7);font-size:11px;">রোগীর Post-Operative Prescription ইতিহাস</div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);font-size:11px;" onclick="togglePsDetails()">
-                    <i class="fas fa-chevron-down mr-1" id="ps-toggle-icon"></i><span id="ps-toggle-text">Details Hide</span>
-                </button>
-            </div>
-        </div>
-        <div id="ps-details-body" style="background:#fff;padding:16px 20px;">
-            <div id="ps-history-list"></div>
-        </div>
-    </div>
-
-    {{-- ══ FRESH HISTORY BOX ══ --}}
+    {{-- FRESH HISTORY BOX --}}
     <div id="fresh-info-box" class="modern-card mb-4" style="display:none; border-left:4px solid #2e7d32;">
         <div style="background:linear-gradient(135deg,#2e7d32 0%,#43a047 100%);padding:12px 20px;">
             <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:8px;">
@@ -659,36 +570,46 @@
                             </tr>
                         </thead>
                         <tbody id="avail-med-tbody">
-                            @forelse($medicines as $med)
-                            <tr class="avail-med-row" data-name="{{ strtolower($med->name ?? '') }}">
-                                <td>
-                                    <input type="checkbox" class="avail-med-cb modern-checkbox"
-                                        data-id="{{ $med->id }}"
-                                        data-name="{{ e($med->name ?? '') }}"
-                                        data-strength="{{ e($med->strength ?? '') }}"
-                                        data-dose="{{ e($med->dose ?? '') }}"
-                                        data-route="{{ e($med->route ?? '') }}"
-                                        data-frequency="{{ e($med->dose ?? $med->frequency ?? '') }}"
-                                        data-duration="{{ e($med->duration ?? '') }}"
-                                        data-timing="{{ e($med->instruction ?? $med->timing ?? '') }}"
-                                        data-note="{{ e($med->note ?? '') }}"
-                                        onchange="onAvailMedChange(this)">
-                                </td>
-                                <td><span class="avail-med-name">{{ $med->name ?? '—' }}</span></td>
-                                <td><span class="text-muted small">{{ $med->strength ?? '—' }}</span></td>
-                                <td><span class="text-muted small">{{ $med->dose ?? '—' }}</span></td>
-                                <td><span class="text-muted small">{{ $med->frequency ?? '—' }}</span></td>
-                                <td><span class="text-muted small">{{ $med->duration ?? '—' }}</span></td>
-                                <td>
-                                    <button type="button" class="btn-quick-add btn-quick-add-green"
-                                            onclick="quickAdd(this)" title="Quick Add">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr><td colspan="7" class="text-center text-muted py-3">No medicines found.</td></tr>
-                            @endforelse
+                            @if($medicines->count() > 0)
+                                @foreach($medicines as $med)
+                                <tr class="avail-med-row" data-name="{{ strtolower($med->name ?? '') }}">
+                                    <td>
+                                        <input type="checkbox" class="avail-med-cb modern-checkbox"
+                                            data-id="{{ $med->id }}"
+                                            data-name="{{ e($med->name ?? '') }}"
+                                            data-strength="{{ e($med->strength ?? '') }}"
+                                            data-dose="{{ e($med->dose ?? '') }}"
+                                            data-route="{{ e($med->route ?? '') }}"
+                                            data-frequency="{{ e($med->dose ?? $med->frequency ?? '') }}"
+                                            data-duration="{{ e($med->duration ?? '') }}"
+                                            data-timing="{{ e($med->instruction ?? $med->timing ?? '') }}"
+                                            data-note="{{ e($med->note ?? '') }}"
+                                            onchange="onAvailMedChange(this)">
+                                    </td>
+                                    <td><span class="avail-med-name">{{ $med->name ?? 'No Name' }}</span></td>
+                                    <td><span class="text-muted small">{{ $med->strength ?? 'No Strength' }}</span></td>
+                                    <td><span class="text-muted small">{{ $med->dose ?? 'No Dose' }}</span></td>
+                                    <td><span class="text-muted small">{{ $med->frequency ?? 'No Frequency' }}</span></td>
+                                    <td><span class="text-muted small">{{ $med->duration ?? 'No Duration' }}</span></td>
+                                    <td>
+                                        <button type="button" class="btn-quick-add btn-quick-add-green"
+                                                onclick="quickAdd(this)" title="Quick Add">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-3">
+                                        <div class="text-center">
+                                            <i class="fas fa-pills fa-2x text-muted mb-2"></i><br>
+                                            <strong>No fresh prescription medicines found.</strong><br>
+                                            <small>Please add medicines with order_type = 'fresh prescription' to the database.</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -1638,7 +1559,7 @@ function selectPatient(btn){
     document.querySelectorAll('.avail-med-cb').forEach(function(cb){cb.checked=false;});
     document.getElementById('auto-loaded-note').classList.add('d-none');
     refreshSelTable();
-    hideEl('admission-info-box'); hideEl('postsurgery-info-box'); hideEl('fresh-info-box');
+    hideEl('fresh-info-box');
     updateDoctorHeader();
     fetchPatientHistory(d.id);
     window.scrollTo({top:0,behavior:'smooth'});
@@ -1656,8 +1577,6 @@ function fetchPatientHistory(patientId){
     .then(function(data){
         hideEl('history-loading');
         if(!data.success) return;
-        renderAdmissionBox(data);
-        renderPostSurgeryBox(data);
         renderFreshBox(data);
         autoLoadMedicines(data);
     })
@@ -1668,97 +1587,91 @@ function fetchPatientHistory(patientId){
    AUTO-LOAD MEDICINES
 ═══════════════════════════════════════════════════ */
 function autoLoadMedicines(data){
-    var admMeds = data.medicines              || [];
+    var admMeds = data.medicines || [];
     var psMeds  = data.post_surgery_medicines || [];
+    var freshMeds = data.fresh_prescriptions || [];
 
-    if(admMeds.length===0 && psMeds.length===0){
-        showAlert('warning','<i class="fas fa-exclamation-circle mr-1"></i>এই রোগীর কোনো On Admission বা Post-Surgery medicine পাওয়া যায়নি।');
+    // Get list of available fresh prescription medicines
+    var availableFreshMeds = [];
+    document.querySelectorAll('.avail-med-cb').forEach(function(cb) {
+        availableFreshMeds.push(cb.dataset.name.toLowerCase());
+    });
+
+    // Collect all medicines from patient history
+    var allHistoryMeds = [];
+    
+    // Add admission medicines
+    admMeds.forEach(function(m){
+        var mName=(m.medicine_name||m.name||'').trim();
+        if(mName && availableFreshMeds.includes(mName.toLowerCase())) {
+            allHistoryMeds.push({
+                medicine_name: mName,
+                dose: m.dose||'',
+                route: m.route||'',
+                frequency: m.frequency||'',
+                duration: m.duration||'',
+                timing: m.timing||'',
+                remarks: m.remarks||m.note||''
+            });
+        }
+    });
+    
+    // Add post-surgery medicines
+    psMeds.forEach(function(m){
+        var mName=(m.medicine_name||m.name||'').trim();
+        if(mName && availableFreshMeds.includes(mName.toLowerCase()) && 
+           !allHistoryMeds.find(function(s){return s.medicine_name.toLowerCase()===mName.toLowerCase();})) {
+            allHistoryMeds.push({
+                medicine_name: mName,
+                dose: m.dose||'',
+                route: m.route||'',
+                frequency: m.frequency||'',
+                duration: m.duration||'',
+                timing: m.timing||'',
+                remarks: m.remarks||m.note||''
+            });
+        }
+    });
+
+    // Add fresh prescription medicines
+    if(freshMeds.length > 0) {
+        freshMeds.forEach(function(rx){
+            var lines = rx.lines || [];
+            lines.forEach(function(m){
+                var mName = m.trim();
+                if(mName && availableFreshMeds.includes(mName.toLowerCase()) && 
+                   !allHistoryMeds.find(function(s){return s.medicine_name.toLowerCase()===mName.toLowerCase();})) {
+                    allHistoryMeds.push({
+                        medicine_name: mName,
+                        dose: '',
+                        route: '',
+                        frequency: '',
+                        duration: '',
+                        timing: '',
+                        remarks: ''
+                    });
+                }
+            });
+        });
+    }
+
+    if(allHistoryMeds.length === 0){
+        showAlert('warning','<i class="fas fa-exclamation-circle mr-1"></i>No fresh prescription medicines found in patient history.');
         return;
     }
 
-    selectedMeds = [];
-    var totalAdded = 0;
-
-    admMeds.forEach(function(m){
-        var mName=(m.medicine_name||m.name||'').trim();
-        if(!mName) return;
-        selectedMeds.push({medicine_name:mName,dose:m.dose||'',route:m.route||'',frequency:m.frequency||'',duration:m.duration||'',timing:m.timing||'',remarks:m.remarks||m.note||''});
-        totalAdded++;
-    });
-    psMeds.forEach(function(m){
-        var mName=(m.medicine_name||m.name||'').trim();
-        if(!mName) return;
-        if(selectedMeds.find(function(s){return s.medicine_name.toLowerCase()===mName.toLowerCase();})) return;
-        selectedMeds.push({medicine_name:mName,dose:m.dose||'',route:m.route||'',frequency:m.frequency||'',duration:m.duration||'',timing:m.timing||'',remarks:m.remarks||m.note||''});
-        totalAdded++;
-    });
-
+    selectedMeds = allHistoryMeds;
     refreshSelTable();
-    if(totalAdded>0){
+    
+    if(selectedMeds.length > 0){
         document.getElementById('auto-loaded-note').classList.remove('d-none');
-        var parts=[];
-        if(admMeds.length>0) parts.push('On Admission: <strong>'+admMeds.length+'টি</strong>');
-        if(psMeds.length >0) parts.push('Post-Surgery: <strong>'+psMeds.length+'টি</strong>');
-        showAlert('info','<i class="fas fa-pills mr-1"></i> '+parts.join(', ')+' medicine auto-load হয়েছে।');
+        showAlert('info','<i class="fas fa-pills mr-1"></i> Fresh Prescription: <strong>'+selectedMeds.length+' medicines</strong> auto-loaded from patient history.');
     }
 }
 
 /* ═══════════════════════════════════════════════════
    RENDER HISTORY BOXES
 ═══════════════════════════════════════════════════ */
-function renderAdmissionBox(data){
-    var adm = data.admission;
-    if(!adm) return;
-    setText('adm-record-id',   '#'+adm.id);
-    setText('adm-date',        adm.admission_date ? fmtDateBD(adm.admission_date):'—');
-    setText('adm-time',        adm.admission_time ? fmtTime(adm.admission_time)  :'—');
-    setText('adm-pulse',       adm.pulse          || '—');
-    setText('adm-bp',          adm.bp             || '—');
-    setText('adm-ot-time',     adm.ot_time        ? fmtTime(adm.ot_time):'—');
-    setText('adm-preg-weeks',  adm.pregnancy_weeks|| '—');
-    setText('adm-baby-sex',    adm.baby_sex       || '—');
-    setText('adm-baby-weight', adm.baby_weight    || '—');
-    setText('adm-baby-time',   adm.baby_time      ? fmtTime(adm.baby_time):'—');
-
-    var meds = data.medicines || [];
-    if(meds.length>0){
-        setText('adm-med-count',meds.length);
-        document.getElementById('adm-medicines-tbody').innerHTML = meds.map(function(m,i){
-            return '<tr><td>'+(i+1)+'</td><td><strong>'+esc(m.medicine_name||'—')+'</strong></td>'+
-                '<td>'+esc(m.dose||'—')+'</td><td>'+esc(m.route||'—')+'</td>'+
-                '<td>'+esc(m.frequency||'—')+'</td><td>'+esc(m.duration||'—')+'</td>'+
-                '<td>'+esc(m.timing||'—')+'</td></tr>';
-        }).join('');
-        showEl('adm-medicines-wrap'); hideEl('adm-no-med-msg');
-    } else { hideEl('adm-medicines-wrap'); showEl('adm-no-med-msg'); }
-
-    var psMeds = data.post_surgery_medicines || [];
-    if(psMeds.length>0){
-        setText('ps-med-count',psMeds.length);
-        document.getElementById('ps-medicines-tbody').innerHTML = psMeds.map(function(m,i){
-            return '<tr><td>'+(i+1)+'</td><td><strong>'+esc(m.medicine_name||'—')+'</strong></td>'+
-                '<td>'+esc(m.strength||'—')+'</td><td>'+esc(m.dose||'—')+'</td>'+
-                '<td>'+esc(m.route||'—')+'</td><td>'+esc(m.frequency||'—')+'</td>'+
-                '<td>'+esc(m.duration||'—')+'</td></tr>';
-        }).join('');
-        showEl('ps-medicines-wrap'); hideEl('ps-no-med-msg');
-    } else { hideEl('ps-medicines-wrap'); showEl('ps-no-med-msg'); }
-
-    var history = data.previous_prescriptions || [];
-    if(history.length>0){ document.getElementById('adm-history-list').innerHTML=buildHistoryCards(history); showEl('adm-history-wrap'); }
-    else { hideEl('adm-history-wrap'); }
-
-    showEl('admission-info-box');
-}
-
-function renderPostSurgeryBox(data){
-    var psHistory = data.post_surgery_prescriptions || [];
-    if(psHistory.length===0){ hideEl('postsurgery-info-box'); return; }
-    setText('ps-count-badge', psHistory.length+' টি');
-    document.getElementById('ps-history-list').innerHTML = buildHistoryCards(psHistory);
-    showEl('postsurgery-info-box');
-}
-
 function renderFreshBox(data){
     var freshHistory = data.fresh_prescriptions || [];
     if(freshHistory.length===0){ hideEl('fresh-info-box'); return; }
@@ -1783,20 +1696,6 @@ function buildHistoryCards(list){
     }).join('');
 }
 
-function toggleAdmDetails(){
-    var body=document.getElementById('adm-details-body');
-    admDetailsOpen=!admDetailsOpen;
-    body.style.display=admDetailsOpen?'':'none';
-    document.getElementById('adm-toggle-icon').className=admDetailsOpen?'fas fa-chevron-up mr-1':'fas fa-chevron-down mr-1';
-    document.getElementById('adm-toggle-text').textContent=admDetailsOpen?'Details Hide':'Details Show';
-}
-function togglePsDetails(){
-    var body=document.getElementById('ps-details-body');
-    psDetailsOpen=!psDetailsOpen;
-    body.style.display=psDetailsOpen?'':'none';
-    document.getElementById('ps-toggle-icon').className=psDetailsOpen?'fas fa-chevron-up mr-1':'fas fa-chevron-down mr-1';
-    document.getElementById('ps-toggle-text').textContent=psDetailsOpen?'Details Hide':'Details Show';
-}
 function toggleFreshDetails(){
     var body=document.getElementById('fresh-details-body');
     freshDetailsOpen=!freshDetailsOpen;

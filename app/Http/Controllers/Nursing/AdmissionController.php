@@ -20,8 +20,8 @@ class AdmissionController extends Controller
     {
         $search = $request->get('search', '');
 
+        // ✅ ON ADMISSION TAB: Show only patients WITHOUT any "moved_to_postsurgery" status
         $query = DB::table('patients')
-           
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
                   ->from('nursing_admissions')
@@ -37,9 +37,9 @@ class AdmissionController extends Controller
             });
         }
 
-        $patients       = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
+        $patients = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
         
-        // Query for past nursing prescriptions (latest admission per patient)
+        // ✅ POST SURGERY TAB: Show only LATEST admission per patient with status = 'moved_to_postsurgery'
         $nursingQuery = DB::table('nursing_admissions')
             ->join('patients', 'nursing_admissions.patient_id', '=', 'patients.id')
             ->select(
@@ -58,24 +58,25 @@ class AdmissionController extends Controller
                 FROM nursing_admissions 
                 GROUP BY patient_id
             )')
+            ->where('nursing_admissions.status', '=', 'moved_to_postsurgery') // ✅ FIXED: Only show moved_to_postsurgery
             ->orderBy('nursing_admissions.created_at', 'desc');
         
         $NursingPatients = $nursingQuery->paginate(20)->withQueryString();
         
         $investigations = DB::table('template_investigations')->orderBy('id')->get();
-        $medicines      = DB::table('template_medicine')->orderBy('group')->get();
+        $medicines      = DB::table('template_medicine')->where('order_type', 'admit')->orderBy('group')->get();
         $templates      = DB::table('tbl_template')
                             ->where('status', 1)
                             ->orderBy('title')
                             ->get();
 
         return view('nursing.onaddmission', [
-            'patients'       => $patients,
-            'NursingPatients'       => $NursingPatients,
-            'search'         => $search,
-            'investigations' => $investigations,
-            'medicines'      => $medicines,
-            'templates'      => $templates,
+            'patients'           => $patients,
+            'NursingPatients'    => $NursingPatients,
+            'search'             => $search,
+            'investigations'     => $investigations,
+            'medicines'          => $medicines,
+            'templates'          => $templates,
         ]);
     }
 

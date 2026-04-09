@@ -568,83 +568,152 @@
         </div>
         <div class="modern-card-body p-0">
             <div id="release-print-area">
-                <div class="release-wrapper">
 
-                    <div class="release-header">
-                        <div class="release-header-left">
-                            <div class="release-logo-row">
-                                <div class="release-cp-logo"><span class="release-cp-c">C</span><span class="release-cp-p">P</span></div>
-                                <div>
-                                    <div class="release-clinic-bn">প্রফেসর ক্লিনিক</div>
-                                    <div class="release-clinic-address">মাঝিড়া, শাজাহানপুর, বগুড়া।</div>
-                                    <div class="release-clinic-phones">মোবাঃ ০১৭২০-০৩৯০০৫, ০১৭২০-০৩৯০০৬</div>
-                                    <div class="release-clinic-phones">০১৭২০-০৩৯০০৭, ০১৭২০-০৩৯০০৮</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="release-header-right">
-                            <div class="release-doc-badge">RELEASE CERTIFICATE</div>
-                            <div class="release-doc-sub">& HOSPITAL BILL</div>
-                            <div class="release-serial mt-2" id="print-release-date">Date: —</div>
-                        </div>
-                    </div>
+                {{-- ═══════════════════════════════════════════
+                     PHYSICAL BILL BOOK LAYOUT — Professor Clinic
+                ═══════════════════════════════════════════ --}}
+                <div class="bill-book-wrapper">
 
-                    <div class="release-patient-row">
-                        <div class="release-patient-field"><span class="rpf-label">Code :</span><span class="rpf-value" id="print-code">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Name :</span><span class="rpf-value" id="print-name">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Age :</span><span class="rpf-value" id="print-age">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Mobile :</span><span class="rpf-value" id="print-mobile">—</span></div>
-                    </div>
-                    <div class="release-patient-row" style="border-top:none;padding-top:2px;">
-                        <div class="release-patient-field"><span class="rpf-label">Admitted :</span><span class="rpf-value" id="print-admit-date">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Released :</span><span class="rpf-value" id="print-rel-date">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Days :</span><span class="rpf-value font-weight-bold" id="print-days">—</span></div>
-                        <div class="release-patient-field"><span class="rpf-label">Condition :</span><span class="rpf-value" id="print-condition">—</span></div>
-                    </div>
-                    <div class="release-patient-row" style="border-top:none;padding-top:2px;padding-bottom:8px;">
-                        <div class="release-patient-field"><span class="rpf-label">Doctor :</span><span class="rpf-value font-weight-bold" id="print-doctor">—</span></div>
-                        <div class="release-patient-field">
-                            <span class="rpf-label">Status :</span>
-                            <span class="rpf-value"><span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">Pending Manager Approval</span></span>
+                    {{-- CLINIC HEADER STRIP --}}
+                    <div class="bb-header">
+                        <div class="bb-header-logo-col">
+                            <div class="bb-cp-logo"><span class="bb-cp-letter">P</span></div>
+                            <div class="bb-clinic-badge">PROFESSOR CLINIC</div>
+                        </div>
+                        <div class="bb-header-center-col">
+                            <div class="bb-clinic-title">PROFESSOR CLINIC</div>
+                            <div class="bb-clinic-sub">MAJHIRA, SAJAHANPUR, BOGURA.</div>
+                        </div>
+                        <div class="bb-header-phone-col">
+                            <div class="bb-phone-line">&#9742; 01720-039005</div>
+                            <div class="bb-phone-line">01720-039006</div>
+                            <div class="bb-phone-line">01720-039007</div>
+                            <div class="bb-phone-line">01720-039008</div>
                         </div>
                     </div>
 
-                    <div class="release-body">
-                        <div class="release-section-label">HOSPITAL BILL / চার্জ বিবরণী</div>
-                        <div class="release-bill-table-wrap">
-                            <table class="release-bill-table" id="print-bill-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width:35px;">#</th>
-                                        <th>Description / বিবরণ</th>
-                                        <th style="width:60px;text-align:center;">Qty</th>
-                                        <th style="width:100px;text-align:right;">Unit Price</th>
-                                        <th style="width:110px;text-align:right;">Amount (৳)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="print-bill-tbody"></tbody>
-                                <tfoot>
-                                    <tr class="print-total-row"><td colspan="4" class="text-right font-weight-bold">Subtotal:</td><td class="text-right font-weight-bold" id="print-subtotal">৳ 0.00</td></tr>
-                                    <tr class="print-discount-row"><td colspan="4" class="text-right">Discount:</td><td class="text-right text-danger" id="print-discount-val">- ৳ 0.00</td></tr>
-                                    <tr class="print-total-row print-grand-row"><td colspan="4" class="text-right font-weight-bold" style="font-size:13px;">Grand Total:</td><td class="text-right font-weight-bold" style="font-size:13px;" id="print-grand-total">৳ 0.00</td></tr>
-                                    <tr class="print-advance-row"><td colspan="4" class="text-right">Advance Paid:</td><td class="text-right text-success" id="print-advance-val">৳ 0.00</td></tr>
-                                    <tr class="print-due-row"><td colspan="4" class="text-right font-weight-bold text-danger" style="font-size:14px;">Due Amount:</td><td class="text-right font-weight-bold text-danger" style="font-size:14px;" id="print-due-val">৳ 0.00</td></tr>
-                                </tfoot>
-                            </table>
+                    {{-- PATIENT META ROW 1 --}}
+                    <div class="bb-meta-row">
+                        <div class="bb-meta-field" style="flex:2.5;">
+                            <span class="bb-meta-label">Name of Patient :</span>
+                            <span class="bb-meta-value" id="print-name">—</span>
                         </div>
-                        <div class="release-notes" id="print-notes"></div>
-                        <div class="release-signature-row">
-                            <div class="release-sig-box"><div class="release-sig-line"></div><div class="release-sig-label">Patient / Attendant Signature</div></div>
-                            <div class="release-sig-box" style="text-align:right;"><div class="release-sig-line"></div><div class="release-sig-label">Authorized Signature</div></div>
+                        <div class="bb-meta-field">
+                            <span class="bb-meta-label">Date :</span>
+                            <span class="bb-meta-value" id="print-release-date">—</span>
+                        </div>
+                        <div class="bb-meta-field">
+                            <span class="bb-meta-label">Serial No. :</span>
+                            <span class="bb-meta-value" id="print-code">—</span>
+                        </div>
+                    </div>
+                    {{-- PATIENT META ROW 2 --}}
+                    <div class="bb-meta-row" style="border-bottom:1.5px solid #bbb;">
+                        <div class="bb-meta-field" style="flex:2.5;">
+                            <span class="bb-meta-label">Cabin/Ward No :</span>
+                            <span class="bb-meta-value" id="print-cabin">—</span>
+                        </div>
+                        <div class="bb-meta-field">
+                            <span class="bb-meta-label">Age :</span>
+                            <span class="bb-meta-value" id="print-age">—</span>
+                        </div>
+                        <div class="bb-meta-field">
+                            <span class="bb-meta-label">Mobile :</span>
+                            <span class="bb-meta-value" id="print-mobile">—</span>
                         </div>
                     </div>
 
-                    <div class="release-footer">
-                        <span>Submitted by: <strong id="print-released-by">—</strong></span>
-                        <span>Generated: <span id="gen-time">—</span></span>
+                    {{-- BILL/ESTIMATE TITLE --}}
+                    <div class="bb-bill-title-row">
+                        <span class="bb-bill-title-badge">BILL/ESTIMATE</span>
                     </div>
-                </div>
-            </div>
+
+                    {{-- BILL TABLE --}}
+                    <table class="bb-table">
+                        <thead>
+                            <tr>
+                                <th class="bb-col-sl">Sl.</th>
+                                <th class="bb-col-desc">Particulars</th>
+                                <th class="bb-col-qty">Qty</th>
+                                <th class="bb-col-rate">Rate (৳)</th>
+                                <th class="bb-col-amt">Amount (৳)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="print-bill-tbody">
+                            {{-- populated by JS --}}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bb-row-total">
+                                <td colspan="4" class="bb-foot-label">Total</td>
+                                <td class="bb-foot-val" id="print-subtotal">৳ 0.00</td>
+                            </tr>
+                            <tr class="bb-row-less">
+                                <td colspan="4" class="bb-foot-label">Less (Discount)</td>
+                                <td class="bb-foot-val" id="print-discount-val">৳ 0.00</td>
+                            </tr>
+                            <tr class="bb-row-net">
+                                <td colspan="4" class="bb-foot-label bb-foot-label-net">Net Total</td>
+                                <td class="bb-foot-val bb-foot-val-net" id="print-grand-total">৳ 0.00</td>
+                            </tr>
+                            <tr class="bb-row-advance">
+                                <td colspan="4" class="bb-foot-label">Advance Paid</td>
+                                <td class="bb-foot-val" id="print-advance-val">৳ 0.00</td>
+                            </tr>
+                            <tr class="bb-row-due">
+                                <td colspan="4" class="bb-foot-label bb-foot-label-due">Due Amount</td>
+                                <td class="bb-foot-val bb-foot-val-due" id="print-due-val">৳ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    {{-- EXTRA DETAILS STRIP --}}
+                    <div class="bb-details-strip">
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">Admitted :</span>
+                            <span class="bb-detail-value" id="print-admit-date">—</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">Released :</span>
+                            <span class="bb-detail-value" id="print-rel-date">—</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">Days :</span>
+                            <span class="bb-detail-value font-weight-bold" id="print-days">—</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">Condition :</span>
+                            <span class="bb-detail-value" id="print-condition">—</span>
+                        </div>
+                        <div class="bb-detail-item">
+                            <span class="bb-detail-label">Doctor :</span>
+                            <span class="bb-detail-value font-weight-bold" id="print-doctor">—</span>
+                        </div>
+                    </div>
+
+                    {{-- NOTES --}}
+                    <div class="bb-notes" id="print-notes"></div>
+
+                    {{-- STATUS / FOOTER META --}}
+                    <div class="bb-status-bar">
+                        <span class="bb-pending-badge">&#8987; Pending Manager Approval</span>
+                        <span class="bb-gen-info">By: <strong id="print-released-by">—</strong> &nbsp;|&nbsp; <span id="gen-time">—</span></span>
+                    </div>
+
+                    {{-- SIGNATURE --}}
+                    <div class="bb-signature-row">
+                        <div class="bb-sig">
+                            <div class="bb-sig-line"></div>
+                            <div class="bb-sig-label">Patient / Attendant Signature</div>
+                        </div>
+                        <div class="bb-sig bb-sig-right">
+                            <div class="bb-sig-line"></div>
+                            <div class="bb-sig-label">Authorized Signature</div>
+                        </div>
+                    </div>
+
+                </div>{{-- /.bill-book-wrapper --}}
+
+            </div>{{-- /#release-print-area --}}
         </div>
         <div class="modern-card-footer">
             <small class="text-muted">
@@ -873,50 +942,275 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .page-link { border-radius:var(--radius-sm) !important;border-color:var(--border);color:var(--teal-mid);font-size:13px; }
 .page-item.active .page-link { background:var(--teal-mid);border-color:var(--teal-mid); }
 
-/* PRINT LAYOUT */
-#release-print-area { padding:0;background:#fff; }
-.release-wrapper { width:100%;max-width:780px;margin:0 auto;background:#fff;border:1px solid #ccc;font-family:'Hind Siliguri',Arial,sans-serif;font-size:12px; }
-.release-header { display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#e0f2f1 0%,#b2dfdb 100%) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:2px solid #00897b;padding:12px 16px 10px;gap:10px; }
-.release-header-left { flex:1; }
-.release-header-right { text-align:right;border-left:2px solid #00897b;padding-left:16px; }
-.release-logo-row { display:flex;align-items:center;gap:10px; }
-.release-cp-logo { width:46px;height:46px;border-radius:50%;border:2px solid #c0392b;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;background:#fff !important;-webkit-print-color-adjust:exact; }
-.release-cp-c { color:#c0392b; } .release-cp-p { color:#00897b; }
-.release-clinic-bn { font-size:22px;font-weight:700;color:#2c3e50;line-height:1.1; }
-.release-clinic-address { font-size:11px;color:#444;margin-top:2px; }
-.release-clinic-phones { font-size:10px;color:#555; }
-.release-doc-badge { font-size:16px;font-weight:800;color:#00695c;letter-spacing:.5px; }
-.release-doc-sub   { font-size:11px;color:#555;margin-top:2px; }
-.release-serial    { font-size:11px;color:#333; }
-.release-patient-row { display:flex;flex-wrap:wrap;background:#e8f5e9 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:6px 16px;border-bottom:1px solid #b2dfdb;gap:6px 10px; }
-.release-patient-field { display:flex;align-items:center;gap:6px;flex:1;min-width:140px; }
-.rpf-label { font-weight:700;font-size:12px;white-space:nowrap; }
-.rpf-value { border-bottom:1px dotted #999;flex:1;padding:0 4px;font-size:12px;min-width:60px; }
-.release-body { padding:12px 16px; }
-.release-section-label { text-align:center;font-weight:700;font-size:13px;text-decoration:underline;margin:4px 0 10px 0;color:#00695c; }
-.release-bill-table-wrap { overflow-x:auto; }
-.release-bill-table { width:100%;border-collapse:collapse;font-size:12px; }
-.release-bill-table th,.release-bill-table td { border:1px solid #ccc;padding:5px 8px;vertical-align:middle; }
-.release-bill-table thead th { background:#f0f8f7 !important;-webkit-print-color-adjust:exact;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px; }
-.print-total-row td { background:#e0f2f1 !important;-webkit-print-color-adjust:exact;font-weight:700; }
-.print-grand-row td { background:#b2dfdb !important;-webkit-print-color-adjust:exact;font-size:14px; }
-.print-discount-row td { background:#fff8f0 !important;-webkit-print-color-adjust:exact; }
-.print-advance-row td { background:#e8f5e9 !important;-webkit-print-color-adjust:exact; }
-.print-due-row td { background:#ffebee !important;-webkit-print-color-adjust:exact;font-size:15px; }
-.release-notes { font-size:11px;color:#444;white-space:pre-wrap;margin-top:10px;padding:6px 0;border-top:1px dashed #ccc; }
-.release-signature-row { display:flex;justify-content:space-between;margin-top:30px;padding:0 20px; }
-.release-sig-box { width:40%; }
-.release-sig-line { border-bottom:1px solid #333;margin-bottom:6px; }
-.release-sig-label { font-size:10px;color:#666;text-align:center; }
-.release-footer { display:flex;justify-content:space-between;border-top:1px solid #ccc;padding:6px 16px;font-size:11px;background:#e0f2f1 !important;-webkit-print-color-adjust:exact;color:#555; }
+/* ═══════════════════════════════════════════════════════════════
+   BILL BOOK PRINT LAYOUT — Matches Professor Clinic carbon book
+═══════════════════════════════════════════════════════════════ */
+#release-print-area {
+    padding: 10px;
+    background: #e8e8e8;
+}
+.bill-book-wrapper {
+    width: 100%;
+    max-width: 750px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1.5px solid #777;
+    font-family: Arial, 'Hind Siliguri', sans-serif;
+    font-size: 12px;
+    color: #111;
+    box-shadow: 0 3px 14px rgba(0,0,0,.15);
+}
 
+/* ── HEADER STRIP (blue/purple like the book) ── */
+.bb-header {
+    display: flex;
+    align-items: stretch;
+    min-height: 64px;
+    background: linear-gradient(90deg, #2d2db0 0%, #4040cc 50%, #2d2db0 100%) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-bottom: 3px solid #1a1a99;
+}
+.bb-header-logo-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-right: 2px solid rgba(255,255,255,.25);
+    min-width: 90px;
+}
+.bb-cp-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2.5px solid #fff;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.bb-cp-letter { font-size:22px;font-weight:900;color:#2d2db0; }
+.bb-clinic-badge {
+    color: #fff;
+    font-size: 6.5px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+.bb-header-center-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+}
+.bb-clinic-title {
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    text-shadow: 1px 1px 3px rgba(0,0,0,.35);
+}
+.bb-clinic-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,.9);
+    margin-top: 4px;
+    letter-spacing: .5px;
+}
+.bb-header-phone-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 8px 12px 8px 8px;
+    border-left: 2px solid rgba(255,255,255,.25);
+    min-width: 115px;
+}
+.bb-phone-line {
+    color: #fff;
+    font-size: 9.5px;
+    line-height: 1.55;
+}
+
+/* ── PATIENT META ── */
+.bb-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 5px 12px;
+    border-bottom: 1px solid #ccc;
+    background: #fafafa !important;
+    -webkit-print-color-adjust: exact;
+    gap: 4px;
+}
+.bb-meta-field {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    flex: 1;
+    min-width: 150px;
+    padding: 2px 4px;
+}
+.bb-meta-label { font-size:11px;font-weight:700;color:#222;white-space:nowrap; }
+.bb-meta-value {
+    flex: 1;
+    border-bottom: 1px dotted #888;
+    font-size: 12px;
+    color: #111;
+    padding: 0 4px 1px;
+    min-width: 70px;
+}
+
+/* ── BILL/ESTIMATE TITLE ── */
+.bb-bill-title-row {
+    text-align: center;
+    padding: 7px 0 5px;
+    border-bottom: 2px solid #333;
+    background: #f8f8f8 !important;
+    -webkit-print-color-adjust: exact;
+}
+.bb-bill-title-badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #fff;
+    background: #333 !important;
+    -webkit-print-color-adjust: exact;
+    padding: 4px 32px;
+    border-radius: 2px;
+}
+
+/* ── MAIN BILL TABLE ── */
+.bb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.bb-table th,
+.bb-table td {
+    border: 1px solid #aaa;
+    padding: 5px 8px;
+    vertical-align: middle;
+}
+.bb-table thead th {
+    background: #efefef !important;
+    -webkit-print-color-adjust: exact;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    text-align: center;
+}
+.bb-col-sl   { width:34px;  text-align:center; }
+.bb-col-desc { text-align:left; }
+.bb-col-qty  { width:48px;  text-align:center; }
+.bb-col-rate { width:88px;  text-align:right; }
+.bb-col-amt  { width:100px; text-align:right; }
+.bb-table tbody tr td { font-size:12px; }
+.bb-table tbody td:first-child { text-align:center;color:#555;font-size:11px; }
+.bb-table tbody td:nth-child(3) { text-align:center; }
+.bb-table tbody td:nth-child(4),
+.bb-table tbody td:nth-child(5) { text-align:right; }
+.bb-table tbody tr:nth-child(odd)  { background:#fff !important; }
+.bb-table tbody tr:nth-child(even) { background:#f9f9f9 !important; }
+.bb-table tfoot td { border:1px solid #aaa; padding:5px 8px; }
+
+/* ── TFOOT ── */
+.bb-foot-label { text-align:right;font-weight:700;font-size:12px; }
+.bb-foot-label-net { font-size:13px;font-weight:900; }
+.bb-foot-label-due { font-size:13px;font-weight:900;color:#b71c1c; }
+.bb-foot-val  { text-align:right;font-weight:700;font-size:12px; }
+.bb-foot-val-net { background:#e0f2f1 !important;-webkit-print-color-adjust:exact;font-size:14px;font-weight:900;color:#004d40; }
+.bb-foot-val-due { background:#ffebee !important;-webkit-print-color-adjust:exact;font-size:14px;font-weight:900;color:#b71c1c; }
+.bb-row-total   { background:#f4f4f4 !important;-webkit-print-color-adjust:exact; }
+.bb-row-less    { background:#fff8ee !important;-webkit-print-color-adjust:exact; }
+.bb-row-net     { background:#e0f2f1 !important;-webkit-print-color-adjust:exact; }
+.bb-row-advance { background:#f0fff4 !important;-webkit-print-color-adjust:exact; }
+.bb-row-due     { background:#ffebee !important;-webkit-print-color-adjust:exact; }
+
+/* ── DETAILS STRIP ── */
+.bb-details-strip {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 5px 12px 4px;
+    border-top: 1.5px solid #aaa;
+    border-bottom: 1px solid #ddd;
+    background: #f4fff8 !important;
+    -webkit-print-color-adjust: exact;
+    gap: 2px 14px;
+}
+.bb-detail-item { display:flex;align-items:baseline;gap:4px;flex:1;min-width:120px;padding:2px 2px; }
+.bb-detail-label { font-size:10.5px;font-weight:700;color:#444;white-space:nowrap; }
+.bb-detail-value { font-size:11px;color:#111;border-bottom:1px dotted #999;flex:1;padding:0 2px 1px; }
+
+/* ── NOTES ── */
+.bb-notes {
+    padding: 4px 14px;
+    min-height: 16px;
+    font-size:11px;
+    color:#444;
+    border-bottom:1px dashed #ccc;
+    white-space:pre-wrap;
+}
+
+/* ── STATUS BAR ── */
+.bb-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 14px;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.bb-pending-badge {
+    background: #fff3e0 !important;
+    -webkit-print-color-adjust: exact;
+    color: #e65100;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 3px;
+    border: 1px solid #ffcc80;
+}
+.bb-gen-info { font-size:10px;color:#777; }
+
+/* ── SIGNATURE ── */
+.bb-signature-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 24px 44px 16px;
+    border-top: 1px solid #e0e0e0;
+}
+.bb-sig { width: 38%; }
+.bb-sig-right { text-align: right; }
+.bb-sig-line  { border-bottom: 1px solid #333; margin-bottom: 6px; height: 30px; }
+.bb-sig-label { font-size: 10px; color: #666; text-align: center; }
+
+/* ── PRINT ── */
 @media print {
-    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
-    body *{visibility:hidden !important;}
-    #release-print-area,#release-print-area *{visibility:visible !important;}
-    #release-print-area{position:fixed;top:0;left:0;width:100%;background:white !important;}
-    .release-wrapper{border:none !important;max-width:100% !important;box-shadow:none !important;}
-    .patient-sticky-bar { display:none !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body * { visibility: hidden !important; }
+    #release-print-area, #release-print-area * { visibility: visible !important; }
+    #release-print-area {
+        position: fixed; top: 0; left: 0; width: 100%;
+        background: white !important; padding: 0 !important;
+    }
+    .bill-book-wrapper { border: none !important; max-width: 100% !important; box-shadow: none !important; }
+    .patient-sticky-bar { display: none !important; }
+    .bb-header { -webkit-print-color-adjust: exact !important; }
+    .bb-row-net, .bb-row-due, .bb-foot-val-net, .bb-foot-val-due { -webkit-print-color-adjust: exact !important; }
 }
 </style>
 @stop
@@ -927,14 +1221,24 @@ var CSRF_TOKEN        = '{{ csrf_token() }}';
 var RELEASE_STORE_URL = '{{ url("/nursing/releasepatients/store") }}';
 var PATIENT_DATA_URL  = '{{ url("/nursing/releasepatients/patient-data") }}'; // ✅ fixed URL
 
+// ══ UPDATED: All 16 charge items matching the physical Professor Clinic bill book ══
 var DEFAULT_BILL_ITEMS = [
-    { description:'Cabin / Ward Charge',       qty:1, unit_price:0 },
-    { description:'Doctor Visit Fee',           qty:1, unit_price:0 },
-    { description:'Nursing Charge',             qty:1, unit_price:0 },
-    { description:'Medicine Charge',            qty:1, unit_price:0 },
-    { description:'Investigation / Lab Charge', qty:1, unit_price:0 },
-    { description:'Operation Theatre Charge',   qty:1, unit_price:0 },
-    { description:'Miscellaneous Charge',       qty:1, unit_price:0 },
+    { description:'Operation Charge',              qty:1, unit_price:0 },
+    { description:'Assistance Charge',             qty:1, unit_price:0 },
+    { description:'Anaesthesia Charge',            qty:1, unit_price:0 },
+    { description:'O.T. Charge',                   qty:1, unit_price:0 },
+    { description:'Advance',                       qty:1, unit_price:0 },
+    { description:'Dressing Charge',               qty:1, unit_price:0 },
+    { description:'Bed Charge',                    qty:1, unit_price:0 },
+    { description:'Service Charge',                qty:1, unit_price:0 },
+    { description:'Admission Fee',                 qty:1, unit_price:0 },
+    { description:'Oxygen Charge',                 qty:1, unit_price:0 },
+    { description:'Delivery Charge',               qty:1, unit_price:0 },
+    { description:'Consultation Fee / Doctor Fee', qty:1, unit_price:0 },
+    { description:'D & C',                         qty:1, unit_price:0 },
+    { description:'Transfusion Charge',            qty:1, unit_price:0 },
+    { description:'Baby Manage',                   qty:1, unit_price:0 },
+    { description:'Other',                         qty:1, unit_price:0 },
 ];
 
 var billItems = [];
@@ -1194,26 +1498,40 @@ function generateReleaseSummary(billData, doctorName){
     setText('ib-name', pName); setText('ib-days', days+' day'+(days!==1?'s':''));
     setText('ib-total', taka(billData.grand)); setText('ib-due', taka(billData.due));
     setText('rx-badge-name', pName);
-    setText('print-code', pCode); setText('print-name', pName);
-    setText('print-age', pAge); setText('print-mobile', pMobile);
-    setText('print-admit-date', fmtDateBD(admDate)); setText('print-rel-date', fmtDateBD(relDate));
-    setText('print-days', days+' দিন'); setText('print-condition', condText);
-    setText('print-doctor', doctorName||'—'); setText('print-release-date','Date: '+fmtDateBD(relDate));
-    setText('print-subtotal', taka(billData.subtotal));
-    setText('print-discount-val', '- '+taka(billData.discountAmt));
-    setText('print-grand-total', taka(billData.grand));
-    setText('print-advance-val', taka(billData.advance));
-    setText('print-due-val', taka(billData.due));
 
-    var validItems=billItems.filter(function(item){ return item.description.trim()&&item.unit_price>0; });
-    document.getElementById('print-bill-tbody').innerHTML=validItems.length
-        ?validItems.map(function(item,i){
-            return '<tr><td>'+(i+1)+'</td><td>'+esc(item.description)+'</td>'+
+    // ── bill-book print fields ──
+    setText('print-code',         pCode);
+    setText('print-name',         pName);
+    setText('print-age',          pAge);
+    setText('print-mobile',       pMobile);
+    setText('print-release-date', fmtDateBD(relDate));
+    setText('print-admit-date',   fmtDateBD(admDate));
+    setText('print-rel-date',     fmtDateBD(relDate));
+    setText('print-days',         days+' দিন');
+    setText('print-condition',    condText);
+    setText('print-doctor',       doctorName||'—');
+
+    // ── bill totals ──
+    setText('print-subtotal',     taka(billData.subtotal));
+    setText('print-discount-val', taka(billData.discountAmt));
+    setText('print-grand-total',  taka(billData.grand));
+    setText('print-advance-val',  taka(billData.advance));
+    setText('print-due-val',      taka(billData.due));
+
+    // ── bill rows: show all items that have a description ──
+    var allItems = billItems.filter(function(item){ return item.description.trim() !== ''; });
+    document.getElementById('print-bill-tbody').innerHTML = allItems.length
+        ? allItems.map(function(item, i){
+            var rowTotal = item.qty * item.unit_price;
+            return '<tr>'+
+                '<td>'+(i+1)+'</td>'+
+                '<td>'+esc(item.description)+'</td>'+
                 '<td style="text-align:center;">'+item.qty+'</td>'+
-                '<td style="text-align:right;">'+taka(item.unit_price)+'</td>'+
-                '<td style="text-align:right;">'+taka(item.qty*item.unit_price)+'</td></tr>';
+                '<td style="text-align:right;">'+(item.unit_price > 0 ? taka(item.unit_price) : '')+'</td>'+
+                '<td style="text-align:right;">'+(rowTotal > 0 ? taka(rowTotal) : '')+'</td>'+
+            '</tr>';
           }).join('')
-        :'<tr><td colspan="5" class="text-center text-muted py-2">No charges added.</td></tr>';
+        : '<tr><td colspan="5" class="text-center" style="padding:8px;color:#999;">No charges entered.</td></tr>';
 
     var notesEl=document.getElementById('print-notes');
     if(notesEl) notesEl.textContent=notes?'Notes: '+notes:'';

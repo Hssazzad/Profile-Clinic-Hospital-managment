@@ -68,44 +68,191 @@
             </div>
         </div>
 
-        {{-- Prescription Table View (like image) --}}
-        <div id="prescriptionTableSection" style="display:none;" class="mb-3">
-            <div class="card card-outline card-info">
-                <div class="card-header py-2 d-flex justify-content-between align-items-center">
-                    <h3 class="card-title"><i class="fas fa-file-medical mr-1"></i> Prescription View</h3>
-                    <button class="btn btn-xs btn-info" id="togglePrescriptionView">
-                        <i class="fas fa-eye-slash"></i> Hide Preview
-                    </button>
-                </div>
-                <div class="card-body p-0" id="prescriptionTableBody">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-sm prescription-table m-0">
-                            <thead class="bg-light">
-                                <tr class="text-center">
-                                    <th rowspan="2" style="width:35%">ঔষধের নাম</th>
-                                    <th colspan="3">কখন খাবেন?</th>
-                                    <th colspan="2">আহারের</th>
-                                    <th colspan="3">কতদিন?</th>
-                                </tr>
-                                <tr class="text-center">
-                                    <th>সকাল</th>
-                                    <th>দুপুর</th>
-                                    <th>রাত</th>
-                                    <th>আগে</th>
-                                    <th>পরে</th>
-                                    <th>দিন</th>
-                                    <th>মাস</th>
-                                    <th>চলবে</th>
-                                </tr>
-                            </thead>
-                            <tbody id="prescriptionRows">
-                                <tr><td colspan="9" class="text-center text-muted p-3">No medicines added yet</td></tr>
-                            </tbody>
-                        </table>
+        {{-- ══ EDIT MODAL ══ --}}
+        <div class="modal fade" id="editMedicineModal" tabindex="-1" role="dialog" aria-labelledby="editMedicineModalLabel">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning py-2">
+                        <h5 class="modal-title font-weight-bold" id="editMedicineModalLabel">
+                            <i class="fas fa-edit mr-2"></i>Edit Medicine
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <input type="hidden" id="edit_medicine_id">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Medicine Name <span class="text-danger">*</span></label>
+                                    <input type="text" id="edit_medicine" list="edit_medicine_list"
+                                           class="form-control form-control-sm" placeholder="Type or select medicine...">
+                                    <datalist id="edit_medicine_list">
+                                        <option value="Almivas 40">
+                                        <option value="Rosu 5mg">
+                                        <option value="Lopimol 75mg">
+                                        <option value="Midazolam 5mg">
+                                        <option value="Atropine 0.6mg">
+                                        <option value="Tramadol 50mg">
+                                        <option value="Paracetamol 500mg">
+                                        <option value="Ondansetron 4mg">
+                                        <option value="Omeprazole 40mg">
+                                        <option value="Metronidazole 500mg">
+                                        <option value="Pantoprazole 40mg">
+                                        <option value="Cefazolin 1g">
+                                        <option value="Metoclopramide 10mg">
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Company Name</label>
+                                    <input type="text" id="edit_company" list="company_list"
+                                           class="form-control form-control-sm" placeholder="Enter company name...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">সকাল (Morning)</label>
+                                    <select id="edit_morning" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                        <option value="26u">26u</option>
+                                        <option value="30u">30u</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">দুপুর (Noon)</label>
+                                    <select id="edit_noon" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">রাত (Night)</label>
+                                    <select id="edit_night" class="form-control form-control-sm">
+                                        <option value="">-</option>
+                                        <option value="0">0</option>
+                                        <option value="1/2">½</option>
+                                        <option value="1">1</option>
+                                        <option value="1+1/2">1½</option>
+                                        <option value="2">2</option>
+                                        <option value="26u">26u</option>
+                                        <option value="30u">30u</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">আহারের আগে/পরে</label>
+                                    <select id="edit_meal_timing" class="form-control form-control-sm">
+                                        <option value="">-- Select --</option>
+                                        <option value="before">আগে (Before)</option>
+                                        <option value="after">পরে (After)</option>
+                                        <option value="with">সাথে (With)</option>
+                                        <option value="empty">খালি পেটে (Empty Stomach)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">কতদিন?</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" id="edit_duration_num" class="form-control form-control-sm"
+                                               placeholder="0" min="0" style="max-width:70px;">
+                                        <select id="edit_duration_type" class="form-control form-control-sm">
+                                            <option value="">--</option>
+                                            <option value="দিন">দিন (Days)</option>
+                                            <option value="মাস">মাস (Month)</option>
+                                            <option value="চলবে">চলবে (Ongoing)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Route</label>
+                                    <select id="edit_route" class="form-control form-control-sm">
+                                        <option value="Oral">Oral (মুখে)</option>
+                                        <option value="IV">IV (শিরায়)</option>
+                                        <option value="IM">IM (মাংসে)</option>
+                                        <option value="SC">SC (চামড়ার নিচে)</option>
+                                        <option value="Topical">Topical</option>
+                                        <option value="Inhalation">Inhalation</option>
+                                        <option value="Tablet">Tablet</option>
+                                        <option value="Gel">Gel</option>
+                                        <option value="Injection">Injection</option>
+                                        <option value="Eye Drop">Eye Drop</option>
+                                        <option value="Ear Drop">Ear Drop</option>
+                                        <option value="Nasal Spray">Nasal Spray</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-2">
+                                    <label class="small font-weight-bold">Order Type</label>
+                                    <select id="edit_order_type" class="form-control form-control-sm">
+                                        <option value="admit">Admission</option>
+                                        <option value="preorder">Pre-Operation</option>
+                                        <option value="postorder">Post-Operation</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="small font-weight-bold">Special Instructions / Notes</label>
+                            <select id="edit_instruction" class="form-control form-control-sm">
+                                <option value="">-- None --</option>
+                                <option value="Before Food">Before Food</option>
+                                <option value="After Food">After Food</option>
+                                <option value="Empty Stomach">Empty Stomach</option>
+                                <option value="With Food">With Food</option>
+                                <option value="At Bed Time">At Bed Time</option>
+                                <option value="With Water">With Water</option>
+                                <option value="With Milk">With Milk</option>
+                                <option value="As Directed">As Directed</option>
+                                <option value="Chew Before Swallow">Chew Before Swallow</option>
+                                <option value="Do Not Crush">Do Not Crush</option>
+                                <option value="Swallow Whole">Swallow Whole</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" id="btnUpdateMedicine">
+                            <i class="fas fa-save mr-1"></i> Update Medicine
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+        {{-- ══ /EDIT MODAL ══ --}}
 
         {{-- ১. AT ADMISSION --}}
         <div class="row" id="admitSection" style="display: none;">
@@ -118,7 +265,6 @@
                         @csrf
                         <div class="card-body p-3">
 
-                            {{-- Medicine Name (searchable dropdown + free text) --}}
                             <div class="form-group mb-2">
                                 <label class="small">Medicine Name <span class="text-danger">*</span></label>
                                 <input type="text" id="admit_medicine" list="admit_medicine_list" class="form-control form-control-sm" placeholder="Type or select medicine...">
@@ -172,7 +318,7 @@
                                     <option value="Phenytoin 100mg">
                                     <option value="Levetiracetam 500mg">
                                     <option value="Amitriptyline 10mg">
-                                    <option value value="Escitalopram 10mg">
+                                    <option value="Escitalopram 10mg">
                                     <option value="Sertraline 50mg">
                                     <option value="Fluoxetine 20mg">
                                     <option value="Methotrexate 2.5mg">
@@ -219,7 +365,6 @@
                             </div>
 
                             <div class="row">
-                                {{-- Morning / Shokal --}}
                                 <div class="col-md-4">
                                     <div class="form-group mb-2">
                                         <label class="small">সকাল (Morning)</label>
@@ -235,7 +380,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                {{-- Noon / Dupur --}}
                                 <div class="col-md-4">
                                     <div class="form-group mb-2">
                                         <label class="small">দুপুর (Noon)</label>
@@ -249,7 +393,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                {{-- Night / Raat --}}
                                 <div class="col-md-4">
                                     <div class="form-group mb-2">
                                         <label class="small">রাত (Night)</label>
@@ -268,7 +411,6 @@
                             </div>
 
                             <div class="row">
-                                {{-- Before / After Food --}}
                                 <div class="col-md-6">
                                     <div class="form-group mb-2">
                                         <label class="small">আহারের আগে/পরে</label>
@@ -281,7 +423,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                {{-- Duration Type --}}
                                 <div class="col-md-6">
                                     <div class="form-group mb-2">
                                         <label class="small">কতদিন?</label>
@@ -315,16 +456,6 @@
                                             <option value="Eye Drop">Eye Drop</option>
                                             <option value="Ear Drop">Ear Drop</option>
                                             <option value="Nasal Spray">Nasal Spray</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-2">
-                                        <label class="small">Order Type</label>
-                                        <select id="admit_order_type" class="form-control form-control-sm">
-                                            <option value="admit">🏥 Admission</option>
-                                            <option value="preorder">⚕️ Pre-Operation</option>
-                                            <option value="postorder">🔧 Post-Operation</option>
                                         </select>
                                     </div>
                                 </div>
@@ -506,16 +637,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-2">
-                                        <label class="small">Order Type</label>
-                                        <select id="preorder_order_type" class="form-control form-control-sm">
-                                            <option value="admit">🏥 Admission</option>
-                                            <option value="preorder" selected>⚕️ Pre-Operation</option>
-                                            <option value="postorder">🔧 Post-Operation</option>
-                                        </select>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="form-group mb-0">
@@ -691,16 +812,6 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-2">
-                                        <label class="small">Order Type</label>
-                                        <select id="postorder_order_type" class="form-control form-control-sm">
-                                            <option value="admit">🏥 Admission</option>
-                                            <option value="preorder">⚕️ Pre-Operation</option>
-                                            <option value="postorder" selected>🔧 Post-Operation</option>
-                                        </select>
-                                    </div>
-                                </div>
                             </div>
 
                             <div class="form-group mb-0">
@@ -790,20 +901,11 @@
         background: #e8f5e9;
     }
     .badge { font-size: 0.75em; padding: 4px 8px; }
-
-    /* Prescription table styling to look like the real prescription */
-    .prescription-table th, .prescription-table td {
-        text-align: center;
-        vertical-align: middle;
-        font-size: 0.88em;
-        padding: 5px 6px !important;
-    }
-    .prescription-table .med-name-cell {
-        text-align: left;
-        font-weight: 600;
-    }
-    .prescription-table .tick { color: #28a745; font-weight: bold; }
     .input-group-sm .form-control { font-size: 0.85em; }
+
+    /* Action button group in table */
+    .btn-action-group { display: flex; gap: 4px; justify-content: center; }
+    .btn-xs { padding: 2px 7px; font-size: 11px; line-height: 1.5; border-radius: 3px; }
 </style>
 @stop
 
@@ -820,14 +922,13 @@ if (typeof jQuery !== 'undefined') {
         // Initialize Select2
         $('#templateid').select2({ width: '100%' });
 
-        // Template Selection
+        // ── Template Selection ───────────────────────────────────
         $('#templateid').on('change', function() {
             let tid = $(this).val();
             if (tid) {
                 currentStep = 'admit';
                 medicines = { admit: [], preorder: [], postorder: [] };
                 $('#stepNavigation').show();
-                $('#prescriptionTableSection').show();
                 loadAllMedicines();
                 showStep('admit');
             } else {
@@ -835,59 +936,55 @@ if (typeof jQuery !== 'undefined') {
             }
         });
 
-        // Step Navigation
-        $('#stepBtn_admit').on('click', function() { currentStep = 'admit'; showStep('admit'); });
-        $('#stepBtn_preorder').on('click', function() { currentStep = 'preorder'; showStep('preorder'); });
-        $('#stepBtn_postorder').on('click', function() { currentStep = 'postorder'; showStep('postorder'); });
+        // ── Step Navigation ──────────────────────────────────────
+        $('#stepBtn_admit').on('click',    function() { currentStep = 'admit';     showStep('admit');     });
+        $('#stepBtn_preorder').on('click', function() { currentStep = 'preorder';  showStep('preorder');  });
+        $('#stepBtn_postorder').on('click',function() { currentStep = 'postorder'; showStep('postorder'); });
 
-        // Toggle prescription preview
-        $('#togglePrescriptionView').on('click', function() {
-            let body = $('#prescriptionTableBody');
-            if (body.is(':visible')) {
-                body.hide();
-                $(this).html('<i class="fas fa-eye"></i> Show Preview');
-            } else {
-                body.show();
-                $(this).html('<i class="fas fa-eye-slash"></i> Hide Preview');
-            }
-        });
-
-        // Add Medicine
+        // ── Add Medicine ─────────────────────────────────────────
         $('.btnAddMedicine').on('click', function() {
             addMedicine($(this).data('type'));
         });
 
+        // ── Update Medicine (modal save) ─────────────────────────
+        $('#btnUpdateMedicine').on('click', function() {
+            updateMedicine();
+        });
+
+        // ════════════════════════════════════════════════════════
+        // FUNCTIONS
+        // ════════════════════════════════════════════════════════
+
         function showStep(step) {
             $('#admitSection, #preorderSection, #postorderSection').hide();
             $('.stepBtn').removeClass('active');
-            if (step === 'admit') { $('#admitSection').show(); $('#stepBtn_admit').addClass('active'); }
-            else if (step === 'preorder') { $('#preorderSection').show(); $('#stepBtn_preorder').addClass('active'); }
+            if      (step === 'admit')     { $('#admitSection').show();     $('#stepBtn_admit').addClass('active');     }
+            else if (step === 'preorder')  { $('#preorderSection').show();  $('#stepBtn_preorder').addClass('active');  }
             else if (step === 'postorder') { $('#postorderSection').show(); $('#stepBtn_postorder').addClass('active'); }
             updateButtonStates();
         }
 
         function updateButtonStates() {
             $('.stepBtn').removeClass('active_other');
-            if (medicines.admit.length > 0 && currentStep !== 'admit') $('#stepBtn_admit').addClass('active_other');
-            if (medicines.preorder.length > 0 && currentStep !== 'preorder') $('#stepBtn_preorder').addClass('active_other');
+            if (medicines.admit.length > 0    && currentStep !== 'admit')     $('#stepBtn_admit').addClass('active_other');
+            if (medicines.preorder.length > 0  && currentStep !== 'preorder')  $('#stepBtn_preorder').addClass('active_other');
             if (medicines.postorder.length > 0 && currentStep !== 'postorder') $('#stepBtn_postorder').addClass('active_other');
         }
 
         function hideAllSteps() {
             $('#admitSection, #preorderSection, #postorderSection').hide();
             $('#stepNavigation').hide();
-            $('#prescriptionTableSection').hide();
         }
 
         function buildDosage(type) {
-            let m = $('#' + type + '_morning').val() || '-';
-            let n = $('#' + type + '_noon').val() || '-';
-            let ni = $('#' + type + '_night').val() || '-';
+            let m  = $('#' + type + '_morning').val() || '-';
+            let n  = $('#' + type + '_noon').val()    || '-';
+            let ni = $('#' + type + '_night').val()   || '-';
             return m + '+' + n + '+' + ni;
         }
 
         function buildDuration(type) {
-            let num = $('#' + type + '_duration_num').val();
+            let num   = $('#' + type + '_duration_num').val();
             let dtype = $('#' + type + '_duration_type').val();
             if (dtype === 'চলবে') return 'চলবে';
             if (num && dtype) return num + ' ' + dtype;
@@ -896,24 +993,24 @@ if (typeof jQuery !== 'undefined') {
         }
 
         function addMedicine(type) {
-            let tid = $('#templateid').val();
+            let tid      = $('#templateid').val();
             let medicine = $('#' + type + '_medicine').val();
 
-            if (!tid) { showAlert('Please select a template!', 'error'); return; }
-            if (!medicine || medicine.trim() === '') { showAlert('Please enter medicine name!', 'error'); return; }
+            if (!tid)                              { showAlert('Please select a template!', 'error'); return; }
+            if (!medicine || !medicine.trim())     { showAlert('Please enter medicine name!', 'error'); return; }
 
-            let dosage = buildDosage(type);
-            let duration = buildDuration(type);
-            let meal_timing = $('#' + type + '_meal_timing').val();
-            let instruction = $('#' + type + '_instruction').val();
-            let route = $('#' + type + '_route').val();
-            let order_type = $('#' + type + '_order_type').val();
-            let company = $('#' + type + '_company').val();
+            let dosage       = buildDosage(type);
+            let duration     = buildDuration(type);
+            let meal_timing  = $('#' + type + '_meal_timing').val();
+            let instruction  = $('#' + type + '_instruction').val();
+            let route        = $('#' + type + '_route').val();
+            let company      = $('#' + type + '_company').val();
+            let morning      = $('#' + type + '_morning').val();
+            let noon         = $('#' + type + '_noon').val();
+            let night        = $('#' + type + '_night').val();
 
-            // Build morning/noon/night individually for saving
-            let morning = $('#' + type + '_morning').val();
-            let noon = $('#' + type + '_noon').val();
-            let night = $('#' + type + '_night').val();
+            // Auto-set order_type based on form section
+            let order_type = type;
 
             let btn = $('.btnAddMedicine[data-type="' + type + '"]');
             btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
@@ -966,6 +1063,125 @@ if (typeof jQuery !== 'undefined') {
             $('#' + type + '_medicine').focus();
         }
 
+        // ── Open Edit Modal ──────────────────────────────────────
+        window.editMedicine = function(id) {
+            // Find the row data from loaded medicines
+            let row = null;
+            ['admit','preorder','postorder'].forEach(function(t) {
+                let found = medicines[t].find(function(m) { return m.id == id; });
+                if (found) row = found;
+            });
+
+            if (!row) {
+                showAlert('Medicine data not found!', 'error');
+                return;
+            }
+
+            // Populate modal fields
+            $('#edit_medicine_id').val(row.id);
+            $('#edit_medicine').val(row.name || '');
+            $('#edit_company').val(row.company || '');
+            $('#edit_route').val(row.route || 'Oral');
+            $('#edit_order_type').val(row.order_type || 'admit');
+            $('#edit_meal_timing').val(row.meal_timing || '');
+            $('#edit_instruction').val(row.instruction || '');
+
+            // Morning / Noon / Night
+            let morning = row.morning || (row.dose ? (row.dose.split('+')[0] || '') : '');
+            let noon    = row.noon    || (row.dose ? (row.dose.split('+')[1] || '') : '');
+            let night   = row.night   || (row.dose ? (row.dose.split('+')[2] || '') : '');
+            $('#edit_morning').val(morning);
+            $('#edit_noon').val(noon);
+            $('#edit_night').val(night);
+
+            // Duration — parse "7 দিন" / "2 মাস" / "চলবে"
+            let dur = row.duration || '';
+            if (dur === 'চলবে' || dur.toLowerCase().includes('চলবে')) {
+                $('#edit_duration_num').val('');
+                $('#edit_duration_type').val('চলবে');
+            } else {
+                let parts = dur.split(' ');
+                if (parts.length >= 2) {
+                    $('#edit_duration_num').val(parts[0]);
+                    $('#edit_duration_type').val(parts[1]);
+                } else {
+                    $('#edit_duration_num').val('');
+                    $('#edit_duration_type').val('');
+                }
+            }
+
+            $('#editMedicineModal').modal('show');
+        };
+
+        // ── Update Medicine (AJAX PUT/POST) ──────────────────────
+        function updateMedicine() {
+            let id = $('#edit_medicine_id').val();
+            if (!id) return;
+
+            let name        = $('#edit_medicine').val().trim();
+            let company     = $('#edit_company').val().trim();
+            let morning     = $('#edit_morning').val();
+            let noon        = $('#edit_noon').val();
+            let night       = $('#edit_night').val();
+            let dosage      = (morning||'-') + '+' + (noon||'-') + '+' + (night||'-');
+            let meal_timing = $('#edit_meal_timing').val();
+            let instruction = $('#edit_instruction').val();
+            let route       = $('#edit_route').val();
+            let order_type  = $('#edit_order_type').val();
+
+            // Build duration
+            let dnum  = $('#edit_duration_num').val();
+            let dtype = $('#edit_duration_type').val();
+            let duration = '';
+            if (dtype === 'চলবে') duration = 'চলবে';
+            else if (dnum && dtype) duration = dnum + ' ' + dtype;
+            else if (dtype) duration = dtype;
+
+            if (!name) { showAlert('Medicine name is required!', 'error'); return; }
+
+            let btn = $('#btnUpdateMedicine');
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Updating...');
+
+            $.ajax({
+                url: `/templates/medicine/ajax/${id}`,
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    _method: 'PUT',
+                    name: name,
+                    company: company,
+                    dosage: dosage,
+                    morning: morning,
+                    noon: noon,
+                    night: night,
+                    meal_timing: meal_timing,
+                    duration: duration,
+                    instruction: instruction,
+                    route: route,
+                    order_type: order_type,
+                },
+                success: function(res) {
+                    if (res.ok || res.success) {
+                        showAlert('✓ Medicine updated successfully!', 'success');
+                        $('#editMedicineModal').modal('hide');
+                        loadAllMedicines();
+                    } else {
+                        showAlert('Update failed: ' + (res.message || 'Unknown error'), 'error');
+                    }
+                },
+                error: function(xhr) {
+                    let msg = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : 'Server error (HTTP ' + xhr.status + ')';
+                    showAlert('Error: ' + msg, 'error');
+                },
+                complete: function() {
+                    btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i> Update Medicine');
+                }
+            });
+        }
+
+        // ── Load All Medicines ───────────────────────────────────
         function loadAllMedicines() {
             let tid = $('#templateid').val();
             if (!tid) return;
@@ -974,12 +1190,17 @@ if (typeof jQuery !== 'undefined') {
                 medicines = { admit: [], preorder: [], postorder: [] };
 
                 let admitHtml = '', preorderHtml = '', postorderHtml = '';
-                let prescriptionHtml = '';
-                let cntA = 1, cntPre = 1, cntPost = 1, cntAll = 1;
+                let cntA = 1, cntPre = 1, cntPost = 1;
 
                 if (res.rows && res.rows.length > 0) {
                     res.rows.forEach(function(row) {
                         let type = row.order_type || 'admit';
+                        
+                        // Ensure the array exists before pushing
+                        if (!medicines[type]) {
+                            medicines[type] = [];
+                        }
+                        
                         medicines[type].push(row);
 
                         let morning = row.morning || (row.dose ? row.dose.split('+')[0] : '-');
@@ -988,62 +1209,52 @@ if (typeof jQuery !== 'undefined') {
                         let meal    = row.meal_timing || '';
                         let dur     = row.duration || '';
 
-                        // Meal timing display
-                        let mealBefore = (meal === 'before') ? '✓' : '';
-                        let mealAfter  = (meal === 'after')  ? '✓' : '';
-
-                        // Duration parse
-                        let durDin = '', durMas = '', durCholbe = '';
-                        if (dur === 'চলবে' || dur.toLowerCase().includes('চলবে') || dur.toLowerCase().includes('continue') || dur.toLowerCase().includes('ongoing')) {
-                            durCholbe = '✓';
-                        } else {
-                            let parts = dur.split(' ');
-                            if (parts[1] && parts[1].includes('মাস')) { durMas = parts[0]; }
-                            else if (parts[0]) { durDin = parts[0]; }
-                        }
-
                         let cnt = type === 'admit' ? cntA++ : type === 'preorder' ? cntPre++ : cntPost++;
+
+                        let mealLabel = '';
+                        if      (meal === 'before') mealLabel = '<span class="badge badge-warning">আগে</span>';
+                        else if (meal === 'after')  mealLabel = '<span class="badge badge-info">পরে</span>';
+                        else if (meal === 'with')   mealLabel = '<span class="badge badge-secondary">সাথে</span>';
+                        else if (meal === 'empty')  mealLabel = '<span class="badge badge-light">খালি</span>';
+                        else                        mealLabel = '-';
+
                         let rowHtml = `<tr class="text-center">
                             <td>${cnt}</td>
-                            <td class="text-left"><strong>${row.name}</strong>${row.company ? '<br><small class="text-muted">' + row.company + '</small>' : ''}</td>
+                            <td class="text-left">
+                                <strong>${row.name}</strong>
+                                ${row.company ? '<br><small class="text-muted">' + row.company + '</small>' : ''}
+                            </td>
                             <td>${morning || '-'}</td>
-                            <td>${noon || '-'}</td>
-                            <td>${night || '-'}</td>
-                            <td>${meal === 'before' ? '<span class="badge badge-warning">আগে</span>' : meal === 'after' ? '<span class="badge badge-info">পরে</span>' : meal === 'with' ? '<span class="badge badge-secondary">সাথে</span>' : meal === 'empty' ? '<span class="badge badge-light">খালি</span>' : '-'}</td>
+                            <td>${noon    || '-'}</td>
+                            <td>${night   || '-'}</td>
+                            <td>${mealLabel}</td>
                             <td>${dur || '-'}</td>
                             <td>
-                                <button onclick="deleteMedicine(${row.id})" class="btn btn-xs btn-outline-danger">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                <div class="btn-action-group">
+                                    <button onclick="editMedicine(${row.id})"
+                                            class="btn btn-xs btn-warning"
+                                            title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button onclick="deleteMedicine(${row.id})"
+                                            class="btn btn-xs btn-outline-danger"
+                                            title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>`;
 
-                        if (type === 'admit') admitHtml += rowHtml;
-                        else if (type === 'preorder') preorderHtml += rowHtml;
-                        else postorderHtml += rowHtml;
-
-                        // Prescription preview row (Bengali layout like image)
-                        let typeLabel = type === 'admit' ? '🏥' : type === 'preorder' ? '⚕️' : '🔧';
-                        prescriptionHtml += `<tr>
-                            <td class="med-name-cell">${typeLabel} <strong>${row.name}</strong>${row.company ? ' <small class="text-muted">(${row.company})</small>' : ''}</td>
-                            <td>${morning || ''}</td>
-                            <td>${noon || ''}</td>
-                            <td>${night || ''}</td>
-                            <td class="tick">${mealBefore}</td>
-                            <td class="tick">${mealAfter}</td>
-                            <td>${durDin}</td>
-                            <td>${durMas}</td>
-                            <td class="tick">${durCholbe}</td>
-                        </tr>`;
-                        cntAll++;
+                        if      (type === 'admit')     admitHtml     += rowHtml;
+                        else if (type === 'preorder')  preorderHtml  += rowHtml;
+                        else                           postorderHtml += rowHtml;
                     });
                 }
 
                 let empty8 = '<tr><td colspan="8" class="text-center p-3 text-muted">No medicines added</td></tr>';
-                $('#admitTableBody').html(admitHtml || empty8);
-                $('#preorderTableBody').html(preorderHtml || empty8);
+                $('#admitTableBody').html(admitHtml     || empty8);
+                $('#preorderTableBody').html(preorderHtml  || empty8);
                 $('#postorderTableBody').html(postorderHtml || empty8);
-                $('#prescriptionRows').html(prescriptionHtml || '<tr><td colspan="9" class="text-center text-muted p-3">No medicines added yet</td></tr>');
 
                 $('#admitCount').text(medicines.admit.length);
                 $('#preorderCount').text(medicines.preorder.length);
@@ -1053,8 +1264,9 @@ if (typeof jQuery !== 'undefined') {
             });
         }
 
+        // ── Alert Helper ─────────────────────────────────────────
         function showAlert(message, type) {
-            let cls = type === 'success' ? 'alert-success' : 'alert-danger';
+            let cls  = type === 'success' ? 'alert-success' : 'alert-danger';
             let icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
             $('#alertMessage').html(`
                 <div class="alert ${cls} alert-dismissible fade show" role="alert">
@@ -1062,9 +1274,12 @@ if (typeof jQuery !== 'undefined') {
                     <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
                 </div>
             `);
-            setTimeout(() => { $('.alert').fadeOut('slow', function() { $(this).remove(); }); }, 3000);
+            setTimeout(function() {
+                $('.alert').fadeOut('slow', function() { $(this).remove(); });
+            }, 3000);
         }
 
+        // ── Delete Medicine ──────────────────────────────────────
         window.deleteMedicine = function(id) {
             if (confirm('Delete this medicine?')) {
                 $.ajax({
@@ -1072,13 +1287,17 @@ if (typeof jQuery !== 'undefined') {
                     type: 'DELETE',
                     data: { _token: "{{ csrf_token() }}" },
                     success: function(res) {
-                        if (res.ok) { showAlert('Deleted!', 'success'); loadAllMedicines(); }
-                    }
+                        if (res.ok || res.success) {
+                            showAlert('Deleted!', 'success');
+                            loadAllMedicines();
+                        }
+                    },
+                    error: function() { showAlert('Delete failed!', 'error'); }
                 });
             }
         };
 
-    });
+    }); // end jQuery ready
 }
 </script>
 @stop

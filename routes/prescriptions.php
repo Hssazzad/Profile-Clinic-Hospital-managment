@@ -76,11 +76,20 @@ Route::middleware(['auth'])->group(function () {
     
     // Store general prescription
     Route::post('/prescriptions', [PrescriptionController::class, 'store'])->name('prescriptions.store');
-        
-    // PreCon Assessment
-    Route::get('/prescriptions/PreConAssessment', [PreConAssessmentController::class, 'create'])->name('prescriptions.preconassessment');
-    Route::post('/prescriptions/PreConAssessmentSave', [PreConAssessmentController::class, 'store'])->name('prescriptions.preconassessment.save');
     
+    // ═══════════════════════════════════════════════════════════════════════
+    // ✅ Pre-Con Assessment Routes (Updated)
+    // ═══════════════════════════════════════════════════════════════════════
+    Route::get('/prescriptions/PreConAssessment', [PreConAssessmentController::class, 'create'])
+        ->name('prescriptions.preconassessment');
+    
+    Route::post('/prescriptions/PreConAssessmentSave', [PreConAssessmentController::class, 'store'])
+        ->name('prescriptions.preconassessment.save');
+    
+    // Get assessment history via AJAX (Latest 10 records)
+    Route::get('/preconassessment/history/{patientcode}', [PreConAssessmentController::class, 'getHistory'])
+        ->name('prescriptions.preconassessment.history');
+
     // --- SURGERY PRESCRIPTION GROUP - FIXED ROUTES ---
     Route::prefix('prescriptions/SurgeryPrescription')->name('surgery-prescriptions.')->group(function () {
         
@@ -111,13 +120,13 @@ Route::middleware(['auth'])->group(function () {
         // PDF routes
         Route::get('/{id}/pdf', [SurgeryPrescriptionController::class, 'viewPDF'])->name('pdf');
         Route::get('/{id}/download', [SurgeryPrescriptionController::class, 'generatePDF'])->name('download');
-		
-		// ============ EXISTING DATA SEARCH ROUTES (NEW) ============
-Route::get('/search-diagnoses',           [SurgeryPrescriptionController::class, 'searchDiagnoses'])->name('search-diagnoses');
-Route::get('/search-investigations',      [SurgeryPrescriptionController::class, 'searchInvestigations'])->name('search-investigations');
-Route::get('/search-advices',             [SurgeryPrescriptionController::class, 'searchAdvices'])->name('search-advices');
-Route::get('/search-fresh-prescriptions', [SurgeryPrescriptionController::class, 'searchFreshPrescriptions'])->name('search-fresh-prescriptions');
-Route::get('/search-discharge-summaries', [SurgeryPrescriptionController::class, 'searchDischargeSummaries'])->name('search-discharge-summaries');
+        
+        // ============ EXISTING DATA SEARCH ROUTES ============
+        Route::get('/search-diagnoses', [SurgeryPrescriptionController::class, 'searchDiagnoses'])->name('search-diagnoses');
+        Route::get('/search-investigations', [SurgeryPrescriptionController::class, 'searchInvestigations'])->name('search-investigations');
+        Route::get('/search-advices', [SurgeryPrescriptionController::class, 'searchAdvices'])->name('search-advices');
+        Route::get('/search-fresh-prescriptions', [SurgeryPrescriptionController::class, 'searchFreshPrescriptions'])->name('search-fresh-prescriptions');
+        Route::get('/search-discharge-summaries', [SurgeryPrescriptionController::class, 'searchDischargeSummaries'])->name('search-discharge-summaries');
         
         // Test route
         Route::get('/test', [SurgeryPrescriptionController::class, 'test'])->name('test');
