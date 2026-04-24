@@ -7,15 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\TemplateMedicine;
+use App\Services\FreshMedicineService;
 
 class FreshController extends Controller
 {
+    protected $medicineService;
+
+    public function __construct(FreshMedicineService $medicineService)
+    {
+        $this->medicineService = $medicineService;
+    }
+
     /* ══════════════════════════════════════════
        INDEX — Fresh patient list
        ✅ শুধু সেই patients যাদের
           status = 'post_surgery_done'
-          অর্থাৎ PostSurgery prescription হয়ে
-          Fresh এ এসেছে
     ══════════════════════════════════════════ */
     public function index(Request $request)
     {
@@ -24,7 +30,7 @@ class FreshController extends Controller
         $query = DB::table('patients')
             ->join('nursing_admissions', 'patients.id', '=', 'nursing_admissions.patient_id')
             ->where('nursing_admissions.admission_type', 'on_admission')
-            ->where('nursing_admissions.status', 'post_surgery_done') // ✅ শুধু এই status
+            ->where('nursing_admissions.status', 'post_surgery_done')
             ->select(
                 'patients.id',
                 'patients.patientname',
@@ -40,15 +46,9 @@ class FreshController extends Controller
                 DB::raw('MAX(nursing_admissions.admission_date) as admission_date')
             )
             ->groupBy(
-                'patients.id',
-                'patients.patientname',
-                'patients.patientcode',
-                'patients.patientfather',
-                'patients.mobile_no',
-                'patients.age',
-                'patients.gender',
-                'patients.blood_group',
-                'patients.address',
+                'patients.id', 'patients.patientname', 'patients.patientcode',
+                'patients.patientfather', 'patients.mobile_no', 'patients.age',
+                'patients.gender', 'patients.blood_group', 'patients.address',
                 'patients.upozila'
             );
 
@@ -56,41 +56,36 @@ class FreshController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('patients.patientname', 'LIKE', "%{$search}%")
                   ->orWhere('patients.patientcode', 'LIKE', "%{$search}%")
-                  ->orWhere('patients.mobile_no', 'LIKE', "%{$search}%");
+                  ->orWhere('patients.mobile_no',   'LIKE', "%{$search}%");
             });
         }
 
-        $patients       = $query->orderBy('admission_id', 'desc')->paginate(20)->withQueryString();
-        
-        // Query for past Fresh prescriptions (latest per patient)
+        $patients = $query->orderBy('admission_id', 'desc')
+                          ->paginate(20)
+                          ->withQueryString();
+
+        // Past Fresh prescriptions (latest per patient)
         $freshQuery = DB::table('nursing_fresh_prescriptions')
             ->join('patients', 'nursing_fresh_prescriptions.patient_id', '=', 'patients.id')
             ->select(
                 'nursing_fresh_prescriptions.*',
-                'patients.patientname',
-                'patients.patientcode',
-                'patients.age',
-                'patients.gender',
-                'patients.mobile_no',
-                'patients.address',
-                'patients.upozila',
-                'patients.blood_group'
+                'patients.patientname', 'patients.patientcode',
+                'patients.age', 'patients.gender', 'patients.mobile_no',
+                'patients.address', 'patients.upozila', 'patients.blood_group'
             )
             ->whereRaw('nursing_fresh_prescriptions.id IN (
-                SELECT MAX(id) 
-                FROM nursing_fresh_prescriptions 
-                GROUP BY patient_id
+                SELECT MAX(id) FROM nursing_fresh_prescriptions GROUP BY patient_id
             )')
             ->orderBy('nursing_fresh_prescriptions.created_at', 'desc');
-        
+
         $FreshPatients = $freshQuery->paginate(20)->withQueryString();
-        
-        // Only load fresh prescription medicines
-        $medicines = DB::table('template_medicine')
-            ->where('order_type', 'fresh prescription')
-            ->orderBy('name')
-            ->get();
-        
+
+        // ✅ "আরো Medicine যোগ করুন" — common_medicine table
+        $medicines = $this->medicineService->getAvailableMedicinesForFresh();
+
+        // ✅ Auto-load Selected Medicines — template_medicine WHERE order_type='fresh prescription'
+        $templateMedicines = $this->medicineService->getTemplateMedicinesForFreshPrescription();
+
         $investigations = DB::table('template_investigations')->orderBy('id')->get();
         $templates      = DB::table('tbl_template')->where('status', 1)->orderBy('title')->get();
         $doctors        = DB::table('doctors')
@@ -99,13 +94,10 @@ class FreshController extends Controller
                             ->get();
 
         return view('nursing.fresh', compact(
-            'patients',
-            'FreshPatients',
-            'search',
-            'medicines',
-            'investigations',
-            'doctors',
-            'templates'
+            'patients', 'FreshPatients', 'search',
+            'medicines',          // common_medicine → আরো Medicine যোগ করুন
+            'templateMedicines',  // template_medicine order_type='fresh prescription' → auto-load
+            'investigations', 'doctors', 'templates'
         ));
     }
 
@@ -131,14 +123,14 @@ class FreshController extends Controller
             'previous_prescriptions'     => $this->getPreviousAdmissionPrescriptions($patientId),
             'fresh_prescriptions'        => $this->getFreshPrescriptions($patientId),
             'post_surgery_prescriptions' => $this->getPostSurgeryPrescriptions($patientId),
-            'message'                    => $admission ? 'Admission record found.' : 'No admission record found.',
+            'message'                    => $admission
+                                            ? 'Admission record found.'
+                                            : 'No admission record found.',
         ]);
     }
 
     /* ══════════════════════════════════════════
        STORE FRESH PRESCRIPTION (AJAX)
-       ✅ Save হলে status change হয় না —
-          Fresh list এ বারবার revisit করা যায়
     ══════════════════════════════════════════ */
     public function storePrescription(Request $request)
     {
@@ -209,6 +201,7 @@ class FreshController extends Controller
                 'message'         => 'Fresh prescription saved successfully.',
                 'prescription_id' => $freshId,
             ]);
+
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
@@ -227,32 +220,37 @@ class FreshController extends Controller
             return response()->json(['success' => false, 'message' => 'No template ID provided.'], 400);
         }
 
-        $template = DB::table('tbl_template')->where('id', $id)->first();
+        $template = DB::table('tbl_template')->where('id', $id)->first()
+                 ?? DB::table('tbl_template')->where('templateid', $id)->first();
+
         if (!$template) {
-            return response()->json(['success' => false, 'message' => 'Template not found.'], 404);
+            return response()->json(['success' => false, 'message' => 'Template not found'], 404);
         }
 
-        $medicines = DB::table('tbl_template_medicines')->where('template_id', $id)->get();
-
-        if ($medicines->isEmpty()) {
-            $medicines = DB::table('template_medicine')->where('template_id', $id)->get();
-        }
+        $templateData       = $this->medicineService->applyTemplateWithCommonMedicines($template->templateid ?? $template->id);
+        $mappedMedicines    = $templateData['template_medicines'];
+        $availableMedicines = $templateData['available_medicines'];
 
         return response()->json([
-            'success'   => true,
-            'template'  => $template,
-            'medicines' => $medicines,
+            'success'             => true,
+            'template'            => $template,
+            'medicines'           => $mappedMedicines,
+            'available_medicines' => $availableMedicines,
+            'debug_info'          => [
+                'template_id'               => $id,
+                'template_templateid'       => $template->templateid,
+                'template_medicines_count'  => $templateData['template_medicines_count'],
+                'available_medicines_count' => $templateData['available_medicines_count'],
+            ],
         ]);
     }
 
     /* ══════════════════════════════════════════
-       GET POST-OPERATION MEDICINES FROM TEMPLATES (AJAX)
-       ✅ Fetch all post-order medicines from all templates
+       GET POST-OPERATION MEDICINES (AJAX)
     ══════════════════════════════════════════ */
     public function getPostOperationMedicines()
     {
         try {
-            // Get all Post-Operation medicines directly using model
             $postOpMeds = TemplateMedicine::where('order_type', 'postorder')
                 ->where('active', 1)
                 ->orderBy('group')
@@ -261,44 +259,40 @@ class FreshController extends Controller
 
             \Log::info("Direct query found: " . $postOpMeds->count() . " Post-Operation medicines");
 
-            // Format response
             $allPostOpMeds = [];
             foreach ($postOpMeds as $med) {
                 $allPostOpMeds[] = [
-                    'id'           => $med->id,
-                    'name'         => $med->name,
-                    'dose'         => $med->dose,
-                    'route'        => $med->route,
-                    'frequency'    => $med->frequency,
-                    'duration'     => $med->duration,
-                    'timing'       => $med->timing,
-                    'order_type'   => $med->order_type,
-                    'templateid'   => $med->templeteid,
-                    'template_name'=> 'Template ' . $med->templeteid
+                    'id'            => $med->id,
+                    'name'          => $med->name,
+                    'dose'          => $med->dose,
+                    'route'         => $med->route,
+                    'frequency'     => $med->frequency,
+                    'duration'      => $med->duration,
+                    'timing'        => $med->timing,
+                    'order_type'    => $med->order_type,
+                    'templateid'    => $med->templeteid,
+                    'template_name' => 'Template ' . $med->templeteid,
                 ];
             }
-
-            \Log::info("Final result: " . count($allPostOpMeds) . " Post-Operation medicines");
 
             return response()->json([
                 'success' => true,
                 'count'   => count($allPostOpMeds),
                 'rows'    => $allPostOpMeds,
-                'message' => count($allPostOpMeds) . ' Post-Operation medicines found'
+                'message' => count($allPostOpMeds) . ' Post-Operation medicines found',
             ]);
 
         } catch (\Exception $e) {
             \Log::error('Error in getPostOperationMedicines: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching Post-Operation medicines: ' . $e->getMessage()
+                'message' => 'Error fetching Post-Operation medicines: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /* ══════════════════════════════════════════
-       DETAIL — Show Fresh prescription details
-       GET /fresh/detail/{id}
+       DETAIL — GET /fresh/detail/{id}
     ══════════════════════════════════════════ */
     public function detail($id)
     {
@@ -311,10 +305,10 @@ class FreshController extends Controller
             ->where('fresh_prescription_id', $id)
             ->get();
 
-        // Get patient information
-        $patient = DB::table('patients')->where('id', $prescription->patient_id)->first();
+        $patient = DB::table('patients')
+            ->where('id', $prescription->patient_id)
+            ->first();
 
-        // Get all patient Fresh prescriptions for history
         $patientPrescriptions = DB::table('nursing_fresh_prescriptions')
             ->where('patient_id', $prescription->patient_id)
             ->orderBy('created_at', 'desc')
@@ -322,36 +316,77 @@ class FreshController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $prescription->id,
-                'patient_name' => $prescription->patient_name,
-                'patient_age' => $prescription->patient_age,
-                'patient_code' => $prescription->patient_code,
-                'doctor_name' => $prescription->doctor_name,
-                'prescription_date' => $prescription->prescription_date,
-                'rx_text' => $prescription->rx_text,
-                'notes' => $prescription->notes,
-                'created_at' => $prescription->created_at,
-                'medicines' => $medicines,
-                'patient' => $patient,
-                'patientPrescriptions' => $patientPrescriptions
-            ]
+            'data'    => [
+                'id'                   => $prescription->id,
+                'patient_name'         => $prescription->patient_name,
+                'patient_age'          => $prescription->patient_age,
+                'patient_code'         => $prescription->patient_code,
+                'doctor_name'          => $prescription->doctor_name,
+                'prescription_date'    => $prescription->prescription_date,
+                'rx_text'              => $prescription->rx_text,
+                'notes'                => $prescription->notes,
+                'created_at'           => $prescription->created_at,
+                'medicines'            => $medicines,
+                'patient'              => $patient,
+                'patientPrescriptions' => $patientPrescriptions,
+            ],
         ]);
     }
 
-    /* ══════════════════════════════════════════
-       PRIVATE HELPERS
-    ══════════════════════════════════════════ */
+    /* ══════════════════════════════════════
+       APPLY TEMPLATE (AJAX POST)
+    ══════════════════════════════════════ */
+    public function applyTemplate(Request $request)
+    {
+        $templateId = $request->get('template_id');
+        if (!$templateId) {
+            return response()->json(['success' => false, 'message' => 'Template ID is required'], 422);
+        }
+
+        $template = DB::table('tbl_template')->where('ID', $templateId)->first()
+                 ?? DB::table('tbl_template')->where('id', $templateId)->first()
+                 ?? DB::table('tbl_template')->where('templateid', $templateId)->first();
+
+        if (!$template) {
+            return response()->json(['success' => false, 'message' => 'Template not found'], 404);
+        }
+
+        $tplCode = $template->templateid;
+        if (empty($tplCode)) {
+            $tplCode = $templateId;
+        }
+
+        $templateData       = $this->medicineService->applyTemplateWithCommonMedicines($tplCode);
+        $mappedMedicines    = $templateData['template_medicines'];
+        $availableMedicines = $templateData['available_medicines'];
+
+        return response()->json([
+            'success'             => true,
+            'message'             => 'Template applied successfully',
+            'template'            => $template,
+            'medicines'           => $mappedMedicines,
+            'available_medicines' => $availableMedicines,
+            'debug_info'          => [
+                'template_id'               => $templateId,
+                'template_templateid'       => $template->templateid,
+                'tplCode_used'              => $tplCode,
+                'template_medicines_count'  => $templateData['template_medicines_count'],
+                'available_medicines_count' => $templateData['available_medicines_count'],
+            ],
+        ]);
+    }
+
+    /* ══════════════════════════════════════
+       PRIVATE HELPERS (UNCHANGED LOGIC)
+    ══════════════════════════════════════ */
 
     private function fetchAdmissionMedicines($admission): array
     {
         $medicines = [];
-
         if ($admission && Schema::hasTable('nursing_admission_medicines')) {
             $rawMeds = DB::table('nursing_admission_medicines')
                 ->where('nursing_admission_id', $admission->id)
                 ->get();
-
             foreach ($rawMeds as $m) {
                 $medicines[] = [
                     'medicine_name' => $m->medicine_name ?? $m->name ?? '',
@@ -363,25 +398,22 @@ class FreshController extends Controller
                 ];
             }
         }
-
         return $medicines;
     }
 
     private function fetchLatestPostSurgeryMedicines($patientId): array
     {
         $postSurgeryMedicines = [];
-
-        if (Schema::hasTable('nursing_postsurgery_prescriptions') && Schema::hasTable('nursing_postsurgery_medicines')) {
+        if (Schema::hasTable('nursing_postsurgery_prescriptions') &&
+            Schema::hasTable('nursing_postsurgery_medicines')) {
             $latestPs = DB::table('nursing_postsurgery_prescriptions')
                 ->where('patient_id', $patientId)
                 ->orderByDesc('id')
                 ->first();
-
             if ($latestPs) {
                 $meds = DB::table('nursing_postsurgery_medicines')
                     ->where('postsurgery_prescription_id', $latestPs->id)
                     ->get();
-
                 foreach ($meds as $m) {
                     $postSurgeryMedicines[] = [
                         'medicine_name'   => $m->medicine_name ?? '',
@@ -396,14 +428,12 @@ class FreshController extends Controller
                 }
             }
         }
-
         return $postSurgeryMedicines;
     }
 
     private function getPreviousAdmissionPrescriptions($patientId): array
     {
         $result = [];
-
         if (!Schema::hasTable('nursing_admissions')) return $result;
 
         $rows = DB::table('nursing_admissions')
@@ -415,39 +445,31 @@ class FreshController extends Controller
 
         foreach ($rows as $row) {
             $lines = [];
-
             if (Schema::hasTable('nursing_admission_medicines')) {
                 $meds = DB::table('nursing_admission_medicines')
                     ->where('nursing_admission_id', $row->id)
                     ->get();
-
                 foreach ($meds as $m) {
                     $parts = array_filter([
                         $m->medicine_name ?? $m->name ?? null,
-                        $m->dose      ?? null,
-                        $m->route     ?? null,
+                        $m->dose      ?? null, $m->route     ?? null,
                         $m->frequency ?? null,
                         !empty($m->duration) ? ('× ' . $m->duration) : null,
                         !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
                     ]);
-
                     if (!empty($parts)) $lines[] = implode(' ', $parts);
                 }
             }
-
             if (empty($lines) && !empty($row->notes)) {
                 $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->notes)));
             }
-
             $result[] = [
-                'id'     => $row->id,
-                'date'   => $row->rx_date ?? $row->admission_date ?? $row->created_at,
-                'doctor' => null,
-                'type'   => 'on_admission',
-                'lines'  => array_values($lines),
+                'id'    => $row->id,
+                'date'  => $row->rx_date ?? $row->admission_date ?? $row->created_at,
+                'doctor'=> null, 'type' => 'on_admission',
+                'lines' => array_values($lines),
             ];
         }
-
         return $result;
     }
 
@@ -464,38 +486,29 @@ class FreshController extends Controller
         $result = [];
         foreach ($rows as $row) {
             $lines = [];
-
             if (Schema::hasTable('nursing_fresh_medicines')) {
                 $meds = DB::table('nursing_fresh_medicines')
                     ->where('fresh_prescription_id', $row->id)
                     ->get();
-
                 foreach ($meds as $m) {
                     $parts = array_filter([
-                        $m->medicine_name ?? null,
-                        $m->dose          ?? null,
-                        $m->route         ?? null,
-                        $m->frequency     ?? null,
+                        $m->medicine_name ?? null, $m->dose ?? null,
+                        $m->route ?? null, $m->frequency ?? null,
                         !empty($m->duration) ? ('× ' . $m->duration) : null,
                     ]);
-
                     if (!empty($parts)) $lines[] = implode(' ', $parts);
                 }
             }
-
             if (empty($lines) && !empty($row->rx_text)) {
                 $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->rx_text)));
             }
-
             $result[] = [
-                'id'     => $row->id,
-                'date'   => $row->prescription_date ?? $row->created_at,
-                'doctor' => $row->doctor_name ?? null,
-                'type'   => 'fresh',
-                'lines'  => array_values($lines),
+                'id'    => $row->id,
+                'date'  => $row->prescription_date ?? $row->created_at,
+                'doctor'=> $row->doctor_name ?? null, 'type' => 'fresh',
+                'lines' => array_values($lines),
             ];
         }
-
         return $result;
     }
 
@@ -512,40 +525,30 @@ class FreshController extends Controller
         $result = [];
         foreach ($rows as $row) {
             $lines = [];
-
             if (Schema::hasTable('nursing_postsurgery_medicines')) {
                 $meds = DB::table('nursing_postsurgery_medicines')
                     ->where('postsurgery_prescription_id', $row->id)
                     ->get();
-
                 foreach ($meds as $m) {
                     $parts = array_filter([
-                        $m->medicine_name ?? null,
-                        $m->strength      ?? null,
-                        $m->dose          ?? null,
-                        $m->route         ?? null,
-                        $m->frequency     ?? null,
+                        $m->medicine_name ?? null, $m->strength ?? null,
+                        $m->dose ?? null, $m->route ?? null, $m->frequency ?? null,
                         !empty($m->duration) ? ('× ' . $m->duration) : null,
                         !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
                     ]);
-
                     if (!empty($parts)) $lines[] = implode(' ', $parts);
                 }
             }
-
             if (empty($lines) && !empty($row->notes)) {
                 $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->notes)));
             }
-
             $result[] = [
-                'id'     => $row->id,
-                'date'   => $row->prescription_date ?? $row->created_at,
-                'doctor' => null,
-                'type'   => 'post-surgery',
-                'lines'  => array_values($lines),
+                'id'    => $row->id,
+                'date'  => $row->prescription_date ?? $row->created_at,
+                'doctor'=> null, 'type' => 'post-surgery',
+                'lines' => array_values($lines),
             ];
         }
-
         return $result;
     }
 }

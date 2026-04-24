@@ -4,6 +4,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
 
+    // Common Medicine List (for autocomplete in Template Medicine form)
+    Route::get('common-medicine/list', function () {
+        $medicines = \App\Models\CommonMedicine::where('active', 1)
+            ->orderBy('name')
+            ->get(['id', 'name', 'GroupName', 'strength']);
+        return response()->json(['ok' => true, 'medicines' => $medicines]);
+    })->name('common.medicine.list');
+
     Route::prefix('templates')->group(function () {
         
         // Template Main Routes

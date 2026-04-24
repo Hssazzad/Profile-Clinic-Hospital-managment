@@ -8,9 +8,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TemplateMedicine;
+use App\Services\PostSurgeryMedicineService;
 
 class PostSurgeryController extends Controller
 {
+    protected $medicineService;
+
+    public function __construct(PostSurgeryMedicineService $medicineService)
+    {
+        $this->medicineService = $medicineService;
+    }
+
     /* ══════════════════════════════════════════
        INDEX — Patient list
        ✅ শুধু সেই patients যাদের
@@ -87,7 +95,8 @@ class PostSurgeryController extends Controller
         
         $PostSurgeryPatients = $postSurgeryQuery->paginate(20)->withQueryString();
         
-        $medicines = DB::table('template_medicine')->where('order_type', 'preorder')->orderBy('group')->get();
+        // ✅ Get available medicines from common_medicine table for post surgery
+        $medicines = $this->medicineService->getAvailableMedicinesForPostSurgery();
         $templates = DB::table('tbl_template')
                         ->where('status', 1)
                         ->orderBy('title')
@@ -316,22 +325,39 @@ class PostSurgeryController extends Controller
             return response()->json(['success' => false, 'message' => 'Template ID is required'], 422);
         }
 
+        // Find template row in tbl_template
         $template = DB::table('tbl_template')->where('ID', $templateId)->first()
+                 ?? DB::table('tbl_template')->where('id', $templateId)->first()
                  ?? DB::table('tbl_template')->where('templateid', $templateId)->first();
 
         if (!$template) {
             return response()->json(['success' => false, 'message' => 'Template not found'], 404);
         }
 
-        $tplCode = $template->templateid ?? null;
+        $tplCode = $template->templateid;
+
+        if (empty($tplCode)) {
+            $tplCode = $templateId;
+        }
+
+        // ✅ Use the new medicine service to apply template with common medicine mapping
+        $templateData = $this->medicineService->applyTemplateWithCommonMedicines($tplCode);
+        $mappedMedicines = $templateData['template_medicines'];
+        $availableMedicines = $templateData['available_medicines'];
 
         return response()->json([
             'success'        => true,
             'message'        => 'Template applied successfully',
             'template'       => $template,
-            'medicines'      => $this->safeFetch('template_medicine',      $tplCode, 'group'),
-            'investigations' => $this->safeFetch('template_investigations', $tplCode, 'id'),
-            'diagnoses'      => $this->safeFetch('template_diagnosis',      $tplCode, 'id'),
+            'medicines'      => $mappedMedicines,
+            'available_medicines' => $availableMedicines,
+            'debug_info'     => [
+                'template_id'            => $templateId,
+                'template_templateid'    => $template->templateid,
+                'tplCode_used'           => $tplCode,
+                'template_medicines_count' => $templateData['template_medicines_count'],
+                'available_medicines_count' => $templateData['available_medicines_count'],
+            ],
         ]);
     }
 

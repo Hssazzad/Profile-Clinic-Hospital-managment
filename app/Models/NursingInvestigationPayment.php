@@ -20,17 +20,21 @@ class NursingInvestigationPayment extends Model
         'payment_date',
         'collected_by',
         'total_amount',
+        'gross_amount',
         'discount',
         'paid_amount',
         'due_amount',
+        'status',
         'payment_method',
         'transaction_ref',
         'notes',
+        'receipt_no',
     ];
 
     protected $casts = [
         'payment_date' => 'date',
         'total_amount' => 'decimal:2',
+        'gross_amount' => 'decimal:2',
         'discount'     => 'decimal:2',
         'paid_amount'  => 'decimal:2',
         'due_amount'   => 'decimal:2',

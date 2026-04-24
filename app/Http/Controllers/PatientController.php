@@ -8,6 +8,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;    
 use App\Models\ConfigDistrict;
+use Illuminate\Support\Facades\File;
 
 class PatientController extends Controller
 {
@@ -41,11 +42,9 @@ class PatientController extends Controller
             ->orderBy('name')
             ->get();
         
-        // YY (last 2 digits of year) => 26 for 2026
         $yy = (int) Carbon::now()->format('y');
 
         $newCode = DB::transaction(function () use ($yy) {
-            // lock rows of this year to avoid duplicate in concurrent requests
             $lastCode = DB::table('configpatientcode')
                 ->whereBetween('Code', [$yy * 100000, $yy * 100000 + 999])
                 ->lockForUpdate()
@@ -62,8 +61,9 @@ class PatientController extends Controller
             return $code;
         });
 
-        // pass to view
-        return view('patients.create', compact('newCode', 'districts'));
+        $patients = Patient::orderByDesc('id')->paginate(15);
+
+        return view('patients.create', compact('newCode', 'districts', 'patients'));
     }
 
     /**
@@ -73,15 +73,13 @@ class PatientController extends Controller
     {
         $type = $request->reference_type;
 
-        // Load from patient_ref table
         $rows = DB::table('patient_ref')
             ->select('ID', 'Name', 'Mobile')
             ->where('active', 1)
-            ->where('ref_type', $type)   // OfficeEmployee / PCNurse / MidWife
+            ->where('ref_type', $type)
             ->orderBy('Name')
             ->get();
 
-        // return <option> list
         $html = '<option value="">-- Select Person --</option>';
         foreach ($rows as $r) {
             $html .= '<option value="'.$r->ID.'">'.$r->Name.' ('.$r->Mobile.')</option>';
@@ -101,7 +99,6 @@ class PatientController extends Controller
             'Mobile'   => ['nullable', 'string', 'max:15'],
         ]);
 
-        // Simple code generate (you can change format)
         $code = strtoupper(substr($data['ref_type'], 0, 2)) . str_pad((string)rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
         $id = DB::table('patient_ref')->insertGetId([
@@ -134,59 +131,60 @@ class PatientController extends Controller
 
     /**
      * Store new patient
-     * ✅ Required: patientname, patientfather, mobile_no, date_of_birth, age, gender
-     * ✅ Optional: all address fields (district, upozila, union, village)
+     * After save → redirect to Billing Payment page for this patient
      */
-    public function store(Request $request)
+    public function storepatientdata(Request $request)
     {
         $validated = $request->validate([
-            // ✅ REQUIRED FIELDS
+            // REQUIRED
             'patientname'    => ['required', 'string', 'max:150'],
-            'patientfather'  => ['required', 'string', 'max:70'],
-            'mobile_no'      => ['required', 'digits:11'],
-            'date_of_birth'  => ['required', 'date'],
+            'mobile_no'      => ['required', 'regex:/^01[0-9]{9}$/'],
             'age'            => ['required', 'string', 'min:1', 'max:150'],
-            'gender'         => ['required', Rule::in(['Male','Female','Other'])],
+            'gender'         => ['required', Rule::in(['Male', 'Female', 'Other'])],
 
-            // ✅ OPTIONAL FIELDS
+            // OPTIONAL
+            'patientfather'  => ['nullable', 'string', 'max:150'],
             'patienthusband' => ['nullable', 'string', 'max:70'],
             'photo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
 
-            // ✅ ADDRESS OPTIONAL
+            // ADDRESS
             'district'       => ['nullable', 'string', 'max:20'],
             'upozila'        => ['nullable', 'string', 'max:20'],
             'union'          => ['nullable', 'string', 'max:20'],
             'village'        => ['nullable', 'string', 'max:20'],
             'address'        => ['nullable', 'string', 'max:255'],
 
-            // ✅ OPTIONAL CONTACT
-            'spomobile_no'   => ['nullable', 'digits:11'],
-            'relmobile_no'   => ['nullable', 'digits:11'],
+            // CONTACT
+            'spomobile_no'   => ['nullable', 'regex:/^01[0-9]{9}$/'],
+            'relmobile_no'   => ['nullable', 'regex:/^01[0-9]{9}$/'],
             'nid_number'     => ['nullable', 'digits_between:10,17'],
             'email'          => ['nullable', 'email', 'max:120'],
 
-            // ✅ OPTIONAL HEALTH INFO
+            // HEALTH
             'blood_group'    => ['nullable', 'string', 'max:5'],
             'notes'          => ['nullable', 'string'],
 
-            // ✅ OPTIONAL REFERENCE
-            'reference_type'   => ['nullable', Rule::in(['Self','OfficeEmployee','PCNurse','MidWife','NOCOM','Others'])],
+            // REFERENCE
+            'reference_type'   => ['nullable', Rule::in(['Self', 'OfficeEmployee', 'PCNurse', 'MidWife', 'NOCOM', 'Others'])],
             'reference_person' => ['nullable', 'integer'],
             'reference_name'   => ['nullable', 'string', 'max:120'],
+
+            // CAMERA
+            'camera_image'   => ['nullable', 'string'],
         ]);
 
         // ===== Reference Type Validation =====
         $type = $validated['reference_type'] ?? null;
 
         if ($type === 'Self' || $type === 'Others') {
-            if (empty(trim((string)($validated['reference_name'] ?? '')))) {
+            if (empty(trim((string) ($validated['reference_name'] ?? '')))) {
                 return back()->withErrors([
                     'reference_name' => 'Reference Name is required for Self/Others.'
                 ])->withInput();
             }
             $validated['reference_person'] = null;
 
-        } elseif (in_array($type, ['OfficeEmployee','PCNurse','MidWife'], true)) {
+        } elseif (in_array($type, ['OfficeEmployee', 'PCNurse', 'MidWife'], true)) {
 
             if (empty($validated['reference_person'])) {
                 return back()->withErrors([
@@ -195,7 +193,7 @@ class PatientController extends Controller
             }
 
             $ref = DB::table('patient_ref')
-                ->select('ID','Name','Mobile','ref_type','active')
+                ->select('ID', 'Name', 'Mobile', 'ref_type', 'active')
                 ->where('ID', $validated['reference_person'])
                 ->where('active', 1)
                 ->first();
@@ -219,21 +217,58 @@ class PatientController extends Controller
             $validated['reference_name'] = null;
         }
 
-        // ===== Photo Upload =====
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
+        // ===== Photo Save =====
+        $destinationPath = public_path('uploads/photos');
 
-            // ensure folder exists
-            if (!is_dir(public_path('uploads/photos'))) {
-                mkdir(public_path('uploads/photos'), 0755, true);
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        if ($request->filled('camera_image')) {
+
+            $image = $request->camera_image;
+
+            if (preg_match('/^data:image\/(\w+);base64,/', $image, $matches)) {
+                $image = substr($image, strpos($image, ',') + 1);
+                $ext = strtolower($matches[1]);
+            } else {
+                return back()->withErrors([
+                    'photo' => 'Invalid camera image data'
+                ])->withInput();
             }
 
-            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/photos'), $filename);
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                return back()->withErrors([
+                    'photo' => 'Unsupported camera image type'
+                ])->withInput();
+            }
 
-            // ✅ DB-তে শুধু path রাখুন (URL না)
-            $validated['photo'] = 'uploads/photos/'.$filename;
+            $image = str_replace(' ', '+', $image);
+            $imageData = base64_decode($image);
+
+            if ($imageData === false) {
+                return back()->withErrors([
+                    'photo' => 'Camera image decode failed'
+                ])->withInput();
+            }
+
+            $imageName = 'cam_' . time() . '.' . $ext;
+            $savePath = $destinationPath . '/' . $imageName;
+
+            file_put_contents($savePath, $imageData);
+
+            $validated['photo'] = $imageName;
+
+        } elseif ($request->hasFile('photo')) {
+
+            $file = $request->file('photo');
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $file->move($destinationPath, $filename);
+
+            $validated['photo'] = $filename;
         }
+
+        unset($validated['camera_image']);
 
         // ===== Generate Patient Code =====
         $yy = (int) Carbon::now()->format('y');
@@ -263,11 +298,12 @@ class PatientController extends Controller
         $validated['patientcode'] = $patientCode;
 
         // ===== Save Patient =====
-        Patient::create($validated);
+        $patient = Patient::create($validated);
 
+        // ✅ Redirect to Billing Payment page for this patient
         return redirect()
-            ->route('patients.newpatient')
-            ->with('success', 'Patient has been saved successfully.');
+            ->route('billing.payment.show', $patient->id)
+            ->with('success', 'Patient saved! Please complete payment.');
     }
 
     /**
@@ -304,73 +340,137 @@ class PatientController extends Controller
     /**
      * Show edit patient form
      */
-    public function editpatient($id)
+    public function editpatient($id = null)
     {
-        $patient   = Patient::findOrFail($id);
+        if (!$id) {
+            abort(404, 'Patient ID missing');
+        }
+
+        $patient = Patient::findOrFail($id);
+
         $districts = DB::table('configdistrict')
             ->orderBy('name')
-            ->get(['code','name']);
+            ->get(['code', 'name']);
 
         return view('patients.editpatient', compact('patient', 'districts'));
     }
 
     /**
      * Update patient
-     * ✅ Required: patientname, patientfather, mobile_no, gender
-     * ✅ Optional: all address fields (district, upozila, union, village)
      */
     public function updatepatient(Request $request, $id)
     {
         $patient = Patient::findOrFail($id);
 
-        $validated = $request->validate([
-            // ✅ REQUIRED
-            'patientname'    => ['required', 'string', 'max:255'],
-            'patientfather'  => ['required', 'string', 'max:255'],
-            'mobile_no'      => ['required', 'digits:11'],
-            'gender'         => ['required', 'in:Male,Female,Other'],
-
-            // ✅ OPTIONAL
-            'patienthusband' => ['nullable', 'string', 'max:255'],
-            'spomobile_no'   => ['nullable', 'digits:11'],
-            'relmobile_no'   => ['nullable', 'digits:11'],
-            'blood_group'    => ['nullable', 'in:A+,A-,B+,B-,AB+,AB-,O+,O-'],
-            'date_of_birth'  => ['nullable', 'date'],
-            'age'            => ['nullable', 'string', 'max:150'],
-            'nid_number'     => ['nullable', 'digits_between:10,17'],
-            'email'          => ['nullable', 'email', 'max:120'],
-            'notes'          => ['nullable', 'string', 'max:1000'],
-
-            // ✅ ADDRESS OPTIONAL
-            'district'       => ['nullable', 'string', 'max:20'],
-            'upozila'        => ['nullable', 'string', 'max:20'],
-            'union'          => ['nullable', 'string', 'max:20'],
-            'village'        => ['nullable', 'string', 'max:20'],
-            'address'        => ['nullable', 'string', 'max:255'],
-
-            // ✅ PHOTO
-            'photo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        $request->validate([
+            'patientname'     => 'required|string|max:255',
+            'mobile_no'       => ['required', 'regex:/^01[0-9]{9}$/'],
+            'spomobile_no'    => ['nullable', 'regex:/^01[0-9]{9}$/'],
+            'relmobile_no'    => ['nullable', 'regex:/^01[0-9]{9}$/'],
+            'email'           => 'nullable|email|max:255',
+            'date_of_birth'   => 'nullable|date',
+            'age'             => 'required|string|max:100',
+            'gender'          => 'required|in:Male,Female,Other',
+            'blood_group'     => 'nullable|string|max:10',
+            'nid_number'      => 'nullable|string|max:50',
+            'patientfather'   => 'nullable|string|max:255',
+            'patienthusband'  => 'nullable|string|max:255',
+            'district'        => 'nullable|string|max:50',
+            'upozila'         => 'nullable|string|max:50',
+            'union'           => 'nullable|string|max:50',
+            'village'         => 'nullable|string|max:50',
+            'reference_type'  => 'nullable|string|max:50',
+            'reference_person'=> 'nullable|string|max:50',
+            'reference_name'  => 'nullable|string|max:255',
+            'notes'           => 'nullable|string',
+            'photo'           => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // ===== Photo upload (optional) =====
-        if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
+        $data = [
+            'patientname'      => $request->patientname,
+            'patientfather'    => $request->patientfather,
+            'patienthusband'   => $request->patienthusband,
+            'mobile_no'        => $request->mobile_no,
+            'spomobile_no'     => $request->spomobile_no,
+            'relmobile_no'     => $request->relmobile_no,
+            'email'            => $request->email,
+            'date_of_birth'    => $request->date_of_birth,
+            'age'              => $request->age,
+            'nid_number'       => $request->nid_number,
+            'gender'           => $request->gender,
+            'blood_group'      => $request->blood_group,
+            'district'         => $request->district,
+            'upozila'          => $request->upozila,
+            'union'            => $request->union,
+            'village'          => $request->village,
+            'reference_type'   => $request->reference_type,
+            'reference_person' => $request->reference_person,
+            'reference_name'   => $request->reference_name,
+            'notes'            => $request->notes,
+        ];
 
-            // ensure folder exists
-            if (!is_dir(public_path('uploads/photos'))) {
-                mkdir(public_path('uploads/photos'), 0755, true);
-            }
+        $destinationPath = public_path('uploads/photos');
 
-            $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/photos'), $filename);
-
-            $validated['photo'] = 'uploads/photos/'.$filename;
+        if (!is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
         }
 
-        $patient->update($validated);
+        if ($request->filled('camera_image')) {
 
-        return redirect()->route('patients.editpatient', $patient->id)
-            ->with('success', 'Patient updated successfully!');
+            $image = $request->camera_image;
+
+            if (preg_match('/^data:image\/(\w+);base64,/', $image, $matches)) {
+                $image = substr($image, strpos($image, ',') + 1);
+                $ext = strtolower($matches[1]);
+            } else {
+                return back()->withErrors(['photo' => 'Invalid camera image data'])->withInput();
+            }
+
+            if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) {
+                return back()->withErrors(['photo' => 'Unsupported camera image type'])->withInput();
+            }
+
+            $image = str_replace(' ', '+', $image);
+            $imageData = base64_decode($image);
+
+            if ($imageData === false) {
+                return back()->withErrors(['photo' => 'Camera image decode failed'])->withInput();
+            }
+
+            $imageName = 'cam_' . time() . '.' . $ext;
+            $savePath = $destinationPath . '/' . $imageName;
+
+            file_put_contents($savePath, $imageData);
+
+            if (!empty($patient->photo)) {
+                $oldPath = public_path('uploads/photos/' . $patient->photo);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            $data['photo'] = $imageName;
+
+        } elseif ($request->hasFile('photo')) {
+
+            $file = $request->file('photo');
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+            $file->move($destinationPath, $filename);
+
+            if (!empty($patient->photo)) {
+                $oldPath = public_path('uploads/photos/' . $patient->photo);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            $data['photo'] = $filename;
+        }
+
+        $patient->update($data);
+
+        return redirect()->route('patients.searchpatient')
+            ->with('success', 'Patient updated successfully.');
     }
 
     /**

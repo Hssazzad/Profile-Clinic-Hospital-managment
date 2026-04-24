@@ -1,4 +1,3 @@
-{{-- resources/views/patients/create.blade.php --}}
 @extends('adminlte::page')
 
 @section('title', 'Add Patient')
@@ -117,7 +116,26 @@
                      style="width:150px;height:150px;border:1px solid #ccc;object-fit:cover;margin:8px 0;">
                 <br>
 
-                <input type="file" name="photo" id="photoInput" accept="image/*" onchange="previewImage(this)">
+                <input type="file"
+                       name="photo"
+                       id="photoInput"
+                       accept="image/*"
+                       onchange="previewImage(this)">
+
+                <button type="button"
+                        class="btn btn-info btn-sm mt-2"
+                        onclick="openCamera()">📷 Camera</button>
+
+                <div id="cameraBox" style="display:none; margin-top:10px;">
+                  <video id="camera" width="200" height="150" autoplay playsinline style="border:1px solid #ccc;"></video><br>
+
+                  <button type="button" class="btn btn-success btn-sm mt-2" onclick="capturePhoto()">Capture</button>
+                  <button type="button" class="btn btn-danger btn-sm mt-2" onclick="closeCamera()">Close</button>
+
+                  <canvas id="canvas" width="200" height="150" style="display:none;"></canvas>
+                </div>
+
+                <input type="hidden" name="camera_image" id="camera_image">
 
                 @error('photo')
                   <div style="color:red;margin-top:6px;">{{ $message }}</div>
@@ -150,10 +168,10 @@
 
             {{-- Father --}}
             <tr>
-              <td class="fw-semibold">Patient father Name (পিতার নাম) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
+              <td class="fw-semibold">Patient father Name (পিতার নাম)</td>
               <td>:</td>
               <td>
-                <input type="text" name="patientfather" class="form-control @error('patientfather') is-invalid @enderror" required value="{{ old('patientfather') }}">
+                <input type="text" name="patientfather" class="form-control @error('patientfather') is-invalid @enderror" value="{{ old('patientfather') }}">
                 @error('patientfather') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
               </td>
             </tr>
@@ -168,31 +186,65 @@
               </td>
             </tr>
 
-            {{-- Mobiles --}}
+            {{-- Own Mobile --}}
             <tr>
               <td class="fw-semibold">Own Mobile (নিজের মোবাইল) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
               <td>:</td>
               <td>
-                <input type="text" id="mobile_no" name="mobile_no" class="form-control @error('mobile_no') is-invalid @enderror" required value="{{ old('mobile_no') }}">
-                @error('mobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+                <input type="text"
+                       id="mobile_no"
+                       name="mobile_no"
+                       class="form-control @error('mobile_no') is-invalid @enderror"
+                       value="{{ old('mobile_no') }}"
+                       pattern="01[0-9]{9}"
+                       maxlength="11"
+                       minlength="11"
+                       placeholder="01XXXXXXXXX"
+                       required
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                @error('mobile_no')
+                  <div style="color:red;margin-top:6px;">{{ $message }}</div>
+                @enderror
               </td>
             </tr>
 
+            {{-- Spouse Mobile --}}
             <tr>
               <td class="fw-semibold">Spouse Mobile (স্বামী/স্ত্রীর মোবাইল)</td>
               <td>:</td>
               <td>
-                <input type="text" id="spomobile_no" name="spomobile_no" class="form-control @error('spomobile_no') is-invalid @enderror" value="{{ old('spomobile_no') }}">
+                <input type="text"
+                       id="spomobile_no"
+                       name="spomobile_no"
+                       class="form-control @error('spomobile_no') is-invalid @enderror"
+                       value="{{ old('spomobile_no') }}"
+                       pattern="01[0-9]{9}"
+                       maxlength="11"
+                       minlength="11"
+                       placeholder="01XXXXXXXXX"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 @error('spomobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
               </td>
             </tr>
 
+            {{-- Relative Mobile --}}
             <tr>
               <td class="fw-semibold">Relative Mobile (আত্মীয়ের মোবাইল)</td>
               <td>:</td>
               <td>
-                <input type="text" id="relmobile_no" name="relmobile_no" class="form-control @error('relmobile_no') is-invalid @enderror" value="{{ old('relmobile_no') }}">
-                @error('relmobile_no') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
+                <input type="text"
+                       id="relmobile_no"
+                       name="relmobile_no"
+                       class="form-control @error('relmobile_no') is-invalid @enderror"
+                       value="{{ old('relmobile_no') }}"
+                       pattern="01[0-9]{9}"
+                       maxlength="11"
+                       minlength="11"
+                       placeholder="01XXXXXXXXX"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                @error('relmobile_no')
+                  <div style="color:red;margin-top:6px;">{{ $message }}</div>
+                @enderror
               </td>
             </tr>
 
@@ -207,14 +259,24 @@
             </tr>
 
             {{-- DOB --}}
-            <tr>
-              <td class="fw-semibold">Date of Birth (জন্মতারিখ) <span style="color:red; font-size:22px; font-weight:bold; line-height:1;">*</span></td>
-              <td>:</td>
-              <td>
-                <input type="date" name="date_of_birth" id="dob" class="form-control @error('date_of_birth') is-invalid @enderror" required value="{{ old('date_of_birth') }}">
-                @error('date_of_birth') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
-              </td>
-            </tr>
+           <tr>
+			  <td class="fw-semibold">Date of Birth (জন্মতারিখ)</td>
+			  <td>:</td>
+			  <td>
+				<input type="text"
+				   name="date_of_birth"
+				   id="dob"
+				   class="form-control @error('date_of_birth') is-invalid @enderror"
+				   value="{{ old('date_of_birth') }}"
+				   placeholder="dd-mm-yyyy"
+				   maxlength="10"
+				   oninput="formatDOB(this)">
+
+				@error('date_of_birth')
+				  <div style="color:red;margin-top:6px;">{{ $message }}</div>
+				@enderror
+			  </td>
+			</tr>
 
             {{-- Age --}}
             <tr>
@@ -247,9 +309,9 @@
                 @php($g = old('gender'))
                 <select name="gender" class="form-select select2 @error('gender') is-invalid @enderror" required>
                   <option value="">-- Select --</option>
-                  <option value="Male"   {{ $g === 'Male' ? 'selected' : '' }}>Male</option>
+                  <option value="Male" {{ $g === 'Male' ? 'selected' : '' }}>Male</option>
                   <option value="Female" {{ $g === 'Female' ? 'selected' : '' }}>Female</option>
-                  <option value="Other"  {{ $g === 'Other' ? 'selected' : '' }}>Other</option>
+                  <option value="Other" {{ $g === 'Other' ? 'selected' : '' }}>Other</option>
                 </select>
                 @error('gender') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
               </td>
@@ -263,7 +325,7 @@
                 <select name="blood_group" class="form-control select2 @error('blood_group') is-invalid @enderror">
                   <option value="">-- Select Blood Group --</option>
                   @foreach(['A+','A-','B+','B-','AB+','AB-','O+','O-'] as $bg)
-                    <option value="{{ $bg }}" {{ old('blood_group')===$bg ? 'selected' : '' }}>{{ $bg }}</option>
+                    <option value="{{ $bg }}" {{ old('blood_group') === $bg ? 'selected' : '' }}>{{ $bg }}</option>
                   @endforeach
                 </select>
                 @error('blood_group') <div style="color:red;margin-top:6px;">{{ $message }}</div> @enderror
@@ -283,7 +345,6 @@
                     </option>
                   @endforeach
                 </select>
-
                 <button type="button" class="btn btn-success btn-sm" id="btnAddDistrict">+</button>
               </td>
             </tr>
@@ -332,12 +393,12 @@
                 @php($rt = old('reference_type'))
                 <select name="reference_type" id="reference_type" class="form-control">
                   <option value="">-- Select Type --</option>
-                  <option value="Self"          {{ $rt==='Self' ? 'selected':'' }}>Self</option>
-                  <option value="OfficeEmployee"{{ $rt==='OfficeEmployee' ? 'selected':'' }}>Office Employee</option>
-                  <option value="PCNurse"       {{ $rt==='PCNurse' ? 'selected':'' }}>PC / Nurse</option>
-                  <option value="MidWife"       {{ $rt==='MidWife' ? 'selected':'' }}>Mid Wife</option>
-                  <option value="NOCOM"         {{ $rt==='NOCOM' ? 'selected':'' }}>No Commission</option>
-                  <option value="Others"        {{ $rt==='Others' ? 'selected':'' }}>Others</option>
+                  <option value="Self" {{ $rt==='Self' ? 'selected':'' }}>Self</option>
+                  <option value="OfficeEmployee" {{ $rt==='OfficeEmployee' ? 'selected':'' }}>Office Employee</option>
+                  <option value="PCNurse" {{ $rt==='PCNurse' ? 'selected':'' }}>PC / Nurse</option>
+                  <option value="MidWife" {{ $rt==='MidWife' ? 'selected':'' }}>Mid Wife</option>
+                  <option value="NOCOM" {{ $rt==='NOCOM' ? 'selected':'' }}>No Commission</option>
+                  <option value="Others" {{ $rt==='Others' ? 'selected':'' }}>Others</option>
                 </select>
 
                 <button type="button" class="btn btn-success btn-sm" id="btnAddRef" title="Add Reference Person">+</button>
@@ -389,12 +450,10 @@
 @stop
 
 @push('js')
-{{-- Select2 CDN --}}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-  // ✅ old values for dependent selects (validation fail restore)
   const OLD_DISTRICT = @json(old('district'));
   const OLD_UPOZILA  = @json(old('upozila'));
   const OLD_UNION    = @json(old('union'));
@@ -408,10 +467,8 @@
 $(function () {
   const CSRF = "{{ csrf_token() }}";
 
-  // ✅ init select2
   $(".select2").select2();
 
-  // ======================= Address cascade (HTML <option> response) =======================
   function resetUpozila(){
     $("#upozila").prop('disabled', true).html('<option value="">-- Select Upozila --</option>').trigger('change.select2');
     $("#btnAddUpozila").prop('disabled', true);
@@ -482,7 +539,6 @@ $(function () {
     });
   }
 
-  // user change events
   $("#district").on("change", function(){
     loadUpozila(this.value, null);
   });
@@ -493,7 +549,6 @@ $(function () {
     loadVillage(this.value, null);
   });
 
-  // ✅ restore chain after validation fail
   if (OLD_DISTRICT) {
     loadUpozila(OLD_DISTRICT, OLD_UPOZILA, function(){
       loadUnion(OLD_UPOZILA, OLD_UNION, function(){
@@ -504,7 +559,6 @@ $(function () {
     resetUpozila();
   }
 
-  // ======================= Reference type/person (HTML <option> response) =======================
   function showRefUI(type){
     $("#personRow").hide();
     $("#manualRow").hide();
@@ -537,14 +591,12 @@ $(function () {
     loadReferencePersons(type);
   });
 
-  // ✅ restore reference after validation fail
   if (OLD_REF_TYPE) {
     $("#reference_type").val(OLD_REF_TYPE);
     showRefUI(OLD_REF_TYPE);
     loadReferencePersons(OLD_REF_TYPE, OLD_REF_PERSON);
   }
 
-  // + open modal
   $("#btnAddRef").on("click", function(){
     const currentType = $("#reference_type").val();
 
@@ -557,7 +609,6 @@ $(function () {
     $("#refModal").modal('show');
   });
 
-  // save reference from modal
   $("#btnSaveRef").on("click", function(){
     const ref_type = $("#ref_type_modal").val();
     const name     = $("#ref_name_modal").val();
@@ -587,7 +638,6 @@ $(function () {
     });
   });
 
-  // ======================= Location Add (+ district/upozila/union/village) =======================
   function openLocModal(kind){
     $("#loc_kind").val(kind);
     $("#loc_name").val('');
@@ -608,7 +658,6 @@ $(function () {
   $("#btnAddUnion").click(()=> openLocModal('union'));
   $("#btnAddVillage").click(()=> openLocModal('village'));
 
-  // enable/disable + buttons
   $("#district").on("change", function(){
     $("#btnAddUpozila").prop('disabled', !this.value);
     $("#btnAddUnion").prop('disabled', true);
@@ -623,9 +672,7 @@ $(function () {
   });
 
   function reloadSelect(kind, parentIds, selectedId){
-    // Your fetch routes return HTML <option> list
     if(kind === 'district'){
-      // If you have api.fetch_district that returns <option> list, use it
       $.post("{{ route('api.fetch_district') }}", { _token: CSRF }, function(html){
         $("#district").html(html).trigger('change.select2');
         $("#district").val(String(selectedId)).trigger('change');
@@ -701,62 +748,142 @@ $(function () {
     });
   });
 
+ $("#dob").on("change", function () {
+    const dob = $(this).val().trim();
+    if (!dob) {
+        $("#age").val("");
+        return;
+    }
+
+    // expected format: dd-mm-yyyy
+    const parts = dob.split("-");
+    if (parts.length !== 3) {
+        $("#age").val("");
+        return;
+    }
+
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+
+    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+        $("#age").val("");
+        return;
+    }
+
+    const birthDate = new Date(year, month - 1, day);
+
+    // invalid date check
+    if (
+        birthDate.getFullYear() !== year ||
+        birthDate.getMonth() !== month - 1 ||
+        birthDate.getDate() !== day
+    ) {
+        $("#age").val("");
+        return;
+    }
+
+    const today = new Date();
+
+    let years = today.getFullYear() - year;
+    let months = today.getMonth() - (month - 1);
+    let days = today.getDate() - day;
+
+    if (days < 0) {
+        months--;
+        const prevMonthDays = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        days += prevMonthDays;
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    if (years < 0 || years > 150) {
+        $("#age").val("");
+        return;
+    }
+
+    // if same day selected, show 0 year 0 month 1 day
+    if (years === 0 && months === 0 && days === 0) {
+        days = "less than 1";
+    }
+
+    $("#age").val(years + " Years " + months + " Months " + days + " Days");
+});
+
 });
 </script>
 
 <script>
-  // DOB -> Age text
-  $(function(){
-    $("#dob").on("change", function () {
-      const dob = $(this).val();
-      if (!dob) return;
+let stream = null;
 
-      const birthDate = new Date(dob);
-      const today = new Date();
-
-      let years  = today.getFullYear() - birthDate.getFullYear();
-      let months = today.getMonth() - birthDate.getMonth();
-      let days   = today.getDate() - birthDate.getDate();
-
-      if (days < 0) {
-        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        days += prevMonth.getDate();
-        months--;
-      }
-      if (months < 0) {
-        months += 12;
-        years--;
-      }
-
-      if (years < 0 || years > 150) {
-        $("#age").val('');
-        return;
-      }
-
-      $("#age").val(years + " Years " + months + " Months " + days + " Days");
-    });
-  });
-</script>
-
-<script>
-  // Image preview
-  function previewImage(input) {
+function previewImage(input) {
     if (!input.files || !input.files[0]) return;
+
     const file = input.files[0];
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.');
-      input.value = '';
-      return;
+        alert('Please select an image file.');
+        input.value = '';
+        return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => document.getElementById('previewImg').src = e.target.result;
-    reader.readAsDataURL(file);
-  }
-</script>
 
-<script>
-  // Mobile validation (needs ids on inputs - already added)
-  document.getElementById('patientForm').addEventListener('submit', function (e) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        document.getElementById('previewImg').src = e.target.result;
+        document.getElementById('camera_image').value = '';
+    };
+    reader.readAsDataURL(file);
+}
+
+function openCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera API not supported in this browser.');
+        return;
+    }
+
+    document.getElementById('cameraBox').style.display = 'block';
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function (s) {
+            stream = s;
+            document.getElementById('camera').srcObject = stream;
+        })
+        .catch(function (err) {
+            console.log(err);
+            alert('Camera not allowed or not supported');
+        });
+}
+
+function capturePhoto() {
+    const video = document.getElementById('camera');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = canvas.toDataURL('image/png');
+
+    document.getElementById('previewImg').src = imageData;
+    document.getElementById('camera_image').value = imageData;
+    document.getElementById('photoInput').value = '';
+
+    console.log('camera_image set:', imageData.substring(0, 50));
+
+    closeCamera();
+}
+
+function closeCamera() {
+    document.getElementById('cameraBox').style.display = 'none';
+
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+}
+
+document.getElementById('patientForm').addEventListener('submit', function (e) {
     const fields = [
       { id: 'mobile_no',     name: 'Mobile No', required: true },
       { id: 'spomobile_no',  name: 'Spouse Mobile No', required: false },
@@ -768,18 +895,51 @@ $(function () {
       if (!el) continue;
 
       const val = el.value.trim();
-      
-      // Skip if empty and not required
+
       if (val === '' && !fields[i].required) continue;
 
-      // If required or has value, validate format
-      if (val !== '' && !/^[0-9]{11}$/.test(val)) {
-        alert(fields[i].name + ' must be exactly 11 digit number');
+      if (val !== '' && !/^01[0-9]{9}$/.test(val)) {
+        alert(fields[i].name + ' must start with 01 and be exactly 11 digits');
         el.focus();
         e.preventDefault();
         return false;
       }
     }
-  });
+});
+</script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+$(function () {
+    $("#dob").datepicker({
+        dateFormat: "dd-mm-yy",   // Laravel format
+        changeMonth: true,        // month dropdown
+        changeYear: true,         // year dropdown
+        yearRange: "1950:+0",     // from 1900 to current year
+        maxDate: 0                // disable future date
+    });
+});
+</script>
+
+<script>
+function formatDOB(input) {
+    let value = input.value.replace(/\D/g, ''); // only numbers
+
+    if (value.length > 8) value = value.substring(0, 8);
+
+    let formatted = '';
+
+    if (value.length > 0) {
+        formatted = value.substring(0, 2);
+    }
+    if (value.length >= 3) {
+        formatted += '-' + value.substring(2, 4);
+    }
+    if (value.length >= 5) {
+        formatted += '-' + value.substring(4, 8);
+    }
+
+    input.value = formatted;
+}
 </script>
 @endpush

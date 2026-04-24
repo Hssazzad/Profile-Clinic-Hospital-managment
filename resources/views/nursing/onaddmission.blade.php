@@ -33,7 +33,7 @@
 @endphp
 
 {{-- ══ STEP INDICATOR ══ --}}
-<div class="row mb-4">
+<div class="row mb-3">
     <div class="col-12">
         <div class="step-track-card">
             <div class="step-track-inner">
@@ -89,297 +89,315 @@
 ══════════════════════════════════════════ --}}
 <div id="panel-step1">
 
-    <div class="modern-card patient-list-card" id="patient-list-card">
-        <div class="modern-card-header">
-            <div class="modern-card-title">
-                <span class="card-title-icon bg-primary-soft"><i class="fas fa-users text-primary"></i></span>
+    {{-- ══ GOV-STYLE PANEL SHELL ══ --}}
+    <div class="gov-panel" id="patient-list-card">
+
+        {{-- Panel Title Bar --}}
+        <div class="gov-panel-titlebar">
+            <div class="gov-panel-titlebar-left">
+                <div class="gov-panel-icon"><i class="fas fa-users"></i></div>
                 <div>
-                    <h5 class="mb-0 font-weight-bold">Select Patient for Admission</h5>
-                    <small class="text-muted">Search and choose a patient to proceed</small>
+                    <div class="gov-panel-title">Patient Selection — Admission</div>
+                    <div class="gov-panel-subtitle">Search and select a patient to proceed with admission</div>
                 </div>
             </div>
-            <span class="patient-total-pill">
-                <i class="fas fa-database mr-1"></i>
-                {{ $patients->total() ?? $patients->count() }} patients
-            </span>
-        </div>
-
-        <div class="inline-search-bar" id="inline-search-bar">
-            <div class="inline-search-inner">
-                <div class="search-input-group search-input-group-inline">
-                    <span class="search-icon"><i class="fas fa-search"></i></span>
-                    <input type="text" id="patientSearch" class="search-input"
-                           placeholder="Search by name, code, or mobile number...">
-                    <button class="search-btn" type="button" onclick="filterTable()">
-                        <i class="fas fa-search mr-1"></i> Search
-                    </button>
-                </div>
+            <div class="gov-panel-titlebar-right">
+                <span class="gov-counter-badge">
+                    <i class="fas fa-database mr-1"></i>
+                    Total Records: <strong>{{ $patients->total() ?? $patients->count() }}</strong>
+                </span>
                 <a href="https://profclinic.erpbd.org/patients/newpatient"
-                   class="btn-add-new-patient" target="_blank">
-                    <i class="fas fa-user-plus mr-1"></i> New Patient
+                   class="gov-new-btn" target="_blank">
+                    <i class="fas fa-user-plus mr-1"></i> Register New Patient
                 </a>
             </div>
         </div>
 
-        <div class="modern-card-body pt-0">
-            <div class="patient-table-scroll" id="patient-table-scroll">
-                <table class="table modern-table" id="patientTable">
-                    <thead>
-                        <tr>
-                            <th style="width:46px;">#</th>
-                            <th style="width:82px;">Code</th>
-                            <th>Name</th>
-                            <th style="width:58px;">Age</th>
-                            <th style="width:52px;">Sex</th>
-                            <th style="width:128px;">Mobile</th>
-                            <th>Address</th>
-                            <th style="width:70px;">Blood</th>
-                            <th style="width:80px; text-align:center;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patientTableBody">
-                        @forelse($patients as $patient)
-                        @php
-                            $pid      = $patient->id           ?? '';
-                            $pcode    = $patient->patientcode  ?? '—';
-                            $pname    = $patient->patientname  ?? '—';
-                            $page     = $patient->age          ?? '—';
-                            $pgender  = strtolower($patient->gender ?? '');
-                            $pmobile  = $patient->mobile_no    ?? '—';
-                            $paddress = $patient->address      ?? '';
-                            $pupozila = $patient->upozila      ?? null;
-                            $pblood   = $patient->blood_group  ?? null;
-                        @endphp
-                        <tr class="patient-row">
-                            <td class="text-muted small">{{ $pid }}</td>
-                            <td><span class="patient-code-badge">{{ $pcode }}</span></td>
-                            <td>
-                                <div class="patient-name-cell">
-                                    <div class="patient-mini-avatar">{{ strtoupper(substr($pname, 0, 1)) }}</div>
-                                    <div>
-                                        <strong>{{ $pname }}</strong>
-                                        @if($patient->patientfather ?? null)
-                                            <br><small class="text-muted" style="font-size:11px;">
-                                                <i class="fas fa-user-tie fa-xs mr-1"></i>{{ $patient->patientfather }}
-                                            </small>
-                                        @endif
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="small">{{ $page }}</td>
-                            <td>
-                                @if($pgender === 'male')
-                                    <span class="gender-badge gender-male"><i class="fas fa-mars mr-1"></i>M</span>
-                                @elseif($pgender === 'female')
-                                    <span class="gender-badge gender-female"><i class="fas fa-venus mr-1"></i>F</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-monospace small">{{ $pmobile }}</td>
-                            <td class="text-muted small">{{ $paddress }}{{ $pupozila ? ', '.$pupozila : '' }}</td>
-                            <td>
-                                @if($pblood)
-                                    <span class="blood-badge">{{ $pblood }}</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <button type="button"
-                                    class="btn-select-patient"
-                                    onclick="selectPatient(this)"
-                                    data-id="{{ $pid }}"
-                                    data-name="{{ $pname }}"
-                                    data-age="{{ $page }}"
-                                    data-code="{{ $pcode }}"
-                                    data-mobile="{{ $pmobile }}"
-                                    data-address="{{ $paddress }}"
-                                    data-upozila="{{ $pupozila }}"
-                                    data-blood="{{ $pblood }}"
-                                    data-gender="{{ $patient->gender ?? '' }}">
-                                    <i class="fas fa-arrow-right"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="9">
-                                <div class="empty-state">
-                                    <i class="fas fa-user-slash"></i>
-                                    <p>No patients found.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if(method_exists($patients, 'links'))
-            <div class="pagination-bar">
-                <small class="text-muted">
-                    <i class="fas fa-list-ul mr-1"></i>
-                    Showing {{ $patients->firstItem() ?? 0 }}–{{ $patients->lastItem() ?? 0 }}
-                    of <strong>{{ $patients->total() ?? 0 }}</strong> patients
-                </small>
-                {{ $patients->links('pagination::bootstrap-4') }}
-            </div>
-            @endif
-        </div>
-
-        <div class="modern-card-footer">
-            <small class="text-muted">
-                <i class="fas fa-info-circle mr-1 text-primary"></i>
-                Click <i class="fas fa-arrow-right" style="font-size:10px;"></i> on a patient row to proceed.
-            </small>
-            <a href="https://profclinic.erpbd.org/patients/newpatient"
-               class="btn-add-new-patient-sm" target="_blank">
-                <i class="fas fa-user-plus mr-1"></i> Add New Patient
-            </a>
-        </div>
-    </div>
-
-    {{-- ══ PAST NURSING PRESCRIPTIONS LIST ══ --}}
-    <div class="modern-card past-rx-card mt-2" id="past-rx-card">
-        <div class="modern-card-header">
-            <div class="modern-card-title">
-                <span class="card-title-icon bg-teal-soft">
-                    <i class="fas fa-history" style="color:#00796B;"></i>
-                </span>
-                <div>
-                    <h5 class="mb-0 font-weight-bold">Past Nursing Prescriptions</h5>
-                    <small class="text-muted">All previously saved on-admission prescriptions</small>
+        {{-- Search Toolbar --}}
+        <div class="gov-toolbar" id="inline-search-bar">
+            <div class="gov-toolbar-inner">
+                <div class="gov-toolbar-label">
+                    <i class="fas fa-search mr-1"></i> SEARCH FILTER
+                </div>
+                <div class="gov-search-group">
+                    <input type="text" id="patientSearch" class="gov-search-input"
+                           placeholder="Search by Name / Patient Code / Mobile Number…"
+                           onkeyup="filterTable()">
+                    <button class="gov-search-btn" type="button" onclick="filterTable()">
+                        <i class="fas fa-search mr-1"></i> Search
+                    </button>
+                    <button class="gov-clear-btn" type="button" onclick="document.getElementById('patientSearch').value='';filterTable();">
+                        <i class="fas fa-times mr-1"></i> Clear
+                    </button>
+                </div>
+                <div class="gov-toolbar-hint">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Press <kbd>Enter</kbd> or click Search to filter
                 </div>
             </div>
-            <span class="patient-total-pill" style="background:#E0F2F1;color:#00695C;">
-                <i class="fas fa-file-medical mr-1"></i>
-                {{ $NursingPatients->total() ?? $NursingPatients->count() }} records
-            </span>
         </div>
 
-        <div class="inline-search-bar" style="border-bottom-color:#B2DFDB;">
-            <div class="inline-search-inner">
-                <div class="search-input-group search-input-group-inline" style="flex:1;">
-                    <span class="search-icon"><i class="fas fa-search"></i></span>
-                    <input type="text" id="nursingRxSearch" class="search-input"
-                           placeholder="Search by name, code or mobile..."
+        {{-- Data Table --}}
+        <div class="gov-table-wrap">
+            <table class="gov-table" id="patientTable">
+                <thead>
+                    <tr>
+                        <th class="gov-th" style="width:46px;">SL#</th>
+                        <th class="gov-th" style="width:90px;">Pt. Code</th>
+                        <th class="gov-th">Patient Name</th>
+                        <th class="gov-th" style="width:52px;">Age</th>
+                        <th class="gov-th" style="width:50px;">Sex</th>
+                        <th class="gov-th" style="width:128px;">Mobile</th>
+                        <th class="gov-th">Address / Upazila</th>
+                        <th class="gov-th" style="width:62px;">Blood</th>
+                        <th class="gov-th gov-th-action" style="width:76px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="patientTableBody">
+                    @forelse($patients as $patient)
+                    @php
+                        $pid      = $patient->id           ?? '';
+                        $pcode    = $patient->patientcode  ?? '—';
+                        $pname    = $patient->patientname  ?? '—';
+                        $page     = $patient->age          ?? '—';
+                        $pgender  = strtolower($patient->gender ?? '');
+                        $pmobile  = $patient->mobile_no    ?? '—';
+                        $paddress = $patient->address      ?? '';
+                        $pupozila = $patient->upozila      ?? null;
+                        $pblood   = $patient->blood_group  ?? null;
+                    @endphp
+                    <tr class="gov-tr patient-row">
+                        <td class="gov-td gov-td-sl">{{ $pid }}</td>
+                        <td class="gov-td">
+                            <span class="gov-code-badge">{{ $pcode }}</span>
+                        </td>
+                        <td class="gov-td">
+                            <div class="gov-name-cell">
+                                <div class="gov-avatar">{{ strtoupper(substr($pname, 0, 1)) }}</div>
+                                <div class="gov-name-info">
+                                    <span class="gov-name-text">{{ $pname }}</span>
+                                    @if($patient->patientfather ?? null)
+                                        <span class="gov-father-text">
+                                            <i class="fas fa-user-tie fa-xs mr-1"></i>{{ $patient->patientfather }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td class="gov-td gov-td-center">{{ $page }}</td>
+                        <td class="gov-td gov-td-center">
+                            @if($pgender === 'male')
+                                <span class="gov-gender gov-gender-m">M</span>
+                            @elseif($pgender === 'female')
+                                <span class="gov-gender gov-gender-f">F</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-mono">{{ $pmobile }}</td>
+                        <td class="gov-td gov-td-muted">
+                            {{ $paddress }}{{ $pupozila ? ', '.$pupozila : '' }}
+                        </td>
+                        <td class="gov-td gov-td-center">
+                            @if($pblood)
+                                <span class="gov-blood-badge">{{ $pblood }}</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-action">
+                            <button type="button"
+                                class="gov-select-btn"
+                                onclick="selectPatient(this)"
+                                data-id="{{ $pid }}"
+                                data-name="{{ $pname }}"
+                                data-age="{{ $page }}"
+                                data-code="{{ $pcode }}"
+                                data-mobile="{{ $pmobile }}"
+                                data-address="{{ $paddress }}"
+                                data-upozila="{{ $pupozila }}"
+                                data-blood="{{ $pblood }}"
+                                data-gender="{{ $patient->gender ?? '' }}"
+                                title="Select this patient">
+                                <i class="fas fa-arrow-right mr-1"></i> Select
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="9">
+                            <div class="gov-empty-state">
+                                <i class="fas fa-user-slash"></i>
+                                <p>No patient records found.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- Pagination Footer --}}
+        @if(method_exists($patients, 'links'))
+        <div class="gov-panel-footer">
+            <div class="gov-footer-info">
+                <i class="fas fa-list-ul mr-1"></i>
+                Showing <strong>{{ $patients->firstItem() ?? 0 }}</strong>
+                to <strong>{{ $patients->lastItem() ?? 0 }}</strong>
+                of <strong>{{ $patients->total() ?? 0 }}</strong> records
+            </div>
+            <div class="gov-pagination-wrap">
+                {{ $patients->links('pagination::bootstrap-4') }}
+            </div>
+            <div class="gov-footer-hint">
+                <i class="fas fa-hand-pointer mr-1"></i>
+                Click <strong>Select</strong> to proceed with admission
+            </div>
+        </div>
+        @endif
+    </div>
+
+    {{-- ══ PAST NURSING PRESCRIPTIONS ══ --}}
+    <div class="gov-panel gov-panel-teal mt-3" id="past-rx-card">
+
+        <div class="gov-panel-titlebar gov-panel-titlebar-teal">
+            <div class="gov-panel-titlebar-left">
+                <div class="gov-panel-icon gov-panel-icon-teal"><i class="fas fa-history"></i></div>
+                <div>
+                    <div class="gov-panel-title">Past On-Admission Prescriptions</div>
+                    <div class="gov-panel-subtitle">Previously saved admission prescription records</div>
+                </div>
+            </div>
+            <div class="gov-panel-titlebar-right">
+                <span class="gov-counter-badge gov-counter-badge-teal">
+                    <i class="fas fa-file-medical mr-1"></i>
+                    Total Records: <strong>{{ $NursingPatients->total() ?? $NursingPatients->count() }}</strong>
+                </span>
+            </div>
+        </div>
+
+        {{-- Search Toolbar --}}
+        <div class="gov-toolbar gov-toolbar-teal">
+            <div class="gov-toolbar-inner">
+                <div class="gov-toolbar-label gov-toolbar-label-teal">
+                    <i class="fas fa-search mr-1"></i> SEARCH FILTER
+                </div>
+                <div class="gov-search-group">
+                    <input type="text" id="nursingRxSearch" class="gov-search-input gov-search-input-teal"
+                           placeholder="Search by Name / Code / Mobile…"
                            onkeyup="filterNursingRxTable()">
-                    <button class="search-btn" type="button"
-                            onclick="filterNursingRxTable()"
-                            style="background:#00796B;">
+                    <button class="gov-search-btn gov-search-btn-teal" type="button" onclick="filterNursingRxTable()">
                         <i class="fas fa-search mr-1"></i> Search
+                    </button>
+                    <button class="gov-clear-btn" type="button" onclick="document.getElementById('nursingRxSearch').value='';filterNursingRxTable();">
+                        <i class="fas fa-times mr-1"></i> Clear
                     </button>
                 </div>
             </div>
         </div>
 
-        <div class="modern-card-body pt-0">
-            <div class="patient-table-scroll">
-                <table class="table modern-table" id="nursingRxTable">
-                    <thead>
-                        <tr>
-                            <th style="width:46px;">#</th>
-                            <th style="width:82px;">Rx ID</th>
-                            <th>Patient Name</th>
-                            <th style="width:58px;">Age</th>
-                            <th style="width:52px;">Sex</th>
-                            <th style="width:128px;">Mobile</th>
-                            <th style="width:115px;">Admission Date</th>
-                            <th style="width:70px;">Blood</th>
-                            <th style="width:110px; text-align:center;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="nursingRxTableBody">
-                        @forelse($NursingPatients as $np)
-                        @php
-                            $npAdmId   = $np->admission_id   ?? $np->id ?? '';
-                            $npCode    = $np->p_code          ?? $np->patient_code ?? '—';
-                            $npName    = $np->patient_name    ?? '—';
-                            $npAge     = $np->patient_age     ?? '—';
-                            $npGender  = strtolower($np->gender ?? '');
-                            $npMobile  = $np->mobile_no       ?? '—';
-                            $npBlood   = $np->blood_group     ?? null;
-                            $npAdmDate = $np->admission_date  ?? $np->created_at ?? '';
-                        @endphp
-                        <tr class="nursing-rx-row">
-                            <td class="text-muted small">{{ $loop->iteration }}</td>
-                            <td>
-                                <span class="patient-code-badge" style="background:#E0F2F1;color:#00695C;">
-                                    #{{ $npAdmId }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="patient-name-cell">
-                                    <div class="patient-mini-avatar"
-                                         style="background:linear-gradient(135deg,#00796B,#26A69A);">
-                                        {{ strtoupper(substr($npName, 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <strong>{{ $npName }}</strong>
-                                        <br>
-                                        <small class="text-muted" style="font-size:11px;">{{ $npCode }}</small>
-                                    </div>
+        {{-- Data Table --}}
+        <div class="gov-table-wrap">
+            <table class="gov-table" id="nursingRxTable">
+                <thead>
+                    <tr>
+                        <th class="gov-th" style="width:46px;">SL#</th>
+                        <th class="gov-th" style="width:80px;">Rx ID</th>
+                        <th class="gov-th">Patient Name</th>
+                        <th class="gov-th" style="width:52px;">Age</th>
+                        <th class="gov-th" style="width:50px;">Sex</th>
+                        <th class="gov-th" style="width:128px;">Mobile</th>
+                        <th class="gov-th" style="width:120px;">Admission Date</th>
+                        <th class="gov-th" style="width:62px;">Blood</th>
+                        <th class="gov-th gov-th-action" style="width:90px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="nursingRxTableBody">
+                    @forelse($NursingPatients as $np)
+                    @php
+                        $npAdmId   = $np->admission_id   ?? $np->id ?? '';
+                        $npCode    = $np->p_code          ?? $np->patient_code ?? '—';
+                        $npName    = $np->patient_name    ?? '—';
+                        $npAge     = $np->patient_age     ?? '—';
+                        $npGender  = strtolower($np->gender ?? '');
+                        $npMobile  = $np->mobile_no       ?? '—';
+                        $npBlood   = $np->blood_group     ?? null;
+                        $npAdmDate = $np->admission_date  ?? $np->created_at ?? '';
+                    @endphp
+                    <tr class="gov-tr nursing-rx-row">
+                        <td class="gov-td gov-td-sl">{{ $loop->iteration }}</td>
+                        <td class="gov-td">
+                            <span class="gov-code-badge gov-code-badge-teal">#{{ $npAdmId }}</span>
+                        </td>
+                        <td class="gov-td">
+                            <div class="gov-name-cell">
+                                <div class="gov-avatar gov-avatar-teal">{{ strtoupper(substr($npName, 0, 1)) }}</div>
+                                <div class="gov-name-info">
+                                    <span class="gov-name-text">{{ $npName }}</span>
+                                    <span class="gov-father-text">{{ $npCode }}</span>
                                 </div>
-                            </td>
-                            <td class="small">{{ $npAge }}</td>
-                            <td>
-                                @if($npGender === 'male')
-                                    <span class="gender-badge gender-male"><i class="fas fa-mars mr-1"></i>M</span>
-                                @elseif($npGender === 'female')
-                                    <span class="gender-badge gender-female"><i class="fas fa-venus mr-1"></i>F</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-monospace small">{{ $npMobile }}</td>
-                            <td class="small text-muted">
-                                @if($npAdmDate)
-                                    {{ \Carbon\Carbon::parse($npAdmDate)->format('d/m/Y') }}
-                                    <br>
-                                    <span style="font-size:10px;">{{ \Carbon\Carbon::parse($npAdmDate)->diffForHumans() }}</span>
-                                @else —
-                                @endif
-                            </td>
-                            <td>
-                                @if($npBlood)
-                                    <span class="blood-badge">{{ $npBlood }}</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <button type="button" class="btn-view-rx"
-                                    onclick="viewPrescription({{ $npAdmId }})">
-                                    <i class="fas fa-eye mr-1"></i> View Rx
-                                </button>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="9">
-                                <div class="empty-state">
-                                    <i class="fas fa-file-medical-alt"></i>
-                                    <p>No past prescriptions found.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </td>
+                        <td class="gov-td gov-td-center">{{ $npAge }}</td>
+                        <td class="gov-td gov-td-center">
+                            @if($npGender === 'male')
+                                <span class="gov-gender gov-gender-m">M</span>
+                            @elseif($npGender === 'female')
+                                <span class="gov-gender gov-gender-f">F</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-mono">{{ $npMobile }}</td>
+                        <td class="gov-td">
+                            @if($npAdmDate)
+                                <span class="gov-date-text">{{ \Carbon\Carbon::parse($npAdmDate)->format('d/m/Y') }}</span>
+                                <span class="gov-date-ago">{{ \Carbon\Carbon::parse($npAdmDate)->diffForHumans() }}</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-center">
+                            @if($npBlood)
+                                <span class="gov-blood-badge">{{ $npBlood }}</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-action">
+                            <button type="button" class="gov-view-btn"
+                                onclick="viewPrescription({{ $npAdmId }})">
+                                <i class="fas fa-eye mr-1"></i> View Rx
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="9">
+                            <div class="gov-empty-state">
+                                <i class="fas fa-file-medical-alt"></i>
+                                <p>No past prescription records found.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-            @if(method_exists($NursingPatients, 'links'))
-            <div class="pagination-bar">
-                <small class="text-muted">
-                    <i class="fas fa-list-ul mr-1"></i>
-                    Showing {{ $NursingPatients->firstItem() ?? 0 }}–{{ $NursingPatients->lastItem() ?? 0 }}
-                    of <strong>{{ $NursingPatients->total() ?? 0 }}</strong> records
-                </small>
+        @if(method_exists($NursingPatients, 'links'))
+        <div class="gov-panel-footer">
+            <div class="gov-footer-info">
+                <i class="fas fa-list-ul mr-1"></i>
+                Showing <strong>{{ $NursingPatients->firstItem() ?? 0 }}</strong>
+                to <strong>{{ $NursingPatients->lastItem() ?? 0 }}</strong>
+                of <strong>{{ $NursingPatients->total() ?? 0 }}</strong> records
+            </div>
+            <div class="gov-pagination-wrap">
                 {{ $NursingPatients->links('pagination::bootstrap-4') }}
             </div>
-            @endif
         </div>
+        @endif
     </div>
 
 </div>{{-- /#panel-step1 --}}
@@ -757,7 +775,6 @@
                 </span>
             </div>
             <div class="modern-card-body p-0">
-                {{-- THIS IS THE PRINT AREA FOR MAIN RX --}}
                 <div id="prescription-print-area">
                     <div class="rx-wrapper">
                         <div class="rx-header">
@@ -827,7 +844,6 @@
                         <div class="rx-notes"><p><span id="rx-notes">—</span></p></div>
                     </div>
                 </div>
-                {{-- END PRINT AREA --}}
             </div>
             <div class="modern-card-footer">
                 <small class="text-muted">
@@ -850,18 +866,13 @@
 
 </div>{{-- /#panel-step2 --}}
 
-{{-- ══════════════════════════════════════════
-     PRESCRIPTION VIEW MODAL (Past Rx)
-══════════════════════════════════════════ --}}
+{{-- ══ PRESCRIPTION VIEW MODAL (Past Rx) ══ --}}
 <div class="modal fade" id="rxViewModal" tabindex="-1" role="dialog" aria-labelledby="rxViewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
         <div class="modal-content rx-modal-content">
-
             <div class="modal-header rx-modal-header">
                 <div class="d-flex align-items-center">
-                    <div class="rx-modal-icon mr-3">
-                        <i class="fas fa-file-medical"></i>
-                    </div>
+                    <div class="rx-modal-icon mr-3"><i class="fas fa-file-medical"></i></div>
                     <div>
                         <h5 class="modal-title mb-0 font-weight-bold text-white" id="rxViewModalLabel">
                             On Admission Prescription
@@ -878,57 +889,35 @@
                     </button>
                 </div>
             </div>
-
             <div class="modal-body p-0">
-
                 <div id="modal-loading" class="modal-state-wrap">
-                    <div class="modal-spinner-icon">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </div>
+                    <div class="modal-spinner-icon"><i class="fas fa-spinner fa-spin"></i></div>
                     <p class="modal-state-text">Loading prescription...</p>
                 </div>
-
                 <div id="modal-error" class="modal-state-wrap d-none">
-                    <div class="modal-error-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
+                    <div class="modal-error-icon"><i class="fas fa-exclamation-triangle"></i></div>
                     <p class="modal-state-text" id="modal-error-msg">Failed to load prescription.</p>
                     <button type="button" class="btn btn-sm btn-outline-secondary mt-2" data-dismiss="modal">Close</button>
                 </div>
-
                 <div id="modal-rx-area" class="d-none">
                     <div class="modal-summary-bar">
                         <div class="modal-summary-item msi-blue">
                             <i class="fas fa-user"></i>
-                            <div>
-                                <div class="msi-label">Patient</div>
-                                <div class="msi-val" id="m-ib-name">—</div>
-                            </div>
+                            <div><div class="msi-label">Patient</div><div class="msi-val" id="m-ib-name">—</div></div>
                         </div>
                         <div class="modal-summary-item msi-green">
                             <i class="fas fa-birthday-cake"></i>
-                            <div>
-                                <div class="msi-label">Age</div>
-                                <div class="msi-val" id="m-ib-age">—</div>
-                            </div>
+                            <div><div class="msi-label">Age</div><div class="msi-val" id="m-ib-age">—</div></div>
                         </div>
                         <div class="modal-summary-item msi-orange">
                             <i class="fas fa-calendar-alt"></i>
-                            <div>
-                                <div class="msi-label">Admission</div>
-                                <div class="msi-val" id="m-ib-admission">—</div>
-                            </div>
+                            <div><div class="msi-label">Admission</div><div class="msi-val" id="m-ib-admission">—</div></div>
                         </div>
                         <div class="modal-summary-item msi-teal">
                             <i class="fas fa-hashtag"></i>
-                            <div>
-                                <div class="msi-label">Rx ID</div>
-                                <div class="msi-val" id="m-ib-id">—</div>
-                            </div>
+                            <div><div class="msi-label">Rx ID</div><div class="msi-val" id="m-ib-id">—</div></div>
                         </div>
                     </div>
-
-                    {{-- THIS IS THE PRINT AREA FOR MODAL RX --}}
                     <div id="modal-prescription-print-area" style="padding:20px 24px;">
                         <div class="rx-wrapper">
                             <div class="rx-header">
@@ -998,12 +987,8 @@
                             <div class="rx-notes"><p><span id="m-rx-notes">—</span></p></div>
                         </div>
                     </div>
-                    {{-- END MODAL PRINT AREA --}}
-
-                </div>{{-- /#modal-rx-area --}}
-
-            </div>{{-- /modal-body --}}
-
+                </div>
+            </div>
             <div class="modal-footer rx-modal-footer">
                 <small class="text-muted">
                     <i class="fas fa-clock mr-1"></i>
@@ -1013,12 +998,10 @@
                     <i class="fas fa-times mr-1"></i> Close
                 </button>
             </div>
-
         </div>
     </div>
 </div>
 
-{{-- ══ SINGLE PRINT OVERLAY — do NOT duplicate this anywhere ══ --}}
 <div id="print-overlay"></div>
 
 @stop
@@ -1026,27 +1009,43 @@
 @section('css')
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════ ROOT ═══════════════════════ */
+/* ═══════════════════════════════════════════
+   ROOT VARIABLES
+═══════════════════════════════════════════ */
 :root {
     --blue-deep:  #1565C0; --blue-mid: #1976D2; --blue-light: #E3F2FD; --blue-soft: #BBDEFB;
     --green-deep: #2E7D32; --green-mid: #43A047; --green-light: #E8F5E9;
-    --teal-deep:  #00695C; --teal-mid: #00796B; --teal-light: #E0F2F1;
+    --teal-deep:  #00695C; --teal-mid: #00796B; --teal-light: #E0F2F1; --teal-soft: #B2DFDB;
     --orange:     #E65100; --pink: #C2185B;
     --text-primary: #1a2332; --text-muted: #6b7a90; --border: #e4e9f0;
     --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
     --shadow-sm: 0 1px 4px rgba(0,0,0,.06); --shadow-md: 0 4px 16px rgba(0,0,0,.08);
     --font-base: 'DM Sans','Hind Siliguri',Arial,sans-serif;
-}
-body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-base); }
 
-/* ═══════════════════════ PAGE HEADER ═══════════════════════ */
+    /* Gov palette */
+    --gov-bg:       #f2f4f7;
+    --gov-header:   #1a3a5c;
+    --gov-header2:  #1e4976;
+    --gov-accent:   #c9972a;
+    --gov-border:   #c8cdd6;
+    --gov-row-odd:  #ffffff;
+    --gov-row-even: #f6f8fb;
+    --gov-row-hover:#e8f0fb;
+    --gov-text:     #1c2b3a;
+    --gov-muted:    #6b7890;
+    --gov-teal-hdr: #0d4a42;
+    --gov-teal-hdr2:#105c54;
+}
+body,.content-wrapper { background:var(--gov-bg) !important; font-family:var(--font-base); }
+
+/* ═══════════════════════════════════════════
+   PAGE HEADER & STEP TRACK (unchanged)
+═══════════════════════════════════════════ */
 .page-main-title { font-size:22px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:10px; }
 .page-title-icon { width:38px;height:38px;border-radius:10px;background:var(--blue-light);display:inline-flex;align-items:center;justify-content:center;color:var(--blue-deep);font-size:17px; }
-.btn-back-modern { background:#fff;border:1.5px solid var(--border);color:var(--text-primary);border-radius:var(--radius-sm);font-weight:500;padding:6px 14px;font-size:13px;transition:all .2s; }
+.btn-back-modern { background:#fff;border:1.5px solid var(--border);color:var(--text-primary);border-radius:var(--radius-sm);font-weight:500;padding:6px 14px;font-size:13px;transition:all .2s;text-decoration:none; }
 .btn-back-modern:hover { background:var(--blue-light);border-color:var(--blue-mid);color:var(--blue-deep); }
-
-/* ═══════════════════════ STEP TRACK ═══════════════════════ */
-.step-track-card { background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:16px 24px; }
+.step-track-card { background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:14px 24px; }
 .step-track-inner { display:flex;align-items:center; }
 .step-item { display:flex;align-items:center; }
 .step-text { margin-left:10px; }
@@ -1061,7 +1060,9 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .step-connector-line { flex:1;max-width:140px;height:3px;background:#e8ecf0;margin:0 18px;border-radius:2px;transition:background .4s; }
 .step-connector-line.done { background:var(--green-deep); }
 
-/* ═══════════════════════ FIXED SEARCH BAR ═══════════════════════ */
+/* ═══════════════════════════════════════════
+   FIXED SEARCH BAR (unchanged)
+═══════════════════════════════════════════ */
 .fixed-search-bar { position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,#1565C0 0%,#1a78d8 100%);box-shadow:0 4px 24px rgba(21,101,192,.35);transform:translateY(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s;opacity:0;pointer-events:none; }
 .fixed-search-bar.visible { transform:translateY(0);opacity:1;pointer-events:all; }
 .fixed-search-inner { display:flex;align-items:center;gap:16px;padding:10px 20px;flex-wrap:wrap; }
@@ -1071,8 +1072,6 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .fixed-search-field { flex:1;min-width:240px; }
 .fixed-search-meta { flex-shrink:0; }
 .fsc-count-pill { background:rgba(255,255,255,.18);color:#fff;border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:600;white-space:nowrap; }
-
-/* ═══════════════════════ SEARCH INPUT GROUPS ═══════════════════════ */
 .search-input-group { display:flex;align-items:center;background:#fff;border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;box-shadow:var(--shadow-sm); }
 .search-input-group:focus-within { border-color:var(--blue-mid);box-shadow:0 0 0 3px rgba(25,118,210,.1); }
 .search-input-group-fixed { border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12); }
@@ -1087,60 +1086,293 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .search-btn { background:var(--blue-deep);color:#fff;border:none;padding:10px 22px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .2s; }
 .search-btn:hover { background:var(--blue-mid); }
 
-/* ═══════════════════════ INLINE SEARCH BAR ═══════════════════════ */
-.inline-search-bar { padding:14px 24px;background:#fafbff;border-bottom:2px solid var(--blue-soft); }
-.inline-search-inner { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
-.search-input-group-inline { flex:1;min-width:260px; }
-.btn-add-new-patient { background:var(--green-light);color:var(--green-deep);border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:9px 18px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap;transition:all .2s; }
-.btn-add-new-patient:hover { background:var(--green-deep);color:#fff;border-color:var(--green-deep); }
-.btn-add-new-patient-sm { font-size:12px;background:var(--green-light);color:var(--green-deep);border:1.5px solid #a5d6a7;border-radius:var(--radius-sm);padding:5px 12px;text-decoration:none;display:inline-flex;align-items:center;transition:all .2s; }
-.btn-add-new-patient-sm:hover { background:var(--green-deep);color:#fff; }
+/* ═══════════════════════════════════════════
+   GOV PANEL — MAIN SHELL
+═══════════════════════════════════════════ */
+.gov-panel {
+    background:#fff;
+    border:1px solid var(--gov-border);
+    border-top:3px solid var(--gov-header);
+    border-radius:0 0 4px 4px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    margin-bottom:16px;
+    overflow:hidden;
+}
+.gov-panel-teal {
+    border-top-color: var(--gov-teal-hdr);
+}
 
-/* ═══════════════════════ MODERN CARD ═══════════════════════ */
+/* Title bar */
+.gov-panel-titlebar {
+    background:linear-gradient(90deg, var(--gov-header) 0%, var(--gov-header2) 100%);
+    padding:10px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:2px solid var(--gov-accent);
+}
+.gov-panel-titlebar-teal {
+    background:linear-gradient(90deg, var(--gov-teal-hdr) 0%, var(--gov-teal-hdr2) 100%);
+    border-bottom-color:#4db6ac;
+}
+.gov-panel-titlebar-left { display:flex;align-items:center;gap:10px; }
+.gov-panel-titlebar-right { display:flex;align-items:center;gap:10px; }
+.gov-panel-icon {
+    width:34px;height:34px;border-radius:4px;
+    background:rgba(255,255,255,.15);
+    color:#fff;font-size:15px;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    border:1px solid rgba(255,255,255,.2);
+}
+.gov-panel-icon-teal { background:rgba(255,255,255,.12); }
+.gov-panel-title { font-size:14px;font-weight:700;color:#fff;line-height:1.2;letter-spacing:.2px; }
+.gov-panel-subtitle { font-size:11px;color:rgba(255,255,255,.7);margin-top:1px; }
+
+.gov-counter-badge {
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:3px;
+    padding:4px 12px;
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+}
+.gov-counter-badge-teal { background:rgba(255,255,255,.12); }
+.gov-new-btn {
+    background:var(--gov-accent);
+    color:#fff;
+    border:none;
+    border-radius:3px;
+    padding:6px 14px;
+    font-size:12px;
+    font-weight:700;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    transition:all .2s;
+    letter-spacing:.2px;
+    white-space:nowrap;
+}
+.gov-new-btn:hover { background:#b8841f;color:#fff;text-decoration:none; }
+
+/* Toolbar */
+.gov-toolbar {
+    background:#f0f3f8;
+    border-bottom:1.5px solid var(--gov-border);
+    padding:8px 16px;
+}
+.gov-toolbar-teal { background:#f0f6f5; }
+.gov-toolbar-inner { display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+.gov-toolbar-label {
+    font-size:11px;font-weight:800;
+    color:var(--gov-header);
+    text-transform:uppercase;
+    letter-spacing:.8px;
+    white-space:nowrap;
+    flex-shrink:0;
+}
+.gov-toolbar-label-teal { color:var(--gov-teal-hdr); }
+.gov-toolbar-hint { font-size:11px;color:var(--gov-muted);white-space:nowrap; }
+.gov-toolbar-hint kbd {
+    background:#fff;
+    border:1px solid var(--gov-border);
+    border-radius:3px;
+    padding:1px 5px;
+    font-size:10px;
+    color:var(--gov-header);
+}
+.gov-search-group { display:flex;align-items:center;gap:4px;flex:1;min-width:260px; }
+.gov-search-input {
+    flex:1;
+    border:1.5px solid var(--gov-border);
+    border-radius:3px;
+    padding:6px 10px;
+    font-size:13px;
+    color:var(--gov-text);
+    background:#fff;
+    outline:none;
+    transition:border-color .2s;
+    font-family:var(--font-base);
+    height:32px;
+}
+.gov-search-input:focus { border-color:var(--blue-mid);box-shadow:0 0 0 2px rgba(25,118,210,.12); }
+.gov-search-input-teal:focus { border-color:var(--teal-mid); }
+.gov-search-btn {
+    border:none;border-radius:3px;padding:0 14px;
+    height:32px;font-size:12px;font-weight:700;
+    cursor:pointer;transition:background .2s;
+    background:var(--gov-header);color:#fff;
+    display:inline-flex;align-items:center;
+    white-space:nowrap;letter-spacing:.2px;
+}
+.gov-search-btn:hover { background:var(--blue-mid); }
+.gov-search-btn-teal { background:var(--gov-teal-hdr); }
+.gov-search-btn-teal:hover { background:var(--teal-mid); }
+.gov-clear-btn {
+    border:1.5px solid var(--gov-border);border-radius:3px;
+    padding:0 10px;height:32px;font-size:12px;font-weight:600;
+    cursor:pointer;transition:all .2s;
+    background:#fff;color:var(--gov-muted);
+    display:inline-flex;align-items:center;
+    white-space:nowrap;
+}
+.gov-clear-btn:hover { background:#ffebee;color:#c62828;border-color:#ffcdd2; }
+
+/* Data Table */
+.gov-table-wrap { overflow-x:auto; }
+.gov-table {
+    border-collapse:collapse;
+    width:100%;
+    font-size:12.5px;
+}
+.gov-th {
+    background:#e8ecf4;
+    color:var(--gov-header);
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    padding:8px 10px;
+    border-bottom:2px solid var(--gov-border);
+    border-right:1px solid #d0d5df;
+    white-space:nowrap;
+    position:sticky;
+    top:0;
+    z-index:5;
+}
+.gov-th:last-child { border-right:none; }
+.gov-th-action { text-align:center; }
+.gov-tr { transition:background .12s; }
+.gov-tr:nth-child(odd)  { background:var(--gov-row-odd); }
+.gov-tr:nth-child(even) { background:var(--gov-row-even); }
+.gov-tr:hover { background:var(--gov-row-hover) !important; }
+.gov-td {
+    padding:7px 10px;
+    border-bottom:1px solid #eaedf2;
+    border-right:1px solid #f0f2f6;
+    vertical-align:middle;
+    color:var(--gov-text);
+}
+.gov-td:last-child { border-right:none; }
+.gov-td-sl     { color:var(--gov-muted);font-size:11.5px;text-align:center; }
+.gov-td-center { text-align:center; }
+.gov-td-mono   { font-family:'Courier New',monospace;font-size:12px;letter-spacing:.3px; }
+.gov-td-muted  { color:var(--gov-muted);font-size:12px; }
+.gov-td-action { text-align:center; }
+
+/* Name cell */
+.gov-name-cell  { display:flex;align-items:center;gap:7px; }
+.gov-avatar {
+    width:26px;height:26px;border-radius:3px;
+    background:var(--gov-header);color:#fff;
+    font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    letter-spacing:0;
+}
+.gov-avatar-teal { background:var(--gov-teal-hdr); }
+.gov-name-info  { display:flex;flex-direction:column;gap:1px; }
+.gov-name-text  { font-weight:600;font-size:13px;color:var(--gov-text);line-height:1.2; }
+.gov-father-text{ font-size:10.5px;color:var(--gov-muted); }
+
+/* Badges */
+.gov-code-badge {
+    background:#e8ecf4;color:var(--gov-header);
+    border:1px solid #c8cdd6;border-radius:2px;
+    padding:1px 7px;font-size:11.5px;font-weight:700;
+    font-family:'Courier New',monospace;letter-spacing:.3px;
+}
+.gov-code-badge-teal { background:#e0f2f1;color:var(--teal-deep);border-color:var(--teal-soft); }
+.gov-gender {
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800;
+}
+.gov-gender-m { background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd; }
+.gov-gender-f { background:#fce7f3;color:#be185d;border:1px solid #f9a8d4; }
+.gov-blood-badge {
+    background:#fee2e2;color:#991b1b;
+    border:1px solid #fca5a5;border-radius:2px;
+    padding:1px 7px;font-size:11.5px;font-weight:700;
+}
+.gov-muted { color:var(--gov-muted);font-size:12px; }
+.gov-date-text { display:block;font-size:12.5px;font-weight:600;color:var(--gov-text); }
+.gov-date-ago  { display:block;font-size:10.5px;color:var(--gov-muted); }
+
+/* Action buttons */
+.gov-select-btn {
+    background:var(--gov-header);
+    color:#fff;
+    border:none;
+    border-radius:3px;
+    padding:5px 12px;
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .18s;
+    display:inline-flex;
+    align-items:center;
+    letter-spacing:.2px;
+    white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.gov-select-btn:hover { background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 3px 8px rgba(21,101,192,.3); }
+.gov-view-btn {
+    background:var(--gov-teal-hdr);
+    color:#fff;
+    border:none;
+    border-radius:3px;
+    padding:5px 11px;
+    font-size:11.5px;
+    font-weight:700;
+    cursor:pointer;
+    transition:all .18s;
+    display:inline-flex;
+    align-items:center;
+    white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.gov-view-btn:hover { background:var(--teal-mid);transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,105,92,.3); }
+
+/* Panel footer */
+.gov-panel-footer {
+    background:#f0f3f8;
+    border-top:1.5px solid var(--gov-border);
+    padding:8px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+}
+.gov-footer-info { font-size:12px;color:var(--gov-muted); }
+.gov-footer-hint { font-size:11.5px;color:var(--gov-muted); }
+.gov-pagination-wrap .pagination { margin:0; }
+.gov-pagination-wrap .page-link { border-radius:2px !important;border-color:var(--gov-border);color:var(--gov-header);font-size:12px;padding:3px 9px; }
+.gov-pagination-wrap .page-item.active .page-link { background:var(--gov-header);border-color:var(--gov-header); }
+
+/* Empty state */
+.gov-empty-state { text-align:center;padding:32px;color:#90a4b7; }
+.gov-empty-state i { font-size:28px;margin-bottom:8px;display:block; }
+.gov-empty-state p { font-size:13px;margin:0; }
+
+/* ═══════════════════════════════════════════
+   STEP 2 & FORM ELEMENTS (fully preserved)
+═══════════════════════════════════════════ */
 .modern-card { background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);border:1px solid var(--border);overflow:hidden;margin-bottom:24px; }
 .modern-card-header { padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafbfd; }
 .modern-card-title { display:flex;align-items:center;gap:12px; }
 .card-title-icon { width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
-.bg-primary-soft { background:var(--blue-light); }
 .bg-info-soft    { background:#E1F5FE; }
 .bg-success-soft { background:var(--green-light); }
 .bg-teal-soft    { background:var(--teal-light); }
 .modern-card-body   { padding:24px; }
 .modern-card-footer { padding:14px 24px;border-top:1px solid var(--border);background:#fafbfd;display:flex;align-items:center;justify-content:space-between; }
-.patient-total-pill { background:var(--blue-light);color:var(--blue-deep);border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:600; }
 .modern-alert { border-radius:var(--radius-md);border:none;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-sm); }
 
-/* ═══════════════════════ PATIENT TABLE ═══════════════════════ */
-.patient-table-scroll { overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 340px); }
-.modern-table { border-collapse:separate;border-spacing:0;width:100%; }
-.modern-table thead tr th { background:#f0f4fa;color:var(--text-primary);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:11px 14px;border-bottom:2px solid var(--border);white-space:nowrap;position:sticky;top:0;z-index:10; }
-.modern-table tbody tr { transition:background .15s; }
-.modern-table tbody tr:hover { background:#f0f6ff; }
-.modern-table tbody td { padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-primary);vertical-align:middle; }
-.patient-code-badge { background:#eef2fb;color:var(--blue-deep);border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;font-family:monospace; }
-.patient-name-cell { display:flex;align-items:center;gap:8px; }
-.patient-mini-avatar { width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue-deep),#42a5f5);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.gender-badge { display:inline-flex;align-items:center;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700; }
-.gender-male   { background:#e3f2fd;color:var(--blue-deep); }
-.gender-female { background:#fce4ec;color:var(--pink); }
-.blood-badge { background:#ffebee;color:#c62828;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700; }
-.btn-select-patient { background:var(--blue-deep);color:#fff;border:none;border-radius:var(--radius-sm);width:34px;height:34px;font-size:13px;cursor:pointer;transition:all .2s;box-shadow:0 2px 6px rgba(21,101,192,.22);display:inline-flex;align-items:center;justify-content:center; }
-.btn-select-patient:hover { background:var(--blue-mid);transform:translateY(-1px);box-shadow:0 4px 12px rgba(21,101,192,.28); }
-.empty-state { text-align:center;padding:40px;color:#b0bec5; }
-.empty-state i { font-size:36px;margin-bottom:10px;display:block; }
-.empty-state p { font-size:14px;margin:0; }
-.pagination-bar { display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1.5px solid var(--border);flex-wrap:wrap;gap:8px; }
-.pagination { margin-bottom:0; }
-.page-link { border-radius:var(--radius-sm) !important;border-color:var(--border);color:var(--blue-deep);font-size:13px; }
-.page-item.active .page-link { background:var(--blue-deep);border-color:var(--blue-deep); }
-
-/* ═══════════════════════ PAST RX LIST ═══════════════════════ */
-.past-rx-card { border-top:3px solid var(--teal-mid); }
-.nursing-rx-row:hover { background:#f0faf9 !important; }
-.btn-view-rx { background:linear-gradient(135deg,var(--teal-mid),#26A69A);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;box-shadow:0 2px 6px rgba(0,121,107,.22); }
-.btn-view-rx:hover { background:linear-gradient(135deg,var(--teal-deep),var(--teal-mid));transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,121,107,.32); }
-
-/* ═══════════════════════ STEP 2 ELEMENTS ═══════════════════════ */
 .patient-selected-bar { background:linear-gradient(135deg,#1565C0 0%,#1E88E5 100%);border-radius:var(--radius-md);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;box-shadow:0 4px 18px rgba(21,101,192,.22); }
 .psb-left { display:flex;align-items:center;gap:14px; }
 .psb-avatar { width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.22);border:2.5px solid rgba(255,255,255,.55);color:#fff;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -1233,6 +1465,7 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .btn-footer-back:hover { background:#f0f4f8;color:var(--text-primary); }
 .btn-footer-save { background:linear-gradient(135deg,#2E7D32,#43A047);color:#fff;border:none;border-radius:var(--radius-sm);padding:11px 28px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(46,125,50,.3);transition:all .2s;display:inline-flex;align-items:center;gap:7px; }
 .btn-footer-save:hover { background:linear-gradient(135deg,#1B5E20,#2E7D32);transform:translateY(-1px);color:#fff; }
+
 .rx-summary-card { border-radius:var(--radius-md);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm);height:100%; }
 .rx-card-blue   { background:linear-gradient(135deg,#1565C0,#1E88E5); }
 .rx-card-green  { background:linear-gradient(135deg,#2E7D32,#43A047); }
@@ -1250,7 +1483,9 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .btn-rx-new   { background:#f0f4f8;color:var(--text-primary);border-color:var(--border); }
 .btn-rx-new:hover { background:#e8ecf2; }
 
-/* ═══════════════════════ RX PRINT LAYOUT ═══════════════════════ */
+/* ═══════════════════════════════════════════
+   RX PRINT LAYOUT (unchanged)
+═══════════════════════════════════════════ */
 #prescription-print-area { padding:24px;background:#fff; }
 .rx-wrapper { width:100%;max-width:800px;margin:0 auto;background:#fff;border:1px solid #d4d4d4;padding:26px 32px;font-family:'Hind Siliguri',Arial,sans-serif; }
 .rx-header { display:flex;align-items:center;justify-content:center;gap:18px;border-bottom:2.5px solid #1a237e;padding-bottom:12px;margin-bottom:6px; }
@@ -1278,7 +1513,9 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .rx-baby-note { margin-top:10px;border-top:1px solid #444;padding-top:7px; }
 .rx-notes { margin-top:10px;font-size:12px;line-height:1.9;color:#222; }
 
-/* ═══════════════════════ RX MODAL ═══════════════════════ */
+/* ═══════════════════════════════════════════
+   RX MODAL (unchanged)
+═══════════════════════════════════════════ */
 .rx-modal-content { border:none;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.18); }
 .rx-modal-header { background:linear-gradient(135deg,#1565C0 0%,#1E88E5 100%);border:none;padding:18px 22px;display:flex;align-items:center;justify-content:space-between; }
 .rx-modal-icon { width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
@@ -1288,8 +1525,6 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .btn-rx-modal-close { background:rgba(255,255,255,.15);border:none;color:rgba(255,255,255,.85);width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s; }
 .btn-rx-modal-close:hover { background:rgba(255,255,255,.28);color:#fff; }
 .rx-modal-footer { background:#fafbfd;border-top:1px solid var(--border);padding:12px 22px;display:flex;align-items:center;justify-content:space-between; }
-
-/* Modal summary bar */
 .modal-summary-bar { display:flex;gap:0;border-bottom:1px solid var(--border); }
 .modal-summary-item { flex:1;padding:14px 18px;display:flex;align-items:center;gap:10px;border-right:1px solid var(--border); }
 .modal-summary-item:last-child { border-right:none; }
@@ -1304,77 +1539,22 @@ body,.content-wrapper { background:#f0f4f8 !important; font-family:var(--font-ba
 .msi-teal  > i { color:var(--teal-mid); }
 .msi-label { font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted); }
 .msi-val   { font-size:13px;font-weight:700;color:var(--text-primary);margin-top:1px; }
-
-/* Modal loading/error states */
 .modal-state-wrap { text-align:center;padding:50px 20px;color:#90A4AE; }
 .modal-spinner-icon { font-size:34px;margin-bottom:12px;color:var(--blue-mid); }
 .modal-error-icon { font-size:36px;margin-bottom:10px;color:#ef5350; }
 .modal-state-text { font-size:14px;margin:0; }
 
-/* ═══════════════════════════════════════════════════════════════
-   PRINT — FIXED
-   Uses visibility toggling (NOT display:block on *) so that
-   flex, inline, li, span layouts inside the rx-wrapper are
-   preserved exactly as they appear on screen.
-═══════════════════════════════════════════════════════════════ */
-#print-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; min-height: 100%;
-    background: #fff;
-    z-index: 9999999;
-    padding: 10mm 12mm;
-    box-sizing: border-box;
-}
-
+/* ═══════════════════════════════════════════
+   PRINT (unchanged)
+═══════════════════════════════════════════ */
+#print-overlay { display:none;position:fixed;top:0;left:0;width:100%;min-height:100%;background:#fff;z-index:9999999;padding:10mm 12mm;box-sizing:border-box; }
 @media print {
-    /* 1. Hide all page content via visibility (preserves layout tree) */
-    body * {
-        visibility: hidden;
-    }
-
-    /* 2. Show only the print overlay and everything inside it */
-    #print-overlay,
-    #print-overlay * {
-        visibility: visible !important;
-    }
-
-    /* 3. Make sure overlay is shown and full-page */
-    #print-overlay {
-        display: block !important;
-        position: fixed !important;
-        top: 0 !important; left: 0 !important;
-        width: 100% !important;
-        background: #fff !important;
-        padding: 10mm 12mm !important;
-        box-sizing: border-box !important;
-    }
-
-    /* 4. rx-wrapper fills page cleanly */
-    #print-overlay .rx-wrapper {
-        border: 1px solid #d4d4d4 !important;
-        max-width: 100% !important;
-        padding: 20px 26px !important;
-        margin: 0 !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
-    }
-
-    /* 5. Hide summary cards / modal chrome that may be cloned */
-    #print-overlay .modern-card-header,
-    #print-overlay .modern-card-footer,
-    #print-overlay .rx-summary-card,
-    #print-overlay .modal-summary-bar,
-    #print-overlay .modal-summary-item {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    @page {
-        size: A4 portrait;
-        margin: 0;
-    }
+    body * { visibility:hidden; }
+    #print-overlay, #print-overlay * { visibility:visible !important; }
+    #print-overlay { display:block !important;position:fixed !important;top:0 !important;left:0 !important;width:100% !important;background:#fff !important;padding:10mm 12mm !important;box-sizing:border-box !important; }
+    #print-overlay .rx-wrapper { border:1px solid #d4d4d4 !important;max-width:100% !important;padding:20px 26px !important;margin:0 !important;box-shadow:none !important;page-break-inside:avoid; }
+    #print-overlay .modern-card-header,#print-overlay .modern-card-footer,#print-overlay .rx-summary-card,#print-overlay .modal-summary-bar,#print-overlay .modal-summary-item { display:none !important;visibility:hidden !important; }
+    @page { size:A4 portrait;margin:0; }
 }
 </style>
 @stop
@@ -1386,9 +1566,7 @@ var STORE_URL  = '{{ url("/nursing/admission/store") }}';
 var TPL_URL    = '{{ url("/nursing/admission/apply-template") }}';
 var DETAIL_URL = '{{ url("/nursing/admission/detail") }}';
 
-/* ═══════════════════════════════════════════════════
-   FIXED SEARCH BAR
-═══════════════════════════════════════════════════ */
+/* ═══ FIXED SEARCH BAR ═══ */
 (function initFixedBar() {
     var bar        = document.getElementById('fixed-search-bar');
     var inlineBar  = document.getElementById('inline-search-bar');
@@ -1396,7 +1574,6 @@ var DETAIL_URL = '{{ url("/nursing/admission/detail") }}';
     var inlineInput= document.getElementById('patientSearch');
     if (!bar || !inlineBar) return;
     bar.style.display = '';
-
     function getSidebarWidth() {
         var sb = document.querySelector('.main-sidebar');
         if (!sb) return 0;
@@ -1428,9 +1605,7 @@ var DETAIL_URL = '{{ url("/nursing/admission/detail") }}';
     });
 })();
 
-/* ═══════════════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════════════ */
+/* ═══ HELPERS ═══ */
 function todayISO() { return new Date().toISOString().split('T')[0]; }
 function fmtDateBD(iso) {
     if (!iso) return '—';
@@ -1450,8 +1625,7 @@ function setText(id,txt) { var e=document.getElementById(id); if(e) e.textConten
 function showAlert(type,msg) {
     var el=document.getElementById('save-alert');
     el.className='alert alert-'+type+' modern-alert';
-    el.innerHTML=msg;
-    el.classList.remove('d-none');
+    el.innerHTML=msg; el.classList.remove('d-none');
     window.scrollTo({top:0,behavior:'smooth'});
     setTimeout(function(){el.classList.add('d-none');},6000);
 }
@@ -1459,77 +1633,39 @@ function esc(v){
     return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-/* ═══════════════════════════════════════════════════
-   PRINT FUNCTIONS — FIXED
-   Strategy: clone only the .rx-wrapper element (the actual
-   prescription content) into #print-overlay. This avoids
-   cloning card headers, modal chrome, etc.
-   Uses visibility toggling so flex/inline/list layouts
-   inside the prescription render identically on paper.
-═══════════════════════════════════════════════════ */
+/* ═══ PRINT ═══ */
 function _doPrint(sourceId) {
     var source  = document.getElementById(sourceId);
     var overlay = document.getElementById('print-overlay');
-
-    if (!source || !overlay) {
-        window.print();
-        return;
-    }
-
-    // Find the inner .rx-wrapper to clone only the prescription content
+    if (!source || !overlay) { window.print(); return; }
     var rxWrapper = source.querySelector('.rx-wrapper');
     var toClone   = rxWrapper || source;
-
-    // Clear overlay and inject clone
     overlay.innerHTML = '';
     overlay.appendChild(toClone.cloneNode(true));
     overlay.style.display = 'block';
-
-    // Double rAF ensures browser paints before print dialog opens
     requestAnimationFrame(function() {
         requestAnimationFrame(function() {
             window.print();
-            // Clean up after print dialog closes
-            // 'focus' fires when the print dialog is dismissed
             var cleanup = function() {
-                overlay.style.display = 'none';
-                overlay.innerHTML = '';
+                overlay.style.display = 'none'; overlay.innerHTML = '';
                 window.removeEventListener('focus', cleanup);
             };
             window.addEventListener('focus', cleanup);
-            // Safety fallback: clean up after 60s regardless
-            setTimeout(function() {
-                overlay.style.display = 'none';
-                overlay.innerHTML = '';
-                window.removeEventListener('focus', cleanup);
-            }, 60000);
+            setTimeout(function() { overlay.style.display='none'; overlay.innerHTML=''; window.removeEventListener('focus',cleanup); }, 60000);
         });
     });
 }
+function printRx()    { _doPrint('prescription-print-area'); }
+function printModal() { _doPrint('modal-prescription-print-area'); }
 
-/* Print main prescription (after Save & Generate) */
-function printRx() {
-    _doPrint('prescription-print-area');
-}
-
-/* Print past prescription from modal */
-function printModal() {
-    _doPrint('modal-prescription-print-area');
-}
-
-/* ═══════════════════════════════════════════════════
-   BABY SECTION TOGGLE
-═══════════════════════════════════════════════════ */
+/* ═══ BABY SECTION ═══ */
 function toggleBabySection(){
     document.getElementById('baby-section-body').classList.toggle('open');
     document.getElementById('baby-chevron').classList.toggle('open');
 }
 
-/* ═══════════════════════════════════════════════════
-   MEDICINE STATE
-═══════════════════════════════════════════════════ */
+/* ═══ MEDICINE STATE ═══ */
 var selectedMeds = [];
-
 function refreshSelTable(){
     var tbody  = document.getElementById('sel-med-tbody');
     var badge1 = document.getElementById('sel-med-badge');
@@ -1594,9 +1730,7 @@ function quickAdd(btn){
     onAvailMedChange(cb);
 }
 
-/* ═══════════════════════════════════════════════════
-   DOM READY
-═══════════════════════════════════════════════════ */
+/* ═══ DOM READY ═══ */
 document.addEventListener('DOMContentLoaded', function(){
     var mf = document.getElementById('med-filter');
     if(mf) mf.addEventListener('input', function(){
@@ -1616,9 +1750,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if(ps) ps.addEventListener('keyup', filterTable);
 });
 
-/* ═══════════════════════════════════════════════════
-   PAST RX TABLE FILTER
-═══════════════════════════════════════════════════ */
+/* ═══ PAST RX TABLE FILTER ═══ */
 function filterNursingRxTable(){
     var q = (document.getElementById('nursingRxSearch').value||'').toLowerCase();
     document.querySelectorAll('#nursingRxTable tbody tr.nursing-rx-row').forEach(function(row){
@@ -1626,63 +1758,36 @@ function filterNursingRxTable(){
     });
 }
 
-/* ═══════════════════════════════════════════════════
-   LOAD TEMPLATE
-═══════════════════════════════════════════════════ */
+/* ═══ LOAD TEMPLATE ═══ */
 function loadTemplate(){
     var id = document.getElementById('f-template-select').value;
     if (!id) { showAlert('warning','Please select a template first.'); return; }
-
     document.getElementById('tpl-loading').classList.remove('d-none');
     document.getElementById('btn-load-tpl').disabled = true;
     $.ajax({
-        url: TPL_URL,
-        method: 'POST',
+        url: TPL_URL, method: 'POST',
         data: {_token: CSRF, template_id: id},
         dataType: 'json',
     }).done(function(res){
-        if (!res.success) {
-            showAlert('danger', res.message || 'Failed to load template');
-            return;
-        }
-
+        if (!res.success) { showAlert('danger', res.message || 'Failed to load template'); return; }
         selectedMeds = [];
         document.querySelectorAll('.avail-med-cb').forEach(function(cb){cb.checked=false;});
         var meds = res.medicines || [];
-
-        if (!meds.length) {
-            refreshSelTable();
-            showAlert('warning', 'Template loaded but no medicines found.');
-            return;
-        }
-
+        if (!meds.length) { refreshSelTable(); showAlert('warning', 'Template loaded but no medicines found.'); return; }
         meds.forEach(function(m){
             var mName = (m.medicine_name || '').trim();
             if (!mName) return;
-            selectedMeds.push({
-                medicine_name: mName,
-                dose:      m.dose      || '',
-                route:     m.route     || '',
-                frequency: m.frequency || '',
-                duration:  m.duration  || '',
-                timing:    m.timing    || '',
-                remarks:   m.remarks   || ''
-            });
+            selectedMeds.push({ medicine_name:mName, dose:m.dose||'', route:m.route||'', frequency:m.frequency||'', duration:m.duration||'', timing:m.timing||'', remarks:m.remarks||'' });
             document.querySelectorAll('.avail-med-cb').forEach(function(cb){
                 if ((cb.dataset.name || '').toLowerCase() === mName.toLowerCase()) cb.checked = true;
             });
         });
-
         var sel = document.getElementById('f-template-select');
         var tplName = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : 'Template';
         var badge = document.getElementById('tpl-status-badge');
-        if (badge) {
-            badge.classList.add('loaded');
-            badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>' + tplName;
-        }
+        if (badge) { badge.classList.add('loaded'); badge.innerHTML = '<i class="fas fa-check-circle mr-1"></i>' + tplName; }
         refreshSelTable();
         showAlert('success', '<i class="fas fa-check-circle mr-1"></i> Template loaded: <strong>' + meds.length + ' medicine(s)</strong> added.');
-
     }).fail(function(xhr){
         showAlert('danger', 'Error: HTTP ' + xhr.status + ' — ' + (xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : xhr.responseText.substring(0, 200)));
     }).always(function(){
@@ -1691,9 +1796,7 @@ function loadTemplate(){
     });
 }
 
-/* ═══════════════════════════════════════════════════
-   STEP NAVIGATION
-═══════════════════════════════════════════════════ */
+/* ═══ STEP NAVIGATION ═══ */
 function selectPatient(btn){
     var d = btn.dataset;
     document.getElementById('f-patient-id').value     = d.id    ||'';
@@ -1702,29 +1805,24 @@ function selectPatient(btn){
     document.getElementById('f-patient-age').value    = d.age   ||'';
     document.getElementById('f-date').value            = todayISO();
     document.getElementById('f-admission-date').value  = todayISO();
-
     document.getElementById('spb-avatar').textContent  = (d.name||'P').charAt(0).toUpperCase();
     document.getElementById('spb-name').textContent    = d.name||'—';
     document.getElementById('spb-meta').textContent    = [d.code,d.age,d.mobile,d.blood,d.upozila].filter(Boolean).join(' · ');
-
     document.getElementById('step1-circle').className = 'step-circle step-done';
     document.getElementById('step1-circle').innerHTML = '<i class="fas fa-check" style="font-size:11px;"></i>';
     document.getElementById('step-connector').classList.add('done');
     document.getElementById('step2-circle').className = 'step-circle step-active';
     document.getElementById('step2-label').className  = 'step-label-main step-label-active';
     document.getElementById('breadcrumb-current').textContent = 'Prescription';
-
     document.getElementById('panel-step1').style.display  = 'none';
     document.getElementById('panel-step2').style.display  = 'block';
     document.getElementById('rx-view').style.display      = 'none';
     document.getElementById('rx-form-card').style.display = 'block';
     document.getElementById('fixed-search-bar').classList.remove('visible');
-
     selectedMeds = [];
     refreshSelTable();
     window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function backToStep1(){
     document.getElementById('step1-circle').className   = 'step-circle step-active';
     document.getElementById('step1-circle').textContent = '1';
@@ -1736,15 +1834,12 @@ function backToStep1(){
     document.getElementById('panel-step2').style.display = 'none';
     window.scrollTo({top:0,behavior:'smooth'});
 }
-
 function editRx(){
     document.getElementById('rx-view').style.display      = 'none';
     document.getElementById('rx-form-card').style.display = 'block';
 }
 
-/* ═══════════════════════════════════════════════════
-   TABLE FILTER (Step 1 patient list)
-═══════════════════════════════════════════════════ */
+/* ═══ TABLE FILTER ═══ */
 function filterTable(){
     var q = document.getElementById('patientSearch').value.toLowerCase();
     document.getElementById('patientSearchFixed').value = q;
@@ -1761,9 +1856,7 @@ function _doFilter(q){
     });
 }
 
-/* ═══════════════════════════════════════════════════
-   SAVE & GENERATE (Step 2)
-═══════════════════════════════════════════════════ */
+/* ═══ SAVE & GENERATE ═══ */
 function saveAndGenerate(){
     var patientId = gVal('f-patient-id');
     if (!patientId) { showAlert('warning','No patient selected!'); return; }
@@ -1795,7 +1888,6 @@ function saveAndGenerate(){
         btn.innerHTML = '<i class="fas fa-save mr-1"></i> Save &amp; Generate Prescription';
     });
 }
-
 function generateRxView(admissionId){
     setText('ib-name',     gVal('f-patient-name'));
     setText('ib-age',      gVal('f-patient-age'));
@@ -1813,7 +1905,6 @@ function generateRxView(admissionId){
     setText('rx-baby-weight',    gVal('f-baby-weight'));
     setText('rx-baby-time',      fmtTime(gVal('f-baby-time')));
     setText('rx-notes',          gVal('f-notes'));
-
     var ul = document.getElementById('rx-medicine-list');
     ul.querySelectorAll('li[data-med]').forEach(function(li){li.remove();});
     selectedMeds.filter(function(m){return m.medicine_name.trim();}).forEach(function(m){
@@ -1823,61 +1914,46 @@ function generateRxView(admissionId){
             m.duration?'× '+m.duration:'',m.timing?'('+m.timing+')':''].filter(Boolean).join('  ');
         ul.appendChild(li);
     });
-
     setText('gen-time', new Date().toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}));
     document.getElementById('rx-form-card').style.display = 'none';
     document.getElementById('rx-view').style.display      = 'block';
     window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ═══════════════════════════════════════════════════
-   VIEW PAST PRESCRIPTION MODAL
-═══════════════════════════════════════════════════ */
+/* ═══ VIEW PAST PRESCRIPTION MODAL ═══ */
 function viewPrescription(admissionId){
     document.getElementById('modal-loading').classList.remove('d-none');
     document.getElementById('modal-error').classList.add('d-none');
     document.getElementById('modal-rx-area').classList.add('d-none');
     document.getElementById('modal-subtitle').textContent = 'Loading...';
-
     $('#rxViewModal').modal('show');
-
     $.ajax({
         url: DETAIL_URL + '/' + admissionId,
-        method: 'GET',
-        dataType: 'json',
+        method: 'GET', dataType: 'json',
     }).done(function(res){
-        if (!res.success || !res.data) {
-            showModalError(res.message || 'Record not found.');
-            return;
-        }
+        if (!res.success || !res.data) { showModalError(res.message || 'Record not found.'); return; }
         populateModal(res.data);
     }).fail(function(xhr){
         showModalError('Failed to load prescription (HTTP ' + xhr.status + ')');
     });
 }
-
 function showModalError(msg){
     document.getElementById('modal-loading').classList.add('d-none');
     document.getElementById('modal-error').classList.remove('d-none');
     document.getElementById('modal-error-msg').textContent = msg;
 }
-
 function populateModal(d){
     document.getElementById('modal-subtitle').textContent =
         (d.patient_name||'—') + '  ·  ' + (d.p_code || d.patient_code || '—');
-
     setText('m-ib-name',      d.patient_name);
     setText('m-ib-age',       d.patient_age);
     setText('m-ib-admission', fmtDateBD(d.admission_date || d.rx_date));
     setText('m-ib-id',        '#' + d.id);
-
     setText('m-rx-name', d.patient_name);
     setText('m-rx-age',  d.patient_age);
     setText('m-rx-date', fmtDateBD(d.rx_date || d.admission_date));
-
     var pw = document.getElementById('m-rx-preg-weeks');
     if (pw) pw.textContent = d.pregnancy_weeks ? d.pregnancy_weeks + ' wks' : '';
-
     setText('m-rx-admission-time', fmtTime(d.admission_time));
     setText('m-rx-pulse',          d.pulse);
     setText('m-rx-bp',             d.bp);
@@ -1886,37 +1962,21 @@ function populateModal(d){
     setText('m-rx-baby-weight',    d.baby_weight);
     setText('m-rx-baby-time',      fmtTime(d.baby_time));
     setText('m-rx-notes',          d.notes);
-
     var ul = document.getElementById('m-rx-medicine-list');
     ul.querySelectorAll('li:not([data-static])').forEach(function(li){li.remove();});
-
     var meds = [];
-    if (d.medicines_decoded && Array.isArray(d.medicines_decoded)) {
-        meds = d.medicines_decoded;
-    } else if (typeof d.medicines === 'string') {
-        try { meds = JSON.parse(d.medicines); } catch(e) { meds = []; }
-    } else if (Array.isArray(d.medicines)) {
-        meds = d.medicines;
-    }
-
-    meds.filter(function(m){ return m && (m.medicine_name||'').trim(); })
-        .forEach(function(m){
-            var li = document.createElement('li');
-            li.textContent = [
-                m.medicine_name, m.dose, m.route, m.frequency,
-                m.duration ? '× '+m.duration : '',
-                m.timing   ? '('+m.timing+')' : ''
-            ].filter(Boolean).join('  ');
-            ul.appendChild(li);
-        });
-
+    if (d.medicines_decoded && Array.isArray(d.medicines_decoded)) { meds = d.medicines_decoded; }
+    else if (typeof d.medicines === 'string') { try { meds = JSON.parse(d.medicines); } catch(e) { meds = []; } }
+    else if (Array.isArray(d.medicines)) { meds = d.medicines; }
+    meds.filter(function(m){ return m && (m.medicine_name||'').trim(); }).forEach(function(m){
+        var li = document.createElement('li');
+        li.textContent = [m.medicine_name,m.dose,m.route,m.frequency,
+            m.duration?'× '+m.duration:'',m.timing?'('+m.timing+')':''].filter(Boolean).join('  ');
+        ul.appendChild(li);
+    });
     setText('m-saved-time', d.created_at
-        ? new Date(d.created_at).toLocaleString('en-BD',{
-            day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'
-          })
-        : '—'
-    );
-
+        ? new Date(d.created_at).toLocaleString('en-BD',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+        : '—');
     document.getElementById('modal-loading').classList.add('d-none');
     document.getElementById('modal-rx-area').classList.remove('d-none');
 }

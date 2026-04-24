@@ -65,18 +65,44 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/release-approval/approve', [ReleaseApprovalController::class, 'approve'])->name('nursing.release_approval.approve');
         Route::post('/release-approval/reject',  [ReleaseApprovalController::class, 'reject'])->name('nursing.release_approval.reject');
 
-        // ── Investigation Payment (X-Ray, ECG, Pathology) ───────────────────
-        // NOTE: specific sub-routes BEFORE generic /{id} to avoid conflicts
-        Route::get('/InvestigationPayment',                              [InvestigationPaymentController::class, 'index'])->name('nursing.investigation_payment');
-        Route::get('/investigationpayment',                              [InvestigationPaymentController::class, 'index']);
-        Route::post('/InvestigationPayment/store',                       [InvestigationPaymentController::class, 'store'])->name('nursing.investigation_payment.store');
-        Route::get('/InvestigationPayment/detail/{id}',                  [InvestigationPaymentController::class, 'detail'])->name('nursing.investigation_payment.detail');
+        // ── Investigation Payment ─────────────────────────────────────────────
+        // IMPORTANT: specific sub-routes MUST come BEFORE any /{id} wildcards
+        // ─────────────────────────────────────────────────────────────────────
+
+        // Main page (GET)
+        Route::get('/InvestigationPayment',  [InvestigationPaymentController::class, 'index'])->name('nursing.investigation_payment');
+        Route::get('/investigationpayment',  [InvestigationPaymentController::class, 'index']);
+
+        // Save new payment (POST)
+        Route::post('/InvestigationPayment/store', [InvestigationPaymentController::class, 'store'])->name('nursing.investigation_payment.store');
+
+        // ✅ NEW: Get all investigations from DB for frontend dropdown (was missing — caused 404)
+        Route::get('/InvestigationPayment/get-investigations', [InvestigationPaymentController::class, 'getInvestigationsFromDatabase'])->name('nursing.investigation_payment.get_investigations');
+
+        // by-admission — Blade JS loadPreviousPayments() calls this
+        // GET /nursing/InvestigationPayment/by-admission/{admissionId}
+        Route::get('/InvestigationPayment/by-admission/{admissionId}', [InvestigationPaymentController::class, 'byAdmission'])->name('nursing.investigation_payment.by_admission');
+
+        // Patient-level payment history (used by release bill)
         Route::get('/InvestigationPayment/patient-payments/{patientId}', [InvestigationPaymentController::class, 'patientPayments'])->name('nursing.investigation_payment.patient_payments');
-        Route::get('/InvestigationPayment/patient-data/{patientId}',     [InvestigationPaymentController::class, 'getPatientData'])->name('nursing.investigation_payment.patient');
-        Route::get('/InvestigationPayment/investigations/{patientId}',   [InvestigationPaymentController::class, 'getInvestigations'])->name('nursing.investigation_payment.investigations');
-        Route::post('/InvestigationPayment/record-payment',              [InvestigationPaymentController::class, 'recordPayment'])->name('nursing.investigation_payment.record');
-        Route::get('/InvestigationPayment/payment-history/{patientId}',  [InvestigationPaymentController::class, 'getPaymentHistory'])->name('nursing.investigation_payment.history');
-        Route::delete('/InvestigationPayment/delete/{id}',               [InvestigationPaymentController::class, 'destroy'])->name('nursing.investigation_payment.destroy');
+
+        // Patient admission data (old method — kept)
+        Route::get('/InvestigationPayment/patient-data/{patientId}', [InvestigationPaymentController::class, 'getPatientData'])->name('nursing.investigation_payment.patient');
+
+        // Raw investigations list for a patient (old method — kept)
+        Route::get('/InvestigationPayment/investigations/{patientId}', [InvestigationPaymentController::class, 'getInvestigations'])->name('nursing.investigation_payment.investigations');
+
+        // Record a single investigation payment against an investigation (old method — kept)
+        Route::post('/InvestigationPayment/record-payment', [InvestigationPaymentController::class, 'recordPayment'])->name('nursing.investigation_payment.record');
+
+        // Payment history for a patient (old method — kept)
+        Route::get('/InvestigationPayment/payment-history/{patientId}', [InvestigationPaymentController::class, 'getPaymentHistory'])->name('nursing.investigation_payment.history');
+
+        // Delete a payment
+        Route::delete('/InvestigationPayment/delete/{id}', [InvestigationPaymentController::class, 'destroy'])->name('nursing.investigation_payment.destroy');
+
+        // Single receipt detail — MUST be LAST to avoid swallowing sub-routes above
+        Route::get('/InvestigationPayment/detail/{id}', [InvestigationPaymentController::class, 'detail'])->name('nursing.investigation_payment.detail');
 
         // ── On Admission ─────────────────────────────────────────────────────
         Route::get('/Onaddmission',              [AdmissionController::class, 'index'])->name('nursing.on_admission');
@@ -139,24 +165,28 @@ Route::middleware(['web', 'auth'])->group(function () {
     });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // PREFIX: Nursing (PascalCase aliases)
+    // PREFIX: Nursing (PascalCase aliases — kept exactly as original)
     // ─────────────────────────────────────────────────────────────────────────
     Route::prefix('Nursing')->group(function () {
-        Route::get('/Onaddmission',      [AdmissionController::class, 'index']);
-        Route::get('/Presurgery',        [NursingController::class, 'Presurgery']);
-        Route::get('/PostSurgery',       [PostSurgeryController::class, 'index']);
+        Route::get('/Onaddmission',       [AdmissionController::class, 'index']);
+        Route::get('/Presurgery',         [NursingController::class, 'Presurgery']);
+        Route::get('/PostSurgery',        [PostSurgeryController::class, 'index']);
         Route::get('/PostSurgery/patient-admission/{patientId}', [PostSurgeryController::class, 'getPatientAdmissionData']);
-        Route::post('/PostSurgery/store',[PostSurgeryController::class, 'storePrescription']);
-        Route::get('/Fresh',             [FreshController::class, 'index']);
-        Route::post('/Fresh/store',      [FreshController::class, 'storePrescription']);
-        Route::get('/RoundPrescription', [RoundPrescriptionController::class, 'index']);
-        Route::get('/Discharge',         [DischargeController::class, 'index']);
-        Route::get('/Releasepatients',   [ReleaseController::class, 'index']);
+        Route::post('/PostSurgery/store', [PostSurgeryController::class, 'storePrescription']);
+        Route::get('/Fresh',              [FreshController::class, 'index']);
+        Route::post('/Fresh/store',       [FreshController::class, 'storePrescription']);
+        Route::get('/RoundPrescription',  [RoundPrescriptionController::class, 'index']);
+        Route::get('/Discharge',          [DischargeController::class, 'index']);
+        Route::get('/Releasepatients',    [ReleaseController::class, 'index']);
         Route::get('/ReleaseApproval',            [ReleaseApprovalController::class, 'index']);
         Route::post('/ReleaseApproval/approve',   [ReleaseApprovalController::class, 'approve']);
         Route::post('/ReleaseApproval/reject',    [ReleaseApprovalController::class, 'reject']);
         Route::get('/InvestigationPayment',       [InvestigationPaymentController::class, 'index']);
         Route::post('/InvestigationPayment/store',[InvestigationPaymentController::class, 'store']);
+        Route::get('/InvestigationPayment/get-investigations', [InvestigationPaymentController::class, 'getInvestigationsFromDatabase']); // ✅ NEW alias
+        Route::get('/InvestigationPayment/by-admission/{admissionId}', [InvestigationPaymentController::class, 'byAdmission']);
+        Route::get('/InvestigationPayment/detail/{id}',                [InvestigationPaymentController::class, 'detail']);
+        Route::delete('/InvestigationPayment/delete/{id}',             [InvestigationPaymentController::class, 'destroy']);
     });
 
 }); // end auth middleware group

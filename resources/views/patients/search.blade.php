@@ -52,14 +52,18 @@
                             <td>{{ $p->mobile_no }}</td>
                             <td>{{ $p->nid_number }}</td>
                             <td>{{ $p->age }}</td>
-                            <td>{{ optional($p->date_of_birth)->format('Y-m-d') }}</td>
+                            <td>{{ optional($p->date_of_birth)->format('d-m-Y') }}</td>
                             <td>{{ $p->gender }}</td>
-							<td>
-								<a href="{{ route('patients.editpatient', $p->id) }}"
-								   class="btn btn-sm btn-warning">
-									<i class="fa fa-edit"></i> Edit
-								</a>
-							</td>
+		<td>
+    @if(!empty($p->id))
+        <a href="{{ route('patients.editpatient', ['id' => $p->id]) }}"
+           class="btn btn-sm btn-warning">
+            <i class="fa fa-edit"></i> Edit
+        </a>
+    @else
+        <span class="text-danger">ID missing</span>
+    @endif
+</td>
                             <td class="text-right">
                                 <button type="button" class="btn btn-sm btn-primary btn-open-appointment"
                                     data-patient-id="{{ $p->id }}" data-patient-name="{{ $p->patientname }}">

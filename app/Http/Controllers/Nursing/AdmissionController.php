@@ -5,22 +5,24 @@ namespace App\Http\Controllers\Nursing;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Log;
+use App\Services\OnAdmissionMedicineService;
 
 class AdmissionController extends Controller
 {
+    protected $medicineService;
+
+    public function __construct(OnAdmissionMedicineService $medicineService)
+    {
+        $this->medicineService = $medicineService;
+    }
+
     /* ══════════════════════════════════════════
        INDEX — On Admission patient list
-       ✅ শুধু সেই patients দেখাবে যাদের
-          moved_to_postsurgery, post_surgery_done
-          বা fresh status হয়নি
     ══════════════════════════════════════════ */
     public function index(Request $request)
     {
         $search = $request->get('search', '');
 
-        // ✅ ON ADMISSION TAB: Show only patients WITHOUT any "moved_to_postsurgery" status
         $query = DB::table('patients')
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
@@ -38,8 +40,7 @@ class AdmissionController extends Controller
         }
 
         $patients = $query->orderBy('id', 'desc')->paginate(20)->withQueryString();
-        
-        // ✅ POST SURGERY TAB: Show only LATEST admission per patient with status = 'moved_to_postsurgery'
+
         $nursingQuery = DB::table('nursing_admissions')
             ->join('patients', 'nursing_admissions.patient_id', '=', 'patients.id')
             ->select(
@@ -54,29 +55,29 @@ class AdmissionController extends Controller
                 'patients.blood_group'
             )
             ->whereRaw('nursing_admissions.id IN (
-                SELECT MAX(id) 
-                FROM nursing_admissions 
+                SELECT MAX(id)
+                FROM nursing_admissions
                 GROUP BY patient_id
             )')
-            ->where('nursing_admissions.status', '=', 'moved_to_postsurgery') // ✅ FIXED: Only show moved_to_postsurgery
+            ->where('nursing_admissions.status', '=', 'moved_to_postsurgery')
             ->orderBy('nursing_admissions.created_at', 'desc');
-        
+
         $NursingPatients = $nursingQuery->paginate(20)->withQueryString();
-        
+
         $investigations = DB::table('template_investigations')->orderBy('id')->get();
-        $medicines      = DB::table('template_medicine')->where('order_type', 'admit')->orderBy('group')->get();
+        $medicines      = $this->medicineService->getAvailableMedicinesForAdmission();
         $templates      = DB::table('tbl_template')
                             ->where('status', 1)
                             ->orderBy('title')
                             ->get();
 
         return view('nursing.onaddmission', [
-            'patients'           => $patients,
-            'NursingPatients'    => $NursingPatients,
-            'search'             => $search,
-            'investigations'     => $investigations,
-            'medicines'          => $medicines,
-            'templates'          => $templates,
+            'patients'        => $patients,
+            'NursingPatients' => $NursingPatients,
+            'search'          => $search,
+            'investigations'  => $investigations,
+            'medicines'       => $medicines,
+            'templates'       => $templates,
         ]);
     }
 
@@ -101,7 +102,6 @@ class AdmissionController extends Controller
                 ->with('error', 'Patient not found.');
         }
 
-        // ✅ Fetch all patient prescriptions
         $prescriptions = DB::table('nursing_admissions')
             ->where('patient_id', $patientId)
             ->orderBy('created_at', 'desc')
@@ -114,16 +114,9 @@ class AdmissionController extends Controller
        STORE — Save prescription via AJAX
        POST /nursing/admission/store
        Returns JSON
-       ✅ Prescription save হলে automatically
-          status = 'moved_to_postsurgery' হবে
-          এবং OnAdmission list থেকে সরে যাবে
     ══════════════════════════════════════════ */
     public function store(Request $request)
     {
-        // Auto-create status column if not exists
-        $this->ensureStatusColumn();
-
-        // Basic validation
         $request->validate([
             'patient_id'     => 'required|integer',
             'admission_type' => 'nullable|string',
@@ -131,8 +124,6 @@ class AdmissionController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Insert main admission row
-            // ✅ status = 'moved_to_postsurgery' সেট করা হচ্ছে
             $admissionId = DB::table('nursing_admissions')->insertGetId([
                 'patient_id'      => $request->patient_id,
                 'patient_name'    => $request->patient_name,
@@ -140,7 +131,7 @@ class AdmissionController extends Controller
                 'patient_code'    => $request->patient_code,
                 'pulse'           => $request->pulse,
                 'bp'              => $request->bp,
-                'rx_date'         => $request->rx_date         ?: now()->toDateString(),
+                'rx_date'         => $request->rx_date        ?: now()->toDateString(),
                 'admission_date'  => $request->admission_date,
                 'admission_time'  => $request->admission_time,
                 'ot_time'         => $request->ot_time,
@@ -150,12 +141,11 @@ class AdmissionController extends Controller
                 'baby_time'       => $request->baby_time,
                 'notes'           => $request->notes,
                 'admission_type'  => $request->admission_type ?? 'on_admission',
-                'status'          => 'moved_to_postsurgery', // ✅ automatically move to Post Surgery
+                'status'          => 'moved_to_postsurgery',
                 'created_at'      => now(),
                 'updated_at'      => now(),
             ]);
 
-            // 2. Insert medicines
             $medicines = $request->input('medicines', []);
             if (!empty($medicines) && is_array($medicines)) {
                 $medRows = [];
@@ -163,13 +153,13 @@ class AdmissionController extends Controller
                     if (empty(trim($med['medicine_name'] ?? ''))) continue;
                     $medRows[] = [
                         'nursing_admission_id' => $admissionId,
-                        'medicine_name'        => $med['medicine_name']  ?? null,
-                        'dose'                 => $med['dose']           ?? null,
-                        'route'                => $med['route']          ?? null,
-                        'frequency'            => $med['frequency']      ?? null,
-                        'duration'             => $med['duration']       ?? null,
-                        'timing'               => $med['timing']         ?? null,
-                        'remarks'              => $med['remarks']        ?? null,
+                        'medicine_name'        => $med['medicine_name'] ?? null,
+                        'dose'                 => $med['dose']          ?? null,
+                        'route'                => $med['route']         ?? null,
+                        'frequency'            => $med['frequency']     ?? null,
+                        'duration'             => $med['duration']      ?? null,
+                        'timing'               => $med['timing']        ?? null,
+                        'remarks'              => $med['remarks']       ?? null,
                         'created_at'           => now(),
                         'updated_at'           => now(),
                     ];
@@ -208,7 +198,6 @@ class AdmissionController extends Controller
             ->where('nursing_admission_id', $id)
             ->get();
 
-        // ✅ Fetch all patient prescriptions
         $patientPrescriptions = DB::table('nursing_admissions')
             ->where('patient_id', $admission->patient_id)
             ->orderBy('created_at', 'desc')
@@ -218,7 +207,7 @@ class AdmissionController extends Controller
     }
 
     /* ══════════════════════════════════════════
-       DETAIL — Show admission details
+       DETAIL — Show admission details (AJAX)
        GET /admission/detail/{id}
     ══════════════════════════════════════════ */
     public function detail($id)
@@ -228,42 +217,38 @@ class AdmissionController extends Controller
             return response()->json(['success' => false, 'message' => 'Admission record not found.'], 404);
         }
 
-        $medicines = DB::table('nursing_admission_medicines')
-            ->where('nursing_admission_id', $id)
-            ->get();
-
-        // Get patient information
-        $patient = DB::table('patients')->where('id', $admission->patient_id)->first();
-
-        // Get all patient prescriptions for history
+        $medicines            = DB::table('nursing_admission_medicines')
+                                    ->where('nursing_admission_id', $id)
+                                    ->get();
+        $patient              = DB::table('patients')->where('id', $admission->patient_id)->first();
         $patientPrescriptions = DB::table('nursing_admissions')
-            ->where('patient_id', $admission->patient_id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+                                    ->where('patient_id', $admission->patient_id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
 
         return response()->json([
             'success' => true,
-            'data' => [
-                'id' => $admission->id,
-                'patient_name' => $admission->patient_name,
-                'patient_age' => $admission->patient_age,
-                'patient_code' => $admission->patient_code,
-                'p_code' => $admission->patient_code,
-                'admission_date' => $admission->admission_date,
-                'rx_date' => $admission->rx_date,
-                'admission_time' => $admission->admission_time,
-                'ot_time' => $admission->ot_time,
-                'pulse' => $admission->pulse,
-                'bp' => $admission->bp,
-                'pregnancy_weeks' => $admission->pregnancy_weeks,
-                'baby_sex' => $admission->baby_sex,
-                'baby_weight' => $admission->baby_weight,
-                'baby_time' => $admission->baby_time,
-                'notes' => $admission->notes,
-                'medicines' => $medicines,
-                'patient' => $patient,
-                'patientPrescriptions' => $patientPrescriptions
-            ]
+            'data'    => [
+                'id'               => $admission->id,
+                'patient_name'     => $admission->patient_name,
+                'patient_age'      => $admission->patient_age,
+                'patient_code'     => $admission->patient_code,
+                'p_code'           => $admission->patient_code,
+                'admission_date'   => $admission->admission_date,
+                'rx_date'          => $admission->rx_date,
+                'admission_time'   => $admission->admission_time,
+                'ot_time'          => $admission->ot_time,
+                'pulse'            => $admission->pulse,
+                'bp'               => $admission->bp,
+                'pregnancy_weeks'  => $admission->pregnancy_weeks,
+                'baby_sex'         => $admission->baby_sex,
+                'baby_weight'      => $admission->baby_weight,
+                'baby_time'        => $admission->baby_time,
+                'notes'            => $admission->notes,
+                'medicines'        => $medicines,
+                'patient'          => $patient,
+                'patientPrescriptions' => $patientPrescriptions,
+            ],
         ]);
     }
 
@@ -275,15 +260,13 @@ class AdmissionController extends Controller
         $admission = DB::table('nursing_admissions')->where('id', $id)->first();
         if (!$admission) abort(404);
 
-        $medicines = DB::table('nursing_admission_medicines')
-            ->where('nursing_admission_id', $id)
-            ->get();
-
-        // ✅ Fetch all patient prescriptions
+        $medicines            = DB::table('nursing_admission_medicines')
+                                    ->where('nursing_admission_id', $id)
+                                    ->get();
         $patientPrescriptions = DB::table('nursing_admissions')
-            ->where('patient_id', $admission->patient_id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+                                    ->where('patient_id', $admission->patient_id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
 
         return view('nursing.admission-edit', compact('admission', 'medicines', 'id', 'patientPrescriptions'));
     }
@@ -312,7 +295,6 @@ class AdmissionController extends Controller
                 'updated_at'      => now(),
             ]);
 
-            // Re-insert medicines
             DB::table('nursing_admission_medicines')
                 ->where('nursing_admission_id', $id)
                 ->delete();
@@ -342,6 +324,7 @@ class AdmissionController extends Controller
 
             DB::commit();
             return redirect()->route('nursing.index')->with('success', 'Updated successfully.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Update failed: ' . $e->getMessage());
@@ -372,23 +355,18 @@ class AdmissionController extends Controller
 
         $tplCode = $template->templateid ?? null;
 
-        $medicines      = $this->safeFetch('template_medicine',      $tplCode, 'group');
-        $investigations = $this->safeFetch('template_investigations', $tplCode, 'id');
-        $diagnoses      = $this->safeFetch('template_diagnosis',      $tplCode, 'id');
-
         return response()->json([
             'success'        => true,
             'template'       => $template,
-            'medicines'      => $medicines,
-            'investigations' => $investigations,
-            'diagnoses'      => $diagnoses,
+            'medicines'      => $this->safeFetch('template_medicine',      $tplCode, 'group'),
+            'investigations' => $this->safeFetch('template_investigations', $tplCode, 'id'),
+            'diagnoses'      => $this->safeFetch('template_diagnosis',      $tplCode, 'id'),
         ]);
     }
 
     /* ══════════════════════════════════════════
        APPLY TEMPLATE (AJAX POST)
        POST /nursing/admission/apply-template
-       ★ Used by On Admission blade to load template medicines
     ══════════════════════════════════════════ */
     public function applyTemplate(Request $request)
     {
@@ -397,7 +375,6 @@ class AdmissionController extends Controller
             return response()->json(['success' => false, 'message' => 'Template ID is required'], 422);
         }
 
-        // Find template row in tbl_template
         $template = DB::table('tbl_template')->where('ID', $templateId)->first()
                  ?? DB::table('tbl_template')->where('id', $templateId)->first()
                  ?? DB::table('tbl_template')->where('templateid', $templateId)->first();
@@ -406,58 +383,11 @@ class AdmissionController extends Controller
             return response()->json(['success' => false, 'message' => 'Template not found'], 404);
         }
 
-        $tplCode = $template->templateid;
+        $tplCode = !empty($template->templateid) ? $template->templateid : $templateId;
 
-        if (empty($tplCode)) {
-            $tplCode = $templateId;
-        }
-
-        // Fetch medicines matching on templeteid
-        $medicines = DB::table('template_medicine')
-            ->where('templeteid', $tplCode)
-            ->where('active', 1)
-            ->orderBy('group')
-            ->orderBy('name')
-            ->get();
-
-        if ($medicines->isEmpty()) {
-            $medicines = DB::table('template_medicine')
-                ->where('templeteid', $tplCode)
-                ->orderBy('group')
-                ->orderBy('name')
-                ->get();
-        }
-
-        if ($medicines->isEmpty() && $tplCode != $templateId) {
-            $medicines = DB::table('template_medicine')
-                ->where('templeteid', $templateId)
-                ->where('active', 1)
-                ->orderBy('group')
-                ->orderBy('name')
-                ->get();
-        }
-
-        // Map DB columns to the keys JS expects
-        $mappedMedicines = $medicines
-            ->map(function ($med) {
-                $mName = trim($med->name ?? '');
-                if ($mName === '') {
-                    $mName = trim($med->group ?? '');
-                }
-                if ($mName === '') return null;
-
-                return [
-                    'medicine_name' => $mName,
-                    'dose'          => $med->dose      ?? '',
-                    'route'         => $med->route     ?? '',
-                    'frequency'     => $med->frequency ?? '',
-                    'duration'      => $med->duration  ?? '',
-                    'timing'        => $med->timing    ?? '',
-                    'remarks'       => $med->note      ?? '',
-                ];
-            })
-            ->filter()
-            ->values();
+        $templateData       = $this->medicineService->applyTemplateWithCommonMedicines($tplCode);
+        $mappedMedicines    = $templateData['template_medicines'];
+        $availableMedicines = $templateData['available_medicines'];
 
         $investigations = DB::table('template_investigations')
             ->where(function ($q) use ($tplCode, $templateId) {
@@ -476,191 +406,19 @@ class AdmissionController extends Controller
             ->get();
 
         return response()->json([
-            'success'        => true,
-            'message'        => 'Template applied successfully',
-            'template'       => $template,
-            'medicines'      => $mappedMedicines,
-            'investigations' => $investigations,
-            'diagnoses'      => $diagnoses,
-            'debug_info'     => [
-                'template_id'            => $templateId,
-                'template_templateid'    => $template->templateid,
-                'tplCode_used'           => $tplCode,
-                'raw_medicines_count'    => $medicines->count(),
-                'mapped_medicines_count' => $mappedMedicines->count(),
-            ],
-        ]);
-    }
-
-    /* ══════════════════════════════════════════
-       DEBUG METHODS (TEMPORARY - Remove in production)
-    ══════════════════════════════════════════ */
-
-    /**
-     * DEBUG: Get all templates with their medicine counts
-     * GET /nursing/admission/debug/templates
-     */
-    public function debugTemplates()
-    {
-        $templates = DB::table('tbl_template')
-            ->where('status', 1)
-            ->orderBy('title')
-            ->get();
-
-        $result = [];
-        foreach ($templates as $template) {
-            $medicines = DB::table('template_medicine')
-                ->where('templeteid', $template->templateid)
-                ->get();
-
-            $result[] = [
-                'id'             => $template->ID,
-                'templateid'     => $template->templateid,
-                'title'          => $template->title,
-                'medicine_count' => $medicines->count(),
-                'medicines'      => $medicines->map(function ($m) {
-                    return [
-                        'id'         => $m->id,
-                        'name'       => $m->name,
-                        'active'     => $m->active,
-                        'templeteid' => $m->templeteid,
-                    ];
-                }),
-            ];
-        }
-
-        return response()->json([
-            'total_templates'    => $templates->count(),
-            'templates'          => $result,
-            'all_medicines_count' => DB::table('template_medicine')->count(),
-            'unique_templeteids' => DB::table('template_medicine')
-                ->select('templeteid')
-                ->distinct()
-                ->pluck('templeteid')
-                ->toArray(),
-        ]);
-    }
-
-    /**
-     * DEBUG: Get specific template details with medicines
-     * GET /nursing/admission/debug/template/{id}
-     */
-    public function debugTemplate($id)
-    {
-        $template = DB::table('tbl_template')->where('ID', $id)->first()
-                 ?? DB::table('tbl_template')->where('templateid', $id)->first();
-
-        if (!$template) {
-            return response()->json(['error' => 'Template not found with ID: ' . $id], 404);
-        }
-
-        $medicines    = DB::table('template_medicine')->where('templeteid', $template->templateid)->get();
-        $medicinesById = DB::table('template_medicine')->where('templeteid', (string) $id)->get();
-        $allMedicines = DB::table('template_medicine')->limit(10)->get();
-
-        return response()->json([
-            'debug_info' => [
-                'searched_id'      => $id,
-                'searched_id_type' => gettype($id),
-            ],
-            'template' => [
-                'ID'         => $template->ID,
-                'templateid' => $template->templateid,
-                'title'      => $template->title,
-                'status'     => $template->status,
-                'created_at' => $template->created_at,
-            ],
-            'medicines_by_templateid' => [
-                'count' => $medicines->count(),
-                'data'  => $medicines->map(function ($m) {
-                    return [
-                        'id'         => $m->id,
-                        'name'       => $m->name,
-                        'group'      => $m->group,
-                        'dose'       => $m->dose,
-                        'route'      => $m->route,
-                        'frequency'  => $m->frequency,
-                        'duration'   => $m->duration,
-                        'timing'     => $m->timing,
-                        'active'     => $m->active,
-                        'templeteid' => $m->templeteid,
-                    ];
-                }),
-            ],
-            'medicines_by_id_as_string' => [
-                'count' => $medicinesById->count(),
-                'data'  => $medicinesById->map(function ($m) {
-                    return [
-                        'id'         => $m->id,
-                        'name'       => $m->name,
-                        'templeteid' => $m->templeteid,
-                    ];
-                }),
-            ],
-            'sample_all_medicines' => $allMedicines->map(function ($m) {
-                return [
-                    'id'         => $m->id,
-                    'name'       => $m->name,
-                    'templeteid' => $m->templeteid,
-                    'active'     => $m->active,
-                ];
-            }),
-            'unique_templeteids_in_db' => DB::table('template_medicine')
-                ->select('templeteid')
-                ->distinct()
-                ->pluck('templeteid')
-                ->toArray(),
-            'total_medicines_in_db' => DB::table('template_medicine')->count(),
-        ]);
-    }
-
-    /**
-     * DEBUG: Check all template_medicine records
-     * GET /nursing/admission/debug/all-medicines
-     */
-    public function debugAllMedicines()
-    {
-        $medicines = DB::table('template_medicine')
-            ->orderBy('templeteid')
-            ->orderBy('name')
-            ->get();
-
-        return response()->json([
-            'total_count' => $medicines->count(),
-            'medicines'   => $medicines->map(function ($m) {
-                return [
-                    'id'         => $m->id,
-                    'templeteid' => $m->templeteid,
-                    'name'       => $m->name,
-                    'group'      => $m->group,
-                    'active'     => $m->active,
-                    'dose'       => $m->dose,
-                    'route'      => $m->route,
-                    'frequency'  => $m->frequency,
-                    'duration'   => $m->duration,
-                ];
-            }),
+            'success'             => true,
+            'message'             => 'Template applied successfully',
+            'template'            => $template,
+            'medicines'           => $mappedMedicines,
+            'available_medicines' => $availableMedicines,
+            'investigations'      => $investigations,
+            'diagnoses'           => $diagnoses,
         ]);
     }
 
     /* ══════════════════════════════════════════
        PRIVATE HELPERS
     ══════════════════════════════════════════ */
-
-    private function ensureStatusColumn(): void
-    {
-        try {
-            if (!Schema::hasColumn('nursing_admissions', 'status')) {
-                DB::statement("
-                    ALTER TABLE nursing_admissions
-                    ADD COLUMN status VARCHAR(50) DEFAULT 'on_admission'
-                    AFTER admission_type
-                ");
-            }
-        } catch (\Exception $e) {
-            // Column already exists or other issue — ignore
-        }
-    }
 
     private function safeFetch(string $table, $tplCode, string $orderBy = 'id')
     {
