@@ -25,29 +25,26 @@
         <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; font-size:15px; font-weight:600; color:#222; display:flex; justify-content:space-between; align-items:center;">
             <span>Create Invoice</span>
 
-            {{-- ✅ Bill types loaded dynamically from `bill_types` table via AJAX --}}
             <select id="billTypeSelect"
                     style="border:1px solid #b2dfdb; border-radius:5px; font-size:12px; font-weight:600;
                            color:#00695c; background:#e0f2f1; padding:5px 10px; outline:none;
                            cursor:pointer; min-width:160px;">
-                <option value="">Loading…</option>
+                <option value="">Loading...</option>
             </select>
         </div>
 
         <div style="padding:12px 14px; display:flex; flex-direction:column; gap:9px;">
 
-            {{-- Patient Dropdown (Select2) --}}
             <div class="ci-row" style="align-items:flex-start;">
                 <div class="ci-label" style="padding-top:6px;">Patient</div>
                 <div class="ci-colon" style="padding-top:6px;">:</div>
                 <div class="ci-control">
                     <select id="patientSelect" style="width:100%;">
-                        <option value="">— Type to search patient —</option>
+                        <option value="">- Type to search patient -</option>
                     </select>
                 </div>
             </div>
 
-            {{-- Patient info mini display --}}
             <div id="patientInfoBox" style="display:none; background:#e8f5e9; border-radius:5px; padding:8px 10px; font-size:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
                     <div>
@@ -58,7 +55,7 @@
                     <div style="color:#555;" id="ptMobile"></div>
                     <button type="button" id="btnClearPatient"
                             style="background:none;border:1px solid #e57373;color:#e57373;border-radius:3px;font-size:11px;padding:1px 8px;cursor:pointer;">
-                        ✕ Clear
+                        X Clear
                     </button>
                 </div>
             </div>
@@ -79,11 +76,9 @@
                 Please select a patient first to add items.
             </div>
 
-            {{-- DYNAMIC FORMS WRAPPER --}}
-            <div id="actionFormsWrapper" style="display:none; flex-direction:column; gap:15px;">
+            <div id="actionFormsWrapper" style="display:flex; flex-direction:column; gap:15px;">
 
-                {{-- DOCTOR VISIT BLOCK --}}
-                <div id="doctorVisitBlock" style="display:none; background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:5px;">
+                <div id="doctorVisitBlock" style="background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:5px;">
                     <div style="font-size:12px; font-weight:bold; color:#1a3a5c; margin-bottom:8px;">
                         <i class="fas fa-user-md"></i> Doctor Consultation
                     </div>
@@ -106,14 +101,18 @@
                     </div>
                 </div>
 
-                {{-- INVESTIGATION BLOCK --}}
-                <div id="investigationBlock" style="display:none; background:#f4fdfb; border:1px solid #b2dfdb; padding:10px; border-radius:5px;">
+                <div id="investigationBlock" style="background:#f4fdfb; border:1px solid #b2dfdb; padding:10px; border-radius:5px;">
                     <div style="font-size:12px; font-weight:bold; color:#00695c; margin-bottom:8px;" id="invBlockTitle">
                         <i class="fas fa-microscope"></i> Add Investigation
                     </div>
 
-                    {{-- Hidden — JS দিয়ে value set হবে --}}
-                    <select id="mainCategorySelect" style="display:none;"></select>
+                    <div id="mainCategoryRow" class="ci-row" style="display:none;">
+                        <div class="ci-label">Type</div>
+                        <div class="ci-colon">:</div>
+                        <div class="ci-control">
+                            <select id="mainCategorySelect" class="ci-select" style="width:100%;"></select>
+                        </div>
+                    </div>
 
                     <div class="ci-row">
                         <div class="ci-label">Investigation</div>
@@ -145,7 +144,7 @@
                     </div>
                 </div>
 
-            </div>{{-- /actionFormsWrapper --}}
+            </div>
 
         </div>
 
@@ -157,10 +156,10 @@
             </button>
         </div>
 
-    </div>{{-- /LEFT --}}
+    </div>
 
 
-    {{-- RIGHT COLUMN — Invoice Preview --}}
+    {{-- RIGHT COLUMN --}}
     <div style="flex:1; border:2px solid #00bfa5; border-radius:6px; background:#fff; overflow:hidden;">
 
         <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; font-size:15px; font-weight:600; color:#222;">
@@ -174,7 +173,7 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px;">
-                <div style="font-size:13px; color:#555; font-weight:500;" id="invoicePatientName">— No patient selected —</div>
+                <div style="font-size:13px; color:#555; font-weight:500;" id="invoicePatientName">- No patient selected -</div>
                 <div style="font-size:12px; color:#777; display:flex; align-items:center; gap:6px; white-space:nowrap;">
                     Bill No:
                     <span style="border:1px solid #ccc; border-radius:3px; padding:2px 8px; font-weight:600; font-size:13px; color:#222;" id="invoiceBillNo"></span>
@@ -210,8 +209,7 @@
 
         </div>
 
-        {{-- Payment Section --}}
-        <div id="invoiceBottomSection" style="display:none; border-top:2px solid #e8f5e9; padding:12px 14px 0;">
+        <div id="invoiceBottomSection" style="border-top:2px solid #e8f5e9; padding:12px 14px 0;">
 
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
                 <div style="flex:1; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:5px; padding:8px 12px;">
@@ -277,14 +275,13 @@
                     <div class="ci-colon">:</div>
                     <div class="ci-control">
                         <select id="collectedByInput" style="width:100%;">
-                            <option value="">— Select Staff —</option>
+                            <option value="">- Select Staff -</option>
                         </select>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Create Invoice Button --}}
         <div style="padding:10px 14px 14px;">
             <button type="button" id="btnSaveInvoice"
                     style="width:100%;background:#00bfa5;color:#fff;border:none;border-radius:4px;
@@ -293,12 +290,11 @@
             </button>
         </div>
 
-    </div>{{-- /RIGHT --}}
+    </div>
 
 </div>
 
-{{-- INVOICE PRINT POPUP MODAL --}}
-<div class="modal fade" id="invoicePrintModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="invoicePrintModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
         <div class="modal-content" style="border-radius:8px; overflow:hidden; border:2px solid #00bfa5;">
             <div style="background:linear-gradient(135deg,#00bfa5,#00796b); padding:12px 20px; display:flex; justify-content:space-between; align-items:center;">
@@ -322,7 +318,7 @@
             <div class="modal-body p-0" style="background:#f4f6f8;">
                 <div id="invoicePrintLoading" style="text-align:center; padding:60px 20px; color:#00796b;">
                     <i class="fas fa-spinner fa-spin fa-2x"></i>
-                    <div style="margin-top:12px; font-size:14px; font-weight:500;">Loading invoice…</div>
+                    <div style="margin-top:12px; font-size:14px; font-weight:500;">Loading invoice...</div>
                 </div>
                 <iframe id="invoicePrintFrame"
                         style="display:none; width:100%; height:75vh; border:none; background:#fff;">
@@ -359,7 +355,7 @@
     .ci-label { flex:0 0 110px; font-size:12px; color:#555; }
     .ci-colon { flex:0 0 12px; color:#888; font-size:12px; }
     .ci-control { flex:1; }
-    .ci-select, .ci-input { width:100%; border:1px solid #ccc; border-radius:4px; padding:5px 8px; font-size:12px; color:#222; background:#fff; height:30px; outline:none; transition:border-color .15s; }
+    .ci-select, .ci-input { width:100%; border:1px solid #ccc; border-radius:4px; padding:5px 8px; font-size:12px; color:#222; background:#fff; height:30px; outline:none; }
     .ci-select:focus, .ci-input:focus { border-color:#00bfa5; }
     .ci-select:disabled { background:#f5f5f5; color:#aaa; cursor:not-allowed; }
     textarea.ci-input { height:auto; }
@@ -377,16 +373,6 @@
 </style>
 @stop
 
-{{--
-    ✅ FIX: jQuery + Select2 must load BEFORE Bootstrap and AdminLTE JS.
-    @prepend('js') injects into the top of the js stack — before adminlte::page
-    injects bootstrap.bundle.min.js, adminlte.min.js, overlayScrollbars, etc.
-    This resolves all four errors:
-      • jQuery is not defined
-      • Bootstrap's JavaScript requires jQuery
-      • Cannot read properties of undefined (reading 'easing')  [overlayScrollbars]
-      • Cannot read properties of undefined (reading 'fn')      [CardRefresh/adminlte]
---}}
 @prepend('js')
 <script>
 if (typeof jQuery === 'undefined') {
@@ -419,7 +405,6 @@ function getBillType() {
     return $('#billTypeSelect').val();
 }
 
-// In-memory map: slug → full bill_type row from DB
 let billTypeMap = {};
 
 function isInvType(type) {
@@ -433,33 +418,65 @@ function getMainCodeFromType(type) {
 }
 
 function getMainNameFromType(type) {
-    return $('#billTypeSelect option[value="' + type + '"]').text().trim();
+    const bt = billTypeMap[type] || {};
+    return bt.label || $('#billTypeSelect option[value="' + type + '"]').text().trim();
+}
+
+function getMappedBillTypeLabel(mainCode) {
+    let label = '';
+
+    $.each(billTypeMap, function (_, bt) {
+        if (
+            !label &&
+            Number(bt.main_code) === Number(mainCode) &&
+            !!bt.requires_category &&
+            !bt.free_text_items
+        ) {
+            label = bt.label || '';
+        }
+    });
+
+    return label;
 }
 
 // ============================================================
-// ✅ Load Bill Types from `bill_types` table via AJAX
+// Load Bill Types
 // ============================================================
 function loadBillTypes() {
     const iconMap = { 'doctor_visit': '🩺', 'investigation': '🔬', 'full_bill': '📋' };
+
     $.get('{{ route("billing.invoice.getBillTypes") }}', function (data) {
         const $sel = $('#billTypeSelect').empty();
+
         data.forEach(function (bt) {
             billTypeMap[bt.value] = bt;
             const opt = new Option((iconMap[bt.value] || '📄') + ' ' + bt.label, bt.value);
-            if (bt.main_code) $(opt).attr('data-maincode', bt.main_code);
+            if (bt.main_code) {
+                $(opt).attr('data-maincode', bt.main_code);
+            }
             $sel.append(opt);
         });
-        if (mainCategoriesLoaded) applyBillTypeView(getBillType());
-        else billTypesLoaded = true;
-    }).fail(function () { toastr.error('Failed to load bill types.'); });
+
+        if (data.length) {
+            $sel.prop('selectedIndex', 0);
+        }
+
+        billTypesLoaded = true;
+
+        if (mainCategoriesLoaded) {
+            applyBillTypeView(getBillType());
+        }
+    }).fail(function () {
+        toastr.error('Failed to load bill types.');
+    });
 }
 
 // ============================================================
-// ✅ Load OfficeEmployee list from patient_ref table via AJAX
+// Load Collectors
 // ============================================================
 function loadOfficeEmployees() {
     $.get('{{ route("billing.invoice.getCollectors") }}', function (data) {
-        const $sel = $('#collectedByInput').empty().append('<option value="">— Select Staff —</option>');
+        const $sel = $('#collectedByInput').empty().append('<option value="">- Select Staff -</option>');
         data.forEach(function (emp) {
             $sel.append(new Option(emp.Name, emp.Name));
         });
@@ -470,7 +487,7 @@ function loadOfficeEmployees() {
 }
 
 // ============================================================
-// HELPERS
+// Helpers
 // ============================================================
 function initials(name) {
     if (!name) return '-';
@@ -492,15 +509,17 @@ function checkAddButtonState() {
     const docReady = selectedDoctor && selectedDoctor.fee > 0;
     const invReady = !!selectedSub;
 
-    if (bt.requires_doctor   && docReady) canAdd = true;
+    if (bt.requires_doctor && docReady) canAdd = true;
     if (bt.requires_category && invReady) canAdd = true;
-    if (bt.free_text_items   && (docReady || invReady)) canAdd = true;
+    if (bt.free_text_items && (docReady || invReady)) canAdd = true;
 
     $('#btnAddItem').prop('disabled', !canAdd || !isPatientSelected());
 }
 
 function resetInvForm() {
-    $('#subCategorySelect').html('<option value="">— Select —</option>').prop('disabled', true);
+    $('#mainCategoryRow').hide();
+    $('#mainCategorySelect').val('');
+    $('#subCategorySelect').html('<option value="">- Select -</option>').prop('disabled', true);
     $('#amountInputGroup, #commentInputGroup').hide();
     $('#customAmountInput, #commentInput').val('');
     selectedSub = null;
@@ -519,22 +538,19 @@ function resetAllForms() {
 }
 
 // ============================================================
-// applyBillTypeView — CORE LOGIC
+// Bill Type View
 // ============================================================
 function applyBillTypeView(type) {
-    if (!type) return;
+    if (!type) {
+        checkAddButtonState();
+        return;
+    }
+
     const bt = billTypeMap[type] || {};
-
-    const showDoctor = !!(bt.requires_doctor) || !!(bt.free_text_items);
-    const showInv    = !!(bt.requires_category) || !!(bt.free_text_items);
-
-    $('#doctorVisitBlock').toggle(showDoctor);
-    $('#investigationBlock').toggle(showInv);
 
     if (bt.requires_category) {
         if (bt.main_code) {
-            const typeName = getMainNameFromType(type);
-            $('#invBlockTitle').html('<i class="fas fa-microscope"></i> ' + typeName);
+            $('#invBlockTitle').html('<i class="fas fa-microscope"></i> ' + getMainNameFromType(type));
             loadSubsForMainCode(bt.main_code);
         } else {
             $('#invBlockTitle').html('<i class="fas fa-microscope"></i> Add Investigation');
@@ -549,32 +565,29 @@ function applyBillTypeView(type) {
 }
 
 function loadSubsForMainCode(mainCode) {
-    resetInvForm();
+    $('#mainCategoryRow').hide();
+    $('#mainCategorySelect').val(String(mainCode));
+    $('#amountInputGroup, #commentInputGroup').hide();
+    $('#customAmountInput, #commentInput').val('');
+    selectedSub = null;
 
-    // Always hide mainCategorySelect for requires_category types
-    $('#mainCategorySelect').hide().removeClass('ci-select');
-
-    $('#subCategorySelect').html('<option value="">Loading…</option>').prop('disabled', true);
+    $('#subCategorySelect').html('<option value="">Loading...</option>').prop('disabled', true);
 
     $.get('{{ route("billing.invoice.getSub") }}', { main_code: mainCode }, function (data) {
         const $sub = $('#subCategorySelect');
-        $sub.empty().append(new Option('— Select —', ''));
+        $sub.empty().append(new Option('- Select -', ''));
+
         if (data.length) {
             data.forEach(function (s) {
                 const opt = new Option(s.Name + ' (' + parseInt(s.Amount).toLocaleString() + ')', s.Code);
                 $(opt).attr('data-name', s.Name)
-                      .attr('data-amount', s.Amount)
-                      .attr('data-maincode', mainCode);
+                    .attr('data-amount', s.Amount)
+                    .attr('data-maincode', mainCode);
                 $sub.append(opt);
             });
         }
+
         $sub.prop('disabled', false);
-
-        // Keep hidden mainCategorySelect in sync for loadTmpItems name resolution
-        $('#mainCategorySelect').empty()
-            .append(new Option('', mainCode))
-            .val(mainCode);
-
     }).fail(function () {
         $('#subCategorySelect').html('<option value="">Failed to load</option>').prop('disabled', false);
         toastr.error('Failed to load investigations.');
@@ -582,30 +595,21 @@ function loadSubsForMainCode(mainCode) {
 }
 
 function showMainCategoryDropdown() {
-    resetInvForm();
-
-    // Only shown for full_bill type
-    const $main = $('#mainCategorySelect');
-    $main.addClass('ci-select').show();
-
-    $main.val('');
+    $('#mainCategoryRow').show();
+    $('#mainCategorySelect').val('');
     $('#subCategorySelect').html('<option value="">Select Type First</option>').prop('disabled', true);
 }
 
 // ============================================================
-// Bill Type Dropdown Change
+// Change Handlers
 // ============================================================
 $('#billTypeSelect').on('change', function () {
     const newType = $(this).val();
-    const bt = billTypeMap[newType] || {};
     resetInvForm();
-    if (!bt.free_text_items) resetDoctorForm();
+    resetDoctorForm();
     applyBillTypeView(newType);
 });
 
-// ============================================================
-// full_bill এর জন্য mainCategorySelect change handler
-// ============================================================
 $('#mainCategorySelect').on('change', function () {
     const mainCode = $(this).val();
     const $sub     = $('#subCategorySelect');
@@ -620,36 +624,35 @@ $('#mainCategorySelect').on('change', function () {
         return;
     }
 
-    const curBt2 = billTypeMap[getBillType()] || {};
-    if (curBt2.free_text_items || (curBt2.requires_category && !curBt2.main_code)) {
+    const curBt = billTypeMap[getBillType()] || {};
+    if (curBt.free_text_items || (curBt.requires_category && !curBt.main_code)) {
         loadSubForFullBill(mainCode);
     }
 });
 
 function loadSubForFullBill(mainCode) {
     const $sub = $('#subCategorySelect');
-    $sub.html('<option value="">Loading…</option>').prop('disabled', true);
+    $sub.html('<option value="">Loading...</option>').prop('disabled', true);
 
     $.get('{{ route("billing.invoice.getSub") }}', { main_code: mainCode }, function (data) {
-        $sub.empty().append(new Option('— Select Investigation —', ''));
+        $sub.empty().append(new Option('- Select Investigation -', ''));
+
         if (data.length) {
             data.forEach(function (s) {
                 const opt = new Option(s.Name + ' (' + parseInt(s.Amount).toLocaleString() + ')', s.Code);
                 $(opt).attr('data-name', s.Name)
-                      .attr('data-amount', s.Amount)
-                      .attr('data-maincode', mainCode);
+                    .attr('data-amount', s.Amount)
+                    .attr('data-maincode', mainCode);
                 $sub.append(opt);
             });
         }
+
         $sub.prop('disabled', false);
     }).fail(function () {
         $sub.html('<option value="">Failed to load</option>').prop('disabled', false);
     });
 }
 
-// ============================================================
-// subCategorySelect change
-// ============================================================
 $('#subCategorySelect').on('change', function () {
     const $opt = $(this).find(':selected');
     const code = $(this).val();
@@ -671,12 +674,14 @@ $('#subCategorySelect').on('change', function () {
             MainCode : mainCode,
             MainName : mainName,
             Name     : $opt.data('name'),
-            Amount   : parseInt($opt.data('amount')) || 0,
+            Amount   : parseInt($opt.data('amount')) || 0
         };
+
         $('#customAmountInput').val(selectedSub.Amount);
         $('#commentInput').val('');
         $('#amountInputGroup, #commentInputGroup').show();
     }
+
     checkAddButtonState();
 });
 
@@ -688,22 +693,30 @@ $('#customAmountInput').on('input', function () {
 });
 
 // ============================================================
-// 1. Load Doctors
+// Doctors
 // ============================================================
 $.get('{{ route("billing.invoice.getDoctors") }}', function (data) {
     const $sel = $('#doctorSelect');
-    $sel.empty().append(new Option('— Select Doctor —', ''));
+    $sel.empty().append(new Option('- Select Doctor -', ''));
+
     data.forEach(function (doc) {
         const opt = new Option(doc.name, doc.id);
         $(opt).attr('data-name', doc.name);
         $sel.append(opt);
     });
-}).fail(function () { toastr.error('Failed to load doctors.'); });
+}).fail(function () {
+    toastr.error('Failed to load doctors.');
+});
 
 $('#doctorSelect').on('change', function () {
     const opt = $(this).find(':selected');
+
     if ($(this).val()) {
-        selectedDoctor = { id: parseInt($(this).val()), name: opt.data('name'), fee: 0 };
+        selectedDoctor = {
+            id   : parseInt($(this).val()),
+            name : opt.data('name'),
+            fee  : 0
+        };
         $('#doctorFeeInput').val('');
         $('#docFeeGroup').show();
     } else {
@@ -711,6 +724,7 @@ $('#doctorSelect').on('change', function () {
         $('#doctorFeeInput').val('');
         $('#docFeeGroup').hide();
     }
+
     checkAddButtonState();
 });
 
@@ -722,7 +736,7 @@ $('#doctorFeeInput').on('input', function () {
 });
 
 // ============================================================
-// ✅ Coordination flags — both AJAX must finish before applyBillTypeView
+// Main Category Load Coordination
 // ============================================================
 let billTypesLoaded      = false;
 let mainCategoriesLoaded = false;
@@ -730,36 +744,46 @@ let mainCategoriesLoaded = false;
 $.get('{{ route("billing.invoice.getMain") }}', function (data) {
     const $sel = $('#mainCategorySelect');
     $sel.empty().append(new Option('Select Investigation Type', ''));
+
     data.forEach(function (m) {
         $sel.append(new Option(m.Name, m.Code));
     });
+
     mainCategoriesLoaded = true;
-    if (billTypesLoaded) applyBillTypeView(getBillType());
+
+    if (billTypesLoaded) {
+        applyBillTypeView(getBillType());
+    }
 }).fail(function () {
     toastr.error('Failed to load investigation types.');
     mainCategoriesLoaded = true;
-    if (billTypesLoaded) applyBillTypeView(getBillType());
+    if (billTypesLoaded) {
+        applyBillTypeView(getBillType());
+    }
 });
 
 loadBillTypes();
 
 // ============================================================
-// 3. ADD BUTTON
+// Add Item
 // ============================================================
 $('#btnAddItem').on('click', function () {
-    if (!isPatientSelected()) { toastr.warning('Please select a patient first.'); return; }
+    if (!isPatientSelected()) {
+        toastr.warning('Please select a patient first.');
+        return;
+    }
 
-    const type   = getBillType();
+    const type = getBillType();
     let requests = [];
-
     const bt = billTypeMap[type] || {};
 
     if ((bt.requires_doctor || bt.free_text_items) && selectedDoctor) {
         selectedDoctor.fee = parseInt($('#doctorFeeInput').val()) || 0;
+
         if (selectedDoctor.fee <= 0) {
             toastr.warning('Please enter visit fee.');
             if (bt.requires_doctor && !bt.free_text_items) return;
-        } else if (billItems.some(i => i.item_type === 'doctor' && i.subCode === selectedDoctor.id)) {
+        } else if (billItems.some(i => i.item_type === 'doctor' && Number(i.subCode) === Number(selectedDoctor.id))) {
             toastr.warning('Dr. ' + selectedDoctor.name + ' already added.');
         } else {
             requests.push({
@@ -777,7 +801,12 @@ $('#btnAddItem').on('click', function () {
 
     if ((bt.requires_category || bt.free_text_items) && selectedSub) {
         selectedSub.Amount = parseInt($('#customAmountInput').val()) || 0;
-        if (billItems.some(i => i.item_type === 'investigation' && i.subCode === selectedSub.Code)) {
+
+        if (billItems.some(i =>
+            i.item_type === 'investigation' &&
+            Number(i.mainCode) === Number(selectedSub.MainCode) &&
+            Number(i.subCode) === Number(selectedSub.Code)
+        )) {
             toastr.warning(selectedSub.Name + ' already added.');
         } else {
             requests.push({
@@ -803,8 +832,8 @@ $('#btnAddItem').on('click', function () {
             main_code    : req.main_code,
             sub_code     : req.sub_code,
             name         : req.name,
-            amount       : req.amount,
-        }).then(res => {
+            amount       : req.amount
+        }).then(function (res) {
             if (res.success) {
                 billItems.push({
                     item_type : req.item_type,
@@ -814,7 +843,7 @@ $('#btnAddItem').on('click', function () {
                     name      : req.name,
                     amount    : req.amount,
                     comment   : req.comment,
-                    tmpId     : res.tmp_id,
+                    tmpId     : res.tmp_id
                 });
             }
             return res;
@@ -826,19 +855,23 @@ $('#btnAddItem').on('click', function () {
         toastr.success('Item(s) added to bill.');
 
         const bt2 = billTypeMap[type] || {};
+
         if (bt2.requires_doctor && !bt2.free_text_items) {
             resetDoctorForm();
         }
+
         if (bt2.requires_category && !bt2.free_text_items) {
             resetInvForm();
             loadSubsForMainCode(getMainCodeFromType(type));
         }
+
         if (bt2.free_text_items) {
             resetDoctorForm();
             resetInvForm();
             $('#mainCategorySelect').val('');
             $('#subCategorySelect').html('<option value="">Select Type First</option>').prop('disabled', true);
         }
+
         checkAddButtonState();
     }).catch(function () {
         toastr.error('Server error adding item.');
@@ -847,7 +880,7 @@ $('#btnAddItem').on('click', function () {
 });
 
 // ============================================================
-// 4. Render Bill
+// Render Bill
 // ============================================================
 function renderBill() {
     const $body = $('#billBody');
@@ -857,47 +890,54 @@ function renderBill() {
         $body.html(`<tr id="billEmptyRow">
             <td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-size:12px;border:1px solid #ddd;">
                 No items added yet
-            </td></tr>`);
+            </td>
+        </tr>`);
         $('#billTotalFoot').text('0');
-        $('#invoiceBottomSection').hide();
         return;
     }
 
     let total = 0;
+
     billItems.forEach(function (item, idx) {
         total += item.amount;
         const badgeClass = (item.item_type === 'doctor') ? 'doc-type-cell' : 'inv-type-cell';
+
         $body.append(`
             <tr>
                 <td style="color:#888; text-align:center;">${idx + 1}</td>
                 <td><span class="${badgeClass}">${item.mainName || ''}</span></td>
                 <td style="font-weight:500;">${item.name}</td>
                 <td style="text-align:right; font-weight:600;">${item.amount.toLocaleString()}</td>
-                <td style="font-size:11px; color:#777; font-style:italic;">${item.comment || '—'}</td>
+                <td style="font-size:11px; color:#777; font-style:italic;">${item.comment || '-'}</td>
                 <td style="text-align:center;">
-                    <button type="button" class="btn-del btnRemove"
-                            data-idx="${idx}" data-tmpid="${item.tmpId || 0}">×</button>
+                    <button type="button" class="btn-del btnRemove" data-idx="${idx}" data-tmpid="${item.tmpId || 0}">x</button>
                 </td>
-            </tr>`);
+            </tr>
+        `);
     });
 
     $('#billTotalFoot').text(total.toLocaleString());
-    $('#invoiceBottomSection').show();
     recalcPayment();
 }
 
 $(document).on('click', '.btnRemove', function () {
     const idx   = parseInt($(this).data('idx'));
     const tmpId = parseInt($(this).data('tmpid'));
+
     if (tmpId > 0) {
-        $.ajax({ url: '{{ route("billing.invoice.removeTmp") }}', method: 'DELETE', data: { tmp_id: tmpId } });
+        $.ajax({
+            url    : '{{ route("billing.invoice.removeTmp") }}',
+            method : 'DELETE',
+            data   : { tmp_id: tmpId }
+        });
     }
+
     billItems.splice(idx, 1);
     renderBill();
 });
 
 // ============================================================
-// 5. Payment Recalc
+// Payment Recalc
 // ============================================================
 function recalcPayment() {
     const total    = billItems.reduce((s, i) => s + i.amount, 0);
@@ -921,13 +961,14 @@ function recalcPayment() {
         $('#paidInput').css('border-color', '#ccc');
     }
 }
+
 $('#discountInput, #paidInput').on('input', recalcPayment);
 
 // ============================================================
-// 6. Patient Select2
+// Patient Select2
 // ============================================================
 $('#patientSelect').select2({
-    placeholder        : 'Type name / code / mobile…',
+    placeholder        : 'Type name / code / mobile...',
     allowClear         : true,
     minimumInputLength : 0,
     width              : '100%',
@@ -936,26 +977,36 @@ $('#patientSelect').select2({
         url           : '{{ route("billing.invoice.searchPatient") }}',
         dataType      : 'json',
         delay         : 250,
-        data          : function (params) { return { q: params.term || '' }; },
-        processResults: function (data) {
-            return { results: data.map(function (p) { return { id: p.id, text: p.patientname, data: p }; }) };
+        data          : function (params) {
+            return { q: params.term || '' };
         },
-        cache: false,
+        processResults: function (data) {
+            return {
+                results: data.map(function (p) {
+                    return { id: p.id, text: p.patientname, data: p };
+                })
+            };
+        },
+        cache: false
     },
     templateResult: function (item) {
-        if (item.loading) return $('<span style="color:#00897b;font-size:12px;">Searching…</span>');
-        if (!item.data)   return item.text;
-        const p    = item.data;
-        const av   = initials(p.patientname);
+        if (item.loading) return $('<span style="color:#00897b;font-size:12px;">Searching...</span>');
+        if (!item.data) return item.text;
+
+        const p = item.data;
+        const av = initials(p.patientname);
         const meta = [p.age ? p.age + ' yrs' : '', p.gender || '', p.mobile_no || ''].filter(Boolean).join(' · ');
-        return $(`<div class="pt-opt-wrap">
-            <div class="pt-opt-avatar">${av}</div>
-            <div class="pt-opt-info">
-                <div class="pt-opt-name">${p.patientname}</div>
-                <div class="pt-opt-meta">${meta}</div>
+
+        return $(`
+            <div class="pt-opt-wrap">
+                <div class="pt-opt-avatar">${av}</div>
+                <div class="pt-opt-info">
+                    <div class="pt-opt-name">${p.patientname}</div>
+                    <div class="pt-opt-meta">${meta}</div>
+                </div>
+                <span class="pt-opt-code">${p.patientcode || ''}</span>
             </div>
-            <span class="pt-opt-code">${p.patientcode || ''}</span>
-        </div>`);
+        `);
     },
     templateSelection: function (item) {
         if (!item.data) return item.text;
@@ -963,12 +1014,13 @@ $('#patientSelect').select2({
     },
     language: {
         noResults: function () { return 'No patients found'; },
-        searching: function () { return 'Searching…'; },
-    },
+        searching: function () { return 'Searching...'; }
+    }
 });
 
 $('#patientSelect').on('select2:select', function (e) {
     const p = e.params.data.data;
+
     $('#ptCode').text(p.patientcode || '');
     $('#ptName').text(p.patientname || '');
     $('#ptAge').text((p.age || '') + ' / ' + (p.gender || ''));
@@ -980,15 +1032,16 @@ $('#patientSelect').on('select2:select', function (e) {
     $('#selectedMobile').val(p.mobile_no || '');
     $('#selectedAdmissionId').val(p.admission_id || '');
     $('#invoicePatientName').text(p.patientname);
-    $('#patientInfoBox').slideDown(180);
+    $('#patientInfoBox').show();
+
     updateFieldsVisibility();
     loadTmpItems(p.patientcode);
 });
 
 $('#patientSelect').on('select2:unselect select2:clear', function () {
-    $('#patientInfoBox').slideUp(180);
+    $('#patientInfoBox').hide();
     $('#selectedPatientId,#selectedPatientCode,#selectedPatientName,#selectedPatientAge,#selectedMobile,#selectedAdmissionId').val('');
-    $('#invoicePatientName').text('— No patient selected —');
+    $('#invoicePatientName').text('- No patient selected -');
     billItems = [];
     renderBill();
     updateFieldsVisibility();
@@ -1001,29 +1054,34 @@ $('#btnClearPatient').on('click', function () {
 function updateFieldsVisibility() {
     if (isPatientSelected()) {
         $('#patientRequiredNotice').hide();
-        $('#actionFormsWrapper').show().css('display','flex');
         applyBillTypeView(getBillType());
     } else {
         $('#patientRequiredNotice').show();
-        $('#actionFormsWrapper').hide();
         resetAllForms();
         $('#btnAddItem').prop('disabled', true);
     }
 }
 
 // ============================================================
-// 7. Load Tmp Items
+// Load Tmp Items
 // ============================================================
 function loadTmpItems(patientCode) {
     $.get('{{ route("billing.invoice.getTmp") }}', { patient_code: patientCode }, function (data) {
         billItems = [];
-        if (!data.length) { renderBill(); return; }
 
-        const mainCodes = [...new Set(data.map(r => r.MainCode).filter(mc => mc != DOCTOR_MAIN_CODE))];
-        let nameMap     = {};
+        if (!data.length) {
+            renderBill();
+            return;
+        }
+
+        const mainCodes = [...new Set(data.map(r => Number(r.MainCode)).filter(mc => mc !== DOCTOR_MAIN_CODE))];
+        let nameMap = {};
         const mainNameMap = {};
+
         $('#mainCategorySelect option').each(function () {
-            if ($(this).val()) mainNameMap[$(this).val()] = $(this).text();
+            if ($(this).val()) {
+                mainNameMap[$(this).val()] = $(this).text();
+            }
         });
 
         function resolveDocName(id) {
@@ -1033,40 +1091,66 @@ function loadTmpItems(patientCode) {
 
         function buildItems() {
             data.forEach(function (row) {
-                const isDoc = (row.MainCode == DOCTOR_MAIN_CODE);
+                const isDoc = Number(row.MainCode) === DOCTOR_MAIN_CODE;
+                const itemKey = row.MainCode + '_' + row.SubCode;
+
                 billItems.push({
                     item_type : isDoc ? 'doctor' : 'investigation',
                     subCode   : row.SubCode,
                     mainCode  : row.MainCode,
-                    mainName  : isDoc ? 'Doctor Consultation' : (mainNameMap[row.MainCode] || ''),
-                    name      : isDoc ? resolveDocName(row.SubCode) : (nameMap[row.SubCode] || ('Item #' + row.SubCode)),
+                    mainName  : isDoc ? 'Doctor Consultation' : (getMappedBillTypeLabel(row.MainCode) || mainNameMap[row.MainCode] || ''),
+                    name      : isDoc ? resolveDocName(row.SubCode) : (row.Name || nameMap[itemKey] || ('Item #' + row.SubCode)),
                     amount    : parseInt(row.Amount) || 0,
                     comment   : '',
-                    tmpId     : row.ID,
+                    tmpId     : row.ID
                 });
             });
+
             renderBill();
         }
 
-        if (mainCodes.length === 0) { buildItems(); return; }
+        if (mainCodes.length === 0) {
+            buildItems();
+            return;
+        }
 
         let pending = mainCodes.length;
+
         mainCodes.forEach(function (mc) {
             $.get('{{ route("billing.invoice.getSub") }}', { main_code: mc }, function (subs) {
-                subs.forEach(function (s) { nameMap[s.Code] = s.Name; });
-                if (--pending === 0) buildItems();
+                subs.forEach(function (s) {
+                    nameMap[mc + '_' + s.Code] = s.Name;
+                });
+
+                pending--;
+                if (pending === 0) {
+                    buildItems();
+                }
+            }).fail(function () {
+                pending--;
+                if (pending === 0) {
+                    buildItems();
+                }
             });
         });
     });
 }
 
 // ============================================================
-// 8. Save Invoice
+// Save Invoice
 // ============================================================
 $('#btnSaveInvoice').on('click', function () {
     const patientId = $('#selectedPatientId').val();
-    if (!patientId)        { toastr.warning('Please select a patient first.'); return; }
-    if (!billItems.length) { toastr.warning('Please add at least one item.'); return; }
+
+    if (!patientId) {
+        toastr.warning('Please select a patient first.');
+        return;
+    }
+
+    if (!billItems.length) {
+        toastr.warning('Please add at least one item.');
+        return;
+    }
 
     const total    = billItems.reduce((s, i) => s + i.amount, 0);
     const discount = parseInt($('#discountInput').val()) || 0;
@@ -1095,20 +1179,22 @@ $('#btnSaveInvoice').on('click', function () {
         payment_method : $('#payMethodInput').val(),
         collected_by   : $('#collectedByInput').val(),
         invoice_type   : getBillType(),
-        items          : billItems.map(i => ({
-            category      : i.mainCode,
-            category_name : i.mainName,
-            service_name  : i.name,
-            unit_price    : i.amount,
-            quantity      : 1,
-            amount        : i.amount,
-            remarks       : i.comment || '',
-        })),
-        _token : '{{ csrf_token() }}',
+        items          : billItems.map(function (i) {
+            return {
+                category      : i.mainCode,
+                category_name : i.mainName,
+                service_name  : i.name,
+                unit_price    : i.amount,
+                quantity      : 1,
+                amount        : i.amount,
+                remarks       : i.comment || ''
+            };
+        }),
+        _token : '{{ csrf_token() }}'
     };
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('Saving…');
+    $btn.prop('disabled', true).text('Saving...');
 
     $.ajax({
         url         : '{{ route("billing.invoice.store") }}',
@@ -1122,6 +1208,7 @@ $('#btnSaveInvoice').on('click', function () {
                     patient_code : $('#selectedPatientCode').val(),
                     _token       : '{{ csrf_token() }}'
                 });
+
                 openInvoiceModal('{{ url("Billing/CreateInvoice") }}/' + res.payment_id + '/print');
                 billItems = [];
                 renderBill();
@@ -1140,9 +1227,7 @@ $('#btnSaveInvoice').on('click', function () {
 });
 
 // ============================================================
-// ✅ FIXED: Modal open — Bootstrap 4 (AdminLTE) uses jQuery $.fn.modal
-// Bootstrap 4 does NOT have bootstrap.Modal.getOrCreateInstance
-// Always check $.fn.modal FIRST, then fall back to Bootstrap 5 API
+// Print Modal
 // ============================================================
 function openInvoiceModal(url) {
     const $frame   = $('#invoicePrintFrame');
@@ -1154,13 +1239,10 @@ function openInvoiceModal(url) {
     const modalEl = document.getElementById('invoicePrintModal');
 
     if (typeof $ !== 'undefined' && $.fn.modal) {
-        // ✅ Bootstrap 4 jQuery plugin (used by AdminLTE 3)
         $(modalEl).modal('show');
     } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal && typeof bootstrap.Modal.getOrCreateInstance === 'function') {
-        // Bootstrap 5 native API
         bootstrap.Modal.getOrCreateInstance(modalEl).show();
     } else {
-        // Plain CSS fallback (no Bootstrap JS loaded)
         modalEl.style.display = 'block';
         modalEl.classList.add('show');
         document.body.classList.add('modal-open');
@@ -1178,20 +1260,14 @@ function openInvoiceModal(url) {
     $frame.attr('src', url);
 }
 
-// ============================================================
-// ✅ FIXED: Modal close — same Bootstrap 4 first priority
-// ============================================================
 $('#btnCloseModal').on('click', function () {
     const modalEl = document.getElementById('invoicePrintModal');
 
     if (typeof $ !== 'undefined' && $.fn.modal) {
-        // ✅ Bootstrap 4 jQuery plugin (used by AdminLTE 3)
         $(modalEl).modal('hide');
     } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal && typeof bootstrap.Modal.getOrCreateInstance === 'function') {
-        // Bootstrap 5 native API
         bootstrap.Modal.getOrCreateInstance(modalEl).hide();
     } else {
-        // Plain CSS fallback
         modalEl.style.display = 'none';
         modalEl.classList.remove('show');
         document.body.classList.remove('modal-open');
@@ -1209,17 +1285,16 @@ $('#btnPrintInvoice').on('click', function () {
 });
 
 // ============================================================
-// INIT
+// Init
 // ============================================================
-// ✅ Collected By — Select2 dropdown (OfficeEmployee)
 $('#collectedByInput').select2({
-    placeholder      : '— Select Staff —',
-    allowClear       : true,
-    dropdownParent   : $('#invoiceBottomSection'),
-    width            : '100%',
+    placeholder    : '- Select Staff -',
+    allowClear     : true,
+    dropdownParent : $('#invoiceBottomSection'),
+    width          : '100%'
 });
-loadOfficeEmployees();
 
+loadOfficeEmployees();
 updateFieldsVisibility();
 
 })();

@@ -301,9 +301,9 @@ class PatientController extends Controller
         $patient = Patient::create($validated);
 
         // ✅ Redirect to Billing Payment page for this patient
-        return redirect()
-            ->route('billing.payment.show', $patient->id)
-            ->with('success', 'Patient saved! Please complete payment.');
+     return redirect()
+      ->route('billing.invoice.index')
+       ->with('success', 'Patient saved! Please complete payment.');
     }
 
     /**

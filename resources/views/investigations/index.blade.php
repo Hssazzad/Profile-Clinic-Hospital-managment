@@ -20,7 +20,7 @@
             <i class="fas fa-folder-plus mr-1"></i> Add Category
         </button>
         <button class="btn-add-new" onclick="openAddModal()">
-            <i class="fas fa-plus mr-1"></i> Add Test
+            <i class="fas fa-plus mr-1"></i> Add subcategory
         </button>
     </div>
 </div>
@@ -50,7 +50,7 @@
             </select>
             <div class="search-wrap">
                 <i class="fas fa-search"></i>
-                <input type="text" id="search-input" placeholder="Search test name..." onkeyup="filterTable()">
+                <input type="text" id="search-input" placeholder="Search name..." onkeyup="filterTable()">
             </div>
         </div>
     </div>
@@ -60,10 +60,10 @@
             <thead>
                 <tr>
                     <th style="width:40px">#</th>
-                    <th>Test Name</th>
                     <th style="width:130px">Category</th>
+                    <th>Subcategory</th>
                     <th style="width:90px">Code</th>
-                    <th style="width:110px">Price (?)</th>
+                    <th style="width:110px">Price (৳)</th>
                     <th style="width:110px;text-align:center">Actions</th>
                 </tr>
             </thead>
@@ -71,10 +71,10 @@
                 @forelse($investigations as $inv)
                 <tr class="inv-row" data-id="{{ $inv->ID }}" data-name="{{ $inv->Name }}" data-category="{{ $inv->category }}" data-price="{{ $inv->Amount }}">
                     <td class="text-muted small">{{ $loop->iteration }}</td>
-                    <td><strong>{{ $inv->Name }}</strong></td>
                     <td><span class="cat-badge">{{ $inv->category ?? 'Other' }}</span></td>
+                    <td><strong>{{ $inv->Name }}</strong></td>
                     <td class="text-muted">{{ $inv->Code }}</td>
-                    <td class="font-weight-bold">? {{ number_format($inv->Amount, 0) }}</td>
+                    <td class="font-weight-bold">৳ {{ number_format($inv->Amount, 0) }}</td>
                     <td class="text-center">
                         <button class="btn-edit" onclick="openEditModal(this)"><i class="fas fa-edit"></i></button>
                         <button class="btn-delete" onclick="deleteRecord({{ $inv->ID }}, this)"><i class="fas fa-trash"></i></button>
@@ -132,15 +132,12 @@
     </div>
 </div>
 
-{{-- ADD/EDIT MODALS (???? ????, ???? Dropdown ? $cat->Name ???) --}}
-@include('investigations.partials_modals') {{-- Modal ?? ??????? ?? ?? ???? ???? ???? ???? Add/Edit Test Modal ??????? ????? ?????? --}}
-{{-- Note: Dropdown ?? ??? ???: @foreach($categories as $cat) <option value="{{ $cat->Name }}">{{ $cat->Name }}</option> @endforeach --}}
+@include('investigations.partials_modals')
 
 @stop
 
 @section('css')
 <style>
-/* ????? ???? CSS ?? ?????... */
 :root { --teal: #00796B; --teal-d: #00695C; --border: #e4e9f0; --text: #1a2332; --bg: #f0f4f0; --radius: 12px; }
 .btn-add-new { background:var(--teal); color:#fff; border:none; border-radius:8px; padding:10px 20px; font-weight:600; }
 .main-card { background:#fff; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; }
@@ -164,7 +161,6 @@ var CSRF = document.querySelector('meta[name="csrf-token"]').getAttribute('conte
 var CAT_UPDATE_URL = '{{ route("investigations.categories.update") }}';
 var CAT_DELETE_URL = '{{ route("investigations.categories.destroy", ":id") }}';
 
-// --- CATEGORY MANAGEMENT JS ---
 function openManageCategoriesModal() {
     $('#manageCategoriesModal').modal('show');
 }
@@ -189,7 +185,7 @@ function saveEditCategory(id) {
     .then(data => {
         if(data.success) {
             alert(data.message);
-            location.reload(); // Reload to update all dropdowns & tables easily
+            location.reload();
         } else {
             alert(data.message);
         }
@@ -208,14 +204,13 @@ function deleteCategory(id) {
     .then(data => {
         if(data.success) {
             alert(data.message);
-            location.reload(); // Reload to update all dropdowns seamlessly
+            location.reload();
         } else {
             alert(data.message);
         }
     });
 }
 
-// (????? ???? Test Add/Edit/Delete JavaScript ????????? ????? ??????)
 function filterTable() {
     var q = (document.getElementById('search-input').value || '').toLowerCase();
     var cat = document.getElementById('filter-category').value;

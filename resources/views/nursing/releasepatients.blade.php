@@ -62,158 +62,178 @@
 <div id="save-alert" class="alert d-none mb-3 modern-alert" role="alert"></div>
 
 {{-- ══════════════════════════════════════════
-     STEP 1 — SELECT PATIENT
+     STEP 1 — SELECT PATIENT (GOV-PANEL)
 ══════════════════════════════════════════ --}}
 <div id="panel-step1">
-    <div class="modern-card">
-        <div class="modern-card-header">
-            <div class="modern-card-title">
-                <span class="card-title-icon bg-teal-soft"><i class="fas fa-users text-teal"></i></span>
+
+    <div class="gov-panel gov-panel-teal">
+
+        {{-- Panel Title Bar --}}
+        <div class="gov-panel-titlebar gov-panel-titlebar-teal">
+            <div class="gov-panel-titlebar-left">
+                <div class="gov-panel-icon gov-panel-icon-teal">
+                    <i class="fas fa-users"></i>
+                </div>
                 <div>
-                    <h5 class="mb-0 font-weight-bold">Select Patient for Release</h5>
-                    <small class="text-muted">Search and choose a patient to proceed with release</small>
+                    <div class="gov-panel-title">Patient Selection — Release</div>
+                    <div class="gov-panel-subtitle">Search and select a discharged patient to proceed with release</div>
                 </div>
             </div>
-            <span class="release-count-badge">
-                <i class="fas fa-bed mr-1"></i>
-                {{ $patients->total() }} Admitted
-            </span>
+            <div class="gov-panel-titlebar-right">
+                <span class="gov-counter-badge gov-counter-badge-teal">
+                    <i class="fas fa-bed mr-1"></i>
+                    Total Records: <strong>{{ $patients->total() }}</strong>
+                </span>
+            </div>
         </div>
 
-        {{-- ══ STICKY SEARCH BAR ══ --}}
-        <div class="patient-sticky-bar" id="patient-sticky-bar">
-            <div class="row align-items-center">
-                <div class="col-md-7">
-                    <div class="search-input-group">
-                        <span class="search-icon"><i class="fas fa-search"></i></span>
-                        <input type="text" id="patientSearch" class="search-input"
-                            placeholder="Search by name, code, or mobile number...">
-                        <button class="search-btn search-btn-teal" type="button" onclick="filterTable()">
-                            Search
-                        </button>
-                    </div>
+        {{-- Search Toolbar --}}
+        <div class="gov-toolbar gov-toolbar-teal">
+            <div class="gov-toolbar-inner">
+                <div class="gov-toolbar-label gov-toolbar-label-teal">
+                    <i class="fas fa-search mr-1"></i> SEARCH FILTER
                 </div>
-                <div class="col-md-5 mt-2 mt-md-0">
-                    <div class="d-flex align-items-center justify-content-md-end">
-                        <span class="sticky-bar-info sticky-bar-info-teal">
-                            <i class="fas fa-bed mr-1"></i>
-                            <strong>{{ $patients->total() }}</strong> patients ready for release
-                        </span>
-                    </div>
+                <div class="gov-search-group">
+                    <input type="text" id="patientSearch" class="gov-search-input gov-search-input-teal"
+                           placeholder="Search by Name / Patient Code / Mobile Number…"
+                           onkeyup="filterTable()">
+                    <button class="gov-search-btn gov-search-btn-teal" type="button" onclick="filterTable()">
+                        <i class="fas fa-search mr-1"></i> Search
+                    </button>
+                    <button class="gov-clear-btn" type="button"
+                            onclick="document.getElementById('patientSearch').value=''; filterTable();">
+                        <i class="fas fa-times mr-1"></i> Clear
+                    </button>
+                </div>
+                <div class="gov-toolbar-hint">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Press <kbd>Enter</kbd> or click Search to filter
                 </div>
             </div>
         </div>
-        <div class="sticky-bar-spacer" id="sticky-bar-spacer"></div>
 
-        <div class="modern-card-body pt-0">
-            <div class="table-responsive">
-                <table class="table modern-table" id="patientTable">
-                    <thead>
-                        <tr>
-                            <th style="width:50px;">#</th>
-                            <th style="width:80px;">Code</th>
-                            <th>Name</th>
-                            <th style="width:65px;">Age</th>
-                            <th style="width:55px;">Gender</th>
-                            <th style="width:130px;">Mobile</th>
-                            <th>Address / Upazila</th>
-                            <th style="width:110px;">Admission Date</th>
-                            <th style="width:100px;">Status</th>
-                            <th style="width:80px; text-align:center;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($patients as $patient)
-                            <tr>
-                                <td class="text-muted small">{{ $patient->id }}</td>
-                                <td><span class="patient-code-badge">{{ $patient->patientcode ?? '—' }}</span></td>
-                                <td>
-                                    <div class="patient-name-cell">
-                                        <div class="patient-mini-avatar patient-mini-avatar-teal">{{ strtoupper(substr($patient->patientname ?? 'P', 0, 1)) }}</div>
-                                        <div>
-                                            <strong>{{ $patient->patientname ?? '—' }}</strong>
-                                            @if($patient->patientfather ?? null)
-                                                <br><small class="text-muted"><i class="fas fa-user-tie fa-xs"></i> {{ $patient->patientfather }}</small>
-                                            @endif
-                                        </div>
+        {{-- Data Table --}}
+        <div class="gov-table-wrap">
+            <table class="gov-table" id="patientTable">
+                <thead>
+                    <tr>
+                        <th class="gov-th" style="width:46px;">SL#</th>
+                        <th class="gov-th" style="width:88px;">Pt. Code</th>
+                        <th class="gov-th">Patient Name</th>
+                        <th class="gov-th" style="width:52px;">Age</th>
+                        <th class="gov-th" style="width:50px;">Sex</th>
+                        <th class="gov-th" style="width:128px;">Mobile</th>
+                        <th class="gov-th">Address / Upazila</th>
+                        <th class="gov-th" style="width:112px;">Admission Date</th>
+                        <th class="gov-th" style="width:90px;">Status</th>
+                        <th class="gov-th gov-th-action" style="width:76px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($patients as $patient)
+                        @php $g = strtolower($patient->gender ?? ''); @endphp
+                        <tr class="gov-tr">
+                            <td class="gov-td gov-td-sl">{{ $patient->id }}</td>
+                            <td class="gov-td">
+                                <span class="gov-code-badge gov-code-badge-teal">{{ $patient->patientcode ?? '—' }}</span>
+                            </td>
+                            <td class="gov-td">
+                                <div class="gov-name-cell">
+                                    <div class="gov-avatar gov-avatar-teal">
+                                        {{ strtoupper(substr($patient->patientname ?? 'P', 0, 1)) }}
                                     </div>
-                                </td>
-                                <td>{{ $patient->age ?? '—' }}</td>
-                                <td>
-                                    @php $g = strtolower($patient->gender ?? ''); @endphp
-                                    @if($g === 'male') <span class="gender-badge gender-male"><i class="fas fa-mars mr-1"></i>M</span>
-                                    @elseif($g === 'female') <span class="gender-badge gender-female"><i class="fas fa-venus mr-1"></i>F</span>
-                                    @else <span class="text-muted">—</span>
-                                    @endif
-                                </td>
-                                <td class="text-monospace small">{{ $patient->mobile_no ?? '—' }}</td>
-                                <td class="text-muted small">
-                                    {{ $patient->address ?? '' }}
-                                    @if($patient->upozila ?? null)<span class="text-muted">, {{ $patient->upozila }}</span>@endif
-                                </td>
-                                <td class="small">
-                                    @if($patient->admission_date ?? null)
-                                        <span class="date-badge"><i class="fas fa-calendar-alt mr-1"></i>{{ \Carbon\Carbon::parse($patient->admission_date)->format('d M Y') }}</span>
-                                    @else —
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="status-badge status-discharged">
-                                        <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
-                                        Discharged
+                                    <div class="gov-name-info">
+                                        <span class="gov-name-text">{{ $patient->patientname ?? '—' }}</span>
+                                        @if($patient->patientfather ?? null)
+                                            <span class="gov-father-text">
+                                                <i class="fas fa-user-tie fa-xs mr-1"></i>{{ $patient->patientfather }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="gov-td gov-td-center">{{ $patient->age ?? '—' }}</td>
+                            <td class="gov-td gov-td-center">
+                                @if($g === 'male')
+                                    <span class="gov-gender gov-gender-m">M</span>
+                                @elseif($g === 'female')
+                                    <span class="gov-gender gov-gender-f">F</span>
+                                @else
+                                    <span class="gov-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="gov-td gov-td-mono">{{ $patient->mobile_no ?? '—' }}</td>
+                            <td class="gov-td gov-td-muted">
+                                {{ $patient->address ?? '' }}{{ ($patient->upozila ?? null) ? ', '.$patient->upozila : '' }}
+                            </td>
+                            <td class="gov-td">
+                                @if($patient->admission_date ?? null)
+                                    <span class="gov-date-text">
+                                        <i class="fas fa-calendar-alt mr-1" style="color:var(--gov-teal-hdr);font-size:10px;"></i>
+                                        {{ \Carbon\Carbon::parse($patient->admission_date)->format('d M Y') }}
                                     </span>
-                                </td>
-                                <td class="text-center">
-                                    <button type="button"
-                                        class="btn-select-patient btn-select-teal"
-                                        onclick="selectPatient(this)"
-                                        data-id="{{ $patient->id }}"
-                                        data-name="{{ $patient->patientname ?? '' }}"
-                                        data-age="{{ $patient->age ?? '' }}"
-                                        data-code="{{ $patient->patientcode ?? '' }}"
-                                        data-mobile="{{ $patient->mobile_no ?? '' }}"
-                                        data-upozila="{{ $patient->upozila ?? '' }}"
-                                        data-blood="{{ $patient->blood_group ?? '' }}"
-                                        data-gender="{{ $patient->gender ?? '' }}"
-                                        data-admission-id="{{ $patient->admission_id ?? '' }}"
-                                        data-admission-date="{{ $patient->admission_date ?? '' }}">
-                                        <i class="fas fa-arrow-right mr-1"></i> Select
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="10">
-                                    <div class="empty-state">
-                                        <i class="fas fa-user-slash"></i>
-                                        <p>No patients found for release.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                                @else
+                                    <span class="gov-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="gov-td gov-td-center">
+                                <span class="gov-status-badge gov-status-discharged">
+                                    <i class="fas fa-circle" style="font-size:6px; margin-right:4px;"></i>
+                                    Discharged
+                                </span>
+                            </td>
+                            <td class="gov-td gov-td-action">
+                                <button type="button"
+                                    class="gov-select-btn"
+                                    onclick="selectPatient(this)"
+                                    data-id="{{ $patient->id }}"
+                                    data-name="{{ $patient->patientname ?? '' }}"
+                                    data-age="{{ $patient->age ?? '' }}"
+                                    data-code="{{ $patient->patientcode ?? '' }}"
+                                    data-mobile="{{ $patient->mobile_no ?? '' }}"
+                                    data-upozila="{{ $patient->upozila ?? '' }}"
+                                    data-blood="{{ $patient->blood_group ?? '' }}"
+                                    data-gender="{{ $patient->gender ?? '' }}"
+                                    data-admission-id="{{ $patient->admission_id ?? '' }}"
+                                    data-admission-date="{{ $patient->admission_date ?? '' }}"
+                                    title="Select this patient">
+                                    <i class="fas fa-arrow-right mr-1"></i> Select
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="10">
+                                <div class="gov-empty-state">
+                                    <i class="fas fa-user-slash"></i>
+                                    <p>No patients found for release.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-            @if(method_exists($patients, 'links'))
-            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                <small class="text-muted">
-                    <i class="fas fa-list-ul mr-1"></i>
-                    Showing {{ $patients->firstItem() ?? 0 }}–{{ $patients->lastItem() ?? 0 }}
-                    of <strong>{{ $patients->total() }}</strong> patients
-                </small>
+        {{-- Panel Footer / Pagination --}}
+        @if(method_exists($patients, 'links'))
+        <div class="gov-panel-footer">
+            <div class="gov-footer-info">
+                <i class="fas fa-list-ul mr-1"></i>
+                Showing <strong>{{ $patients->firstItem() ?? 0 }}</strong>
+                to <strong>{{ $patients->lastItem() ?? 0 }}</strong>
+                of <strong>{{ $patients->total() }}</strong> records
+            </div>
+            <div class="gov-pagination-wrap">
                 {{ $patients->links('pagination::bootstrap-4') }}
             </div>
-            @endif
+            <div class="gov-footer-hint">
+                <i class="fas fa-hand-pointer mr-1"></i>
+                Click <strong>Select</strong> to proceed with Bill & Release
+            </div>
         </div>
+        @endif
 
-        <div class="modern-card-footer">
-            <small class="text-muted">
-                <i class="fas fa-info-circle mr-1 text-teal"></i>
-                Click <strong>Select</strong> on a patient row to proceed to Bill & Release.
-                Release submit করলে manager approval এর পর released হবে।
-            </small>
-        </div>
     </div>
 </div>
 
@@ -737,6 +757,9 @@
 @section('css')
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════
+   ROOT VARIABLES
+═══════════════════════════════════════════════════════ */
 :root {
     --teal-deep:    #00695C;
     --teal-mid:     #00897B;
@@ -761,22 +784,41 @@
     --shadow-sm:    0 1px 4px rgba(0,0,0,.06);
     --shadow-md:    0 4px 16px rgba(0,0,0,.08);
     --font-base:    'DM Sans', 'Hind Siliguri', Arial, sans-serif;
-}
-body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-base); }
-.text-teal   { color:var(--teal-mid)   !important; }
-.text-orange { color:var(--orange)     !important; }
-.text-blue   { color:var(--blue-mid)   !important; }
-.text-red    { color:var(--red-mid)    !important; }
-.text-indigo { color:var(--indigo-mid) !important; }
 
-/* PAGE HEADER */
+    /* Gov palette */
+    --gov-bg:        #f2f4f7;
+    --gov-header:    #1a3a5c;
+    --gov-header2:   #1e4976;
+    --gov-accent:    #c9972a;
+    --gov-border:    #c8cdd6;
+    --gov-row-odd:   #ffffff;
+    --gov-row-even:  #f6f8fb;
+    --gov-row-hover: #e6f7f5;
+    --gov-text:      #1c2b3a;
+    --gov-muted:     #6b7890;
+
+    /* Teal gov palette */
+    --gov-teal-hdr:  #0d4a42;
+    --gov-teal-hdr2: #105c54;
+}
+body, .content-wrapper { background: var(--gov-bg) !important; font-family: var(--font-base); }
+.text-teal   { color: var(--teal-mid)   !important; }
+.text-orange { color: var(--orange)     !important; }
+.text-blue   { color: var(--blue-mid)   !important; }
+.text-red    { color: var(--red-mid)    !important; }
+.text-indigo { color: var(--indigo-mid) !important; }
+
+/* ═══════════════════════════════════════════════════════
+   PAGE HEADER
+═══════════════════════════════════════════════════════ */
 .page-main-title { font-size:22px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:10px; }
 .page-title-icon { width:38px;height:38px;border-radius:10px;background:var(--teal-light);display:inline-flex;align-items:center;justify-content:center;color:var(--teal-mid);font-size:17px; }
 .btn-back-modern { background:#fff;border:1.5px solid var(--border);color:var(--text-primary);border-radius:var(--radius-sm);font-weight:500;padding:6px 14px;font-size:13px;transition:all .2s;text-decoration:none; }
 .btn-back-modern:hover { background:var(--teal-light);border-color:var(--teal-mid);color:var(--teal-deep); }
-.release-count-badge { background:var(--teal-light);color:var(--teal-deep);border:1.5px solid var(--teal-soft);border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:700; }
 
-/* STEP INDICATOR */
+/* ═══════════════════════════════════════════════════════
+   STEP INDICATOR
+═══════════════════════════════════════════════════════ */
 .step-track-card { background:#fff;border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--border);padding:16px 24px; }
 .step-track-inner { display:flex;align-items:center; }
 .step-item { display:flex;align-items:center; }
@@ -795,7 +837,223 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 /* ALERT */
 .modern-alert { border-radius:var(--radius-md);border:none;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-sm); }
 
-/* CARD */
+/* ═══════════════════════════════════════════════════════
+   GOV PANEL — TEAL VARIANT (Step 1)
+═══════════════════════════════════════════════════════ */
+.gov-panel {
+    background: #fff;
+    border: 1px solid var(--gov-border);
+    border-top: 3px solid var(--gov-header);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+.gov-panel-teal { border-top-color: var(--gov-teal-hdr); }
+
+/* Title bar */
+.gov-panel-titlebar {
+    background: linear-gradient(90deg, var(--gov-header) 0%, var(--gov-header2) 100%);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+    border-bottom: 2px solid var(--gov-accent);
+}
+.gov-panel-titlebar-teal {
+    background: linear-gradient(90deg, var(--gov-teal-hdr) 0%, var(--gov-teal-hdr2) 100%);
+    border-bottom-color: #4db6ac;
+}
+.gov-panel-titlebar-left  { display: flex; align-items: center; gap: 10px; }
+.gov-panel-titlebar-right { display: flex; align-items: center; gap: 10px; }
+
+.gov-panel-icon {
+    width: 34px; height: 34px; border-radius: 4px;
+    background: rgba(255,255,255,.15);
+    color: #fff; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 1px solid rgba(255,255,255,.2);
+}
+.gov-panel-icon-teal { background: rgba(255,255,255,.12); }
+.gov-panel-title    { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; letter-spacing: .2px; }
+.gov-panel-subtitle { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 1px; }
+
+.gov-counter-badge {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 3px; padding: 4px 12px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.gov-counter-badge-teal { background: rgba(255,255,255,.12); }
+
+/* Toolbar */
+.gov-toolbar {
+    background: #f0f3f8;
+    border-bottom: 1.5px solid var(--gov-border);
+    padding: 8px 16px;
+}
+.gov-toolbar-teal { background: #f0f6f5; border-bottom-color: #b2dfdb; }
+.gov-toolbar-inner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.gov-toolbar-label {
+    font-size: 11px; font-weight: 800; color: var(--gov-header);
+    text-transform: uppercase; letter-spacing: .8px;
+    white-space: nowrap; flex-shrink: 0;
+}
+.gov-toolbar-label-teal { color: var(--gov-teal-hdr); }
+.gov-toolbar-hint { font-size: 11px; color: var(--gov-muted); white-space: nowrap; }
+.gov-toolbar-hint kbd {
+    background: #fff; border: 1px solid var(--gov-border);
+    border-radius: 3px; padding: 1px 5px;
+    font-size: 10px; color: var(--gov-header);
+}
+.gov-search-group { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 260px; }
+.gov-search-input {
+    flex: 1; border: 1.5px solid var(--gov-border);
+    border-radius: 3px; padding: 6px 10px;
+    font-size: 13px; color: var(--gov-text); background: #fff;
+    outline: none; transition: border-color .2s;
+    font-family: var(--font-base); height: 32px;
+}
+.gov-search-input-teal:focus { border-color: var(--teal-mid); box-shadow: 0 0 0 2px rgba(0,137,123,.12); }
+.gov-search-btn {
+    border: none; border-radius: 3px; padding: 0 14px;
+    height: 32px; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: background .2s;
+    background: var(--gov-header); color: #fff;
+    display: inline-flex; align-items: center;
+    white-space: nowrap; letter-spacing: .2px;
+}
+.gov-search-btn-teal { background: var(--gov-teal-hdr); }
+.gov-search-btn-teal:hover { background: var(--teal-mid); }
+.gov-clear-btn {
+    border: 1.5px solid var(--gov-border); border-radius: 3px;
+    padding: 0 10px; height: 32px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    background: #fff; color: var(--gov-muted);
+    display: inline-flex; align-items: center; white-space: nowrap;
+}
+.gov-clear-btn:hover { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+
+/* ═══════════════════════════════════════════════════════
+   GOV TABLE
+═══════════════════════════════════════════════════════ */
+.gov-table-wrap { overflow-x: auto; }
+.gov-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.gov-th {
+    background: #e8ecf4;
+    color: var(--gov-teal-hdr);
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .6px;
+    padding: 8px 10px;
+    border-bottom: 2px solid #b2dfdb;
+    border-right: 1px solid #c8d8d6;
+    white-space: nowrap; position: sticky; top: 0; z-index: 5;
+}
+.gov-th:last-child { border-right: none; }
+.gov-th-action { text-align: center; }
+
+.gov-tr { transition: background .12s; }
+.gov-tr:nth-child(odd)  { background: var(--gov-row-odd); }
+.gov-tr:nth-child(even) { background: #f5faf9; }
+.gov-tr:hover { background: #e6f7f5 !important; }
+
+.gov-td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #eaedf2;
+    border-right: 1px solid #f0f2f6;
+    vertical-align: middle; color: var(--gov-text);
+}
+.gov-td:last-child { border-right: none; }
+.gov-td-sl     { color: var(--gov-muted); font-size: 11.5px; text-align: center; }
+.gov-td-center { text-align: center; }
+.gov-td-mono   { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: .3px; }
+.gov-td-muted  { color: var(--gov-muted); font-size: 12px; }
+.gov-td-action { text-align: center; }
+
+/* Name cell */
+.gov-name-cell { display: flex; align-items: center; gap: 7px; }
+.gov-avatar {
+    width: 26px; height: 26px; border-radius: 3px;
+    background: var(--gov-header); color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.gov-avatar-teal { background: var(--gov-teal-hdr); }
+.gov-name-info  { display: flex; flex-direction: column; gap: 1px; }
+.gov-name-text  { font-weight: 600; font-size: 13px; color: var(--gov-text); line-height: 1.2; }
+.gov-father-text{ font-size: 10.5px; color: var(--gov-muted); }
+
+/* Badges */
+.gov-code-badge {
+    background: #e8ecf4; color: var(--gov-header);
+    border: 1px solid #c8cdd6; border-radius: 2px;
+    padding: 1px 7px; font-size: 11.5px; font-weight: 700;
+    font-family: 'Courier New', monospace; letter-spacing: .3px;
+}
+.gov-code-badge-teal { background: #e0f2f1; color: var(--teal-deep); border-color: var(--teal-soft); }
+
+.gov-gender {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 11px; font-weight: 800;
+}
+.gov-gender-m { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.gov-gender-f { background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; }
+
+.gov-date-text { display: block; font-size: 12.5px; font-weight: 600; color: var(--gov-text); }
+.gov-muted     { color: var(--gov-muted); font-size: 12px; }
+
+/* Status badge */
+.gov-status-badge {
+    display: inline-flex; align-items: center;
+    border-radius: 3px; padding: 2px 9px;
+    font-size: 11px; font-weight: 700;
+}
+.gov-status-discharged { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+
+/* Select button */
+.gov-select-btn {
+    background: var(--gov-teal-hdr);
+    color: #fff; border: none; border-radius: 3px;
+    padding: 5px 12px; font-size: 11.5px; font-weight: 700;
+    cursor: pointer; transition: all .18s;
+    display: inline-flex; align-items: center;
+    letter-spacing: .2px; white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.gov-select-btn:hover { background: var(--teal-mid); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,105,92,.3); }
+
+/* Empty state */
+.gov-empty-state { text-align: center; padding: 44px; color: #b0bec5; }
+.gov-empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
+.gov-empty-state p { font-size: 14px; margin: 0; }
+
+/* ═══════════════════════════════════════════════════════
+   PANEL FOOTER / PAGINATION
+═══════════════════════════════════════════════════════ */
+.gov-panel-footer {
+    background: #f0f6f5;
+    border-top: 1.5px solid #b2dfdb;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+}
+.gov-footer-info  { font-size: 12px; color: var(--gov-muted); white-space: nowrap; }
+.gov-footer-hint  { font-size: 11.5px; color: var(--gov-muted); }
+.gov-footer-hint strong { color: var(--gov-teal-hdr); }
+.gov-pagination-wrap .pagination { margin-bottom: 0; }
+.gov-pagination-wrap .page-link  {
+    border-radius: 3px !important; border-color: var(--gov-border);
+    color: var(--teal-mid); font-size: 12.5px; padding: 5px 10px;
+}
+.gov-pagination-wrap .page-item.active .page-link {
+    background: var(--teal-mid); border-color: var(--teal-mid);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODERN CARD (Step 2 & 3)
+═══════════════════════════════════════════════════════ */
 .modern-card { background:#fff;border-radius:var(--radius-lg);box-shadow:var(--shadow-md);border:1px solid var(--border);overflow:hidden;margin-bottom:24px; }
 .modern-card-header { padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:#fafbfd; }
 .modern-card-title { display:flex;align-items:center;gap:12px; }
@@ -803,51 +1061,10 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .bg-teal-soft   { background:var(--teal-light); }
 .bg-orange-soft { background:var(--orange-light); }
 .bg-blue-soft   { background:var(--blue-light); }
-.bg-indigo-soft { background:var(--indigo-light); }
+.bg-indigo-soft { background:#E8EAF6; }
 .modern-card-body { padding:24px; }
 .modern-card-footer { padding:14px 24px;border-top:1px solid var(--border);background:#fafbfd;display:flex;align-items:center;justify-content:space-between; }
 .action-card { border:2px solid var(--teal-soft); }
-
-/* STICKY BAR */
-.patient-sticky-bar { padding:14px 24px;background:#fff;border-bottom:2px solid var(--teal-soft);z-index:999;transition:box-shadow .25s,border-color .25s; }
-.patient-sticky-bar.is-sticky { position:fixed;top:57px;left:0;right:0;border-bottom-color:var(--teal-mid);box-shadow:0 4px 18px rgba(0,137,123,.13); }
-.sticky-bar-spacer { display:none; }
-.sticky-bar-spacer.active { display:block; }
-.sticky-bar-info { font-size:13px;color:var(--text-muted);padding:6px 14px;border-radius:20px;font-weight:500; }
-.sticky-bar-info-teal { background:var(--teal-light);color:var(--teal-deep); }
-.sticky-bar-info-teal strong { color:var(--teal-deep); }
-
-/* SEARCH */
-.search-input-group { display:flex;align-items:center;background:#fff;border:2px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s;box-shadow:var(--shadow-sm); }
-.search-input-group:focus-within { border-color:var(--teal-mid);box-shadow:0 0 0 3px rgba(0,137,123,.1); }
-.search-icon { padding:0 12px;color:#aab;font-size:15px; }
-.search-input { flex:1;border:none;outline:none;padding:10px 6px;font-size:14px;background:transparent;color:var(--text-primary); }
-.search-btn { border:none;padding:10px 22px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .2s; }
-.search-btn-teal { background:var(--teal-mid);color:#fff; }
-.search-btn-teal:hover { background:var(--teal-deep); }
-
-/* TABLE */
-.modern-table { border-collapse:separate;border-spacing:0;width:100%; }
-.modern-table thead tr th { background:#f0f8f7;color:var(--text-primary);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:11px 14px;border-bottom:2px solid var(--teal-soft);white-space:nowrap;position:sticky;top:0;z-index:10; }
-.modern-table tbody tr { transition:background .15s; }
-.modern-table tbody tr:hover { background:#f0f8f7; }
-.modern-table tbody td { padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-primary);vertical-align:middle; }
-.patient-code-badge { background:var(--teal-light);color:var(--teal-deep);border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700;font-family:monospace; }
-.patient-name-cell { display:flex;align-items:center;gap:8px; }
-.patient-mini-avatar { width:28px;height:28px;border-radius:50%;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
-.patient-mini-avatar-teal { background:linear-gradient(135deg,var(--teal-deep),#4db6ac); }
-.gender-badge { display:inline-flex;align-items:center;border-radius:5px;padding:2px 8px;font-size:11.5px;font-weight:700; }
-.gender-male   { background:#e3f2fd;color:var(--blue-deep); }
-.gender-female { background:#fce4ec;color:#880e4f; }
-.date-badge { font-size:12px;color:var(--text-muted); }
-.status-badge { display:inline-flex;align-items:center;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700; }
-.status-discharged { background:#e8f5e9;color:#2e7d32; }
-.btn-select-patient { border:none;border-radius:var(--radius-sm);padding:6px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s; }
-.btn-select-teal { background:var(--teal-mid);color:#fff;box-shadow:0 2px 6px rgba(0,137,123,.25); }
-.btn-select-teal:hover { background:var(--teal-deep);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,137,123,.32); }
-.empty-state { text-align:center;padding:40px;color:#b0bec5; }
-.empty-state i { font-size:36px;margin-bottom:10px;display:block; }
-.empty-state p { font-size:14px;margin:0; }
 
 /* SELECTED PATIENT BAR */
 .patient-selected-bar { border-radius:var(--radius-md);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px; }
@@ -911,7 +1128,7 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .btn-release-print-bill:hover { background:var(--blue-mid);color:#fff; }
 .btn-release-back { background:#fff;color:var(--text-muted);border:1.5px solid var(--border); }
 .btn-release-back:hover { background:#f0f4f8; }
-.btn-toggle-rx { background:var(--indigo-light);color:var(--indigo-mid);border:1.5px solid #c5cae9;border-radius:var(--radius-sm);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s; }
+.btn-toggle-rx { background:#E8EAF6;color:#3949AB;border:1.5px solid #c5cae9;border-radius:var(--radius-sm);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s; }
 
 /* RX SUMMARY CARDS */
 .rx-summary-card { border-radius:var(--radius-md);padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-sm);height:100%; }
@@ -923,7 +1140,6 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .rx-summary-label { color:rgba(255,255,255,.75);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:600; }
 .rx-summary-value { color:#fff;font-size:14px;font-weight:700;margin-top:2px; }
 .rx-saved-badge { border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:700;display:inline-flex;align-items:center; }
-.rx-saved-badge-teal   { background:var(--teal-light);color:var(--teal-deep);border:1.5px solid var(--teal-soft); }
 .rx-saved-badge-orange { background:var(--orange-light);color:var(--orange);border:1.5px solid var(--orange-soft); }
 .btn-rx-action { border-radius:var(--radius-sm);padding:8px 18px;font-size:13px;font-weight:600;border:1.5px solid transparent;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center; }
 .btn-rx-print { background:var(--blue-deep);color:#fff;border-color:var(--blue-deep); }
@@ -937,200 +1153,42 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .rx-history-line { font-size:12px;color:var(--text-primary);padding:2px 0;border-bottom:1px dashed var(--border); }
 .rx-history-line:last-child { border-bottom:none; }
 
-/* PAGINATION */
-.pagination { margin-bottom:0; }
-.page-link { border-radius:var(--radius-sm) !important;border-color:var(--border);color:var(--teal-mid);font-size:13px; }
-.page-item.active .page-link { background:var(--teal-mid);border-color:var(--teal-mid); }
-
 /* ═══════════════════════════════════════════════════════════════
    BILL BOOK PRINT LAYOUT — Matches Professor Clinic carbon book
 ═══════════════════════════════════════════════════════════════ */
-#release-print-area {
-    padding: 10px;
-    background: #e8e8e8;
-}
-.bill-book-wrapper {
-    width: 100%;
-    max-width: 750px;
-    margin: 0 auto;
-    background: #fff;
-    border: 1.5px solid #777;
-    font-family: Arial, 'Hind Siliguri', sans-serif;
-    font-size: 12px;
-    color: #111;
-    box-shadow: 0 3px 14px rgba(0,0,0,.15);
-}
-
-/* ── HEADER STRIP (blue/purple like the book) ── */
-.bb-header {
-    display: flex;
-    align-items: stretch;
-    min-height: 64px;
-    background: linear-gradient(90deg, #2d2db0 0%, #4040cc 50%, #2d2db0 100%) !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    border-bottom: 3px solid #1a1a99;
-}
-.bb-header-logo-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 8px 12px;
-    border-right: 2px solid rgba(255,255,255,.25);
-    min-width: 90px;
-}
-.bb-cp-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2.5px solid #fff;
-    background: #fff !important;
-    -webkit-print-color-adjust: exact;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
+#release-print-area { padding:10px;background:#e8e8e8; }
+.bill-book-wrapper { width:100%;max-width:750px;margin:0 auto;background:#fff;border:1.5px solid #777;font-family:Arial,'Hind Siliguri',sans-serif;font-size:12px;color:#111;box-shadow:0 3px 14px rgba(0,0,0,.15); }
+.bb-header { display:flex;align-items:stretch;min-height:64px;background:linear-gradient(90deg,#2d2db0 0%,#4040cc 50%,#2d2db0 100%) !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;border-bottom:3px solid #1a1a99; }
+.bb-header-logo-col { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 12px;border-right:2px solid rgba(255,255,255,.25);min-width:90px; }
+.bb-cp-logo { width:40px;height:40px;border-radius:50%;border:2.5px solid #fff;background:#fff !important;-webkit-print-color-adjust:exact;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
 .bb-cp-letter { font-size:22px;font-weight:900;color:#2d2db0; }
-.bb-clinic-badge {
-    color: #fff;
-    font-size: 6.5px;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: .4px;
-    text-transform: uppercase;
-    line-height: 1.3;
-}
-.bb-header-center-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-}
-.bb-clinic-title {
-    font-size: 24px;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    line-height: 1.1;
-    text-shadow: 1px 1px 3px rgba(0,0,0,.35);
-}
-.bb-clinic-sub {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255,255,255,.9);
-    margin-top: 4px;
-    letter-spacing: .5px;
-}
-.bb-header-phone-col {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    padding: 8px 12px 8px 8px;
-    border-left: 2px solid rgba(255,255,255,.25);
-    min-width: 115px;
-}
-.bb-phone-line {
-    color: #fff;
-    font-size: 9.5px;
-    line-height: 1.55;
-}
-
-/* ── PATIENT META ── */
-.bb-meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 5px 12px;
-    border-bottom: 1px solid #ccc;
-    background: #fafafa !important;
-    -webkit-print-color-adjust: exact;
-    gap: 4px;
-}
-.bb-meta-field {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-    flex: 1;
-    min-width: 150px;
-    padding: 2px 4px;
-}
+.bb-clinic-badge { color:#fff;font-size:6.5px;font-weight:700;text-align:center;letter-spacing:.4px;text-transform:uppercase;line-height:1.3; }
+.bb-header-center-col { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 14px; }
+.bb-clinic-title { font-size:24px;font-weight:900;color:#fff;letter-spacing:1.5px;text-transform:uppercase;line-height:1.1;text-shadow:1px 1px 3px rgba(0,0,0,.35); }
+.bb-clinic-sub { font-size:11px;font-weight:600;color:rgba(255,255,255,.9);margin-top:4px;letter-spacing:.5px; }
+.bb-header-phone-col { display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:8px 12px 8px 8px;border-left:2px solid rgba(255,255,255,.25);min-width:115px; }
+.bb-phone-line { color:#fff;font-size:9.5px;line-height:1.55; }
+.bb-meta-row { display:flex;flex-wrap:wrap;align-items:center;padding:5px 12px;border-bottom:1px solid #ccc;background:#fafafa !important;-webkit-print-color-adjust:exact;gap:4px; }
+.bb-meta-field { display:flex;align-items:baseline;gap:5px;flex:1;min-width:150px;padding:2px 4px; }
 .bb-meta-label { font-size:11px;font-weight:700;color:#222;white-space:nowrap; }
-.bb-meta-value {
-    flex: 1;
-    border-bottom: 1px dotted #888;
-    font-size: 12px;
-    color: #111;
-    padding: 0 4px 1px;
-    min-width: 70px;
-}
-
-/* ── BILL/ESTIMATE TITLE ── */
-.bb-bill-title-row {
-    text-align: center;
-    padding: 7px 0 5px;
-    border-bottom: 2px solid #333;
-    background: #f8f8f8 !important;
-    -webkit-print-color-adjust: exact;
-}
-.bb-bill-title-badge {
-    display: inline-block;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: 3px;
-    color: #fff;
-    background: #333 !important;
-    -webkit-print-color-adjust: exact;
-    padding: 4px 32px;
-    border-radius: 2px;
-}
-
-/* ── MAIN BILL TABLE ── */
-.bb-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-}
-.bb-table th,
-.bb-table td {
-    border: 1px solid #aaa;
-    padding: 5px 8px;
-    vertical-align: middle;
-}
-.bb-table thead th {
-    background: #efefef !important;
-    -webkit-print-color-adjust: exact;
-    font-weight: 700;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .4px;
-    text-align: center;
-}
-.bb-col-sl   { width:34px;  text-align:center; }
-.bb-col-desc { text-align:left; }
-.bb-col-qty  { width:48px;  text-align:center; }
-.bb-col-rate { width:88px;  text-align:right; }
-.bb-col-amt  { width:100px; text-align:right; }
+.bb-meta-value { flex:1;border-bottom:1px dotted #888;font-size:12px;color:#111;padding:0 4px 1px;min-width:70px; }
+.bb-bill-title-row { text-align:center;padding:7px 0 5px;border-bottom:2px solid #333;background:#f8f8f8 !important;-webkit-print-color-adjust:exact; }
+.bb-bill-title-badge { display:inline-block;font-size:13px;font-weight:900;letter-spacing:3px;color:#fff;background:#333 !important;-webkit-print-color-adjust:exact;padding:4px 32px;border-radius:2px; }
+.bb-table { width:100%;border-collapse:collapse;font-size:12px; }
+.bb-table th,.bb-table td { border:1px solid #aaa;padding:5px 8px;vertical-align:middle; }
+.bb-table thead th { background:#efefef !important;-webkit-print-color-adjust:exact;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;text-align:center; }
+.bb-col-sl { width:34px;text-align:center; } .bb-col-desc { text-align:left; } .bb-col-qty { width:48px;text-align:center; } .bb-col-rate { width:88px;text-align:right; } .bb-col-amt { width:100px;text-align:right; }
 .bb-table tbody tr td { font-size:12px; }
 .bb-table tbody td:first-child { text-align:center;color:#555;font-size:11px; }
 .bb-table tbody td:nth-child(3) { text-align:center; }
-.bb-table tbody td:nth-child(4),
-.bb-table tbody td:nth-child(5) { text-align:right; }
+.bb-table tbody td:nth-child(4),.bb-table tbody td:nth-child(5) { text-align:right; }
 .bb-table tbody tr:nth-child(odd)  { background:#fff !important; }
 .bb-table tbody tr:nth-child(even) { background:#f9f9f9 !important; }
-.bb-table tfoot td { border:1px solid #aaa; padding:5px 8px; }
-
-/* ── TFOOT ── */
+.bb-table tfoot td { border:1px solid #aaa;padding:5px 8px; }
 .bb-foot-label { text-align:right;font-weight:700;font-size:12px; }
 .bb-foot-label-net { font-size:13px;font-weight:900; }
 .bb-foot-label-due { font-size:13px;font-weight:900;color:#b71c1c; }
-.bb-foot-val  { text-align:right;font-weight:700;font-size:12px; }
+.bb-foot-val { text-align:right;font-weight:700;font-size:12px; }
 .bb-foot-val-net { background:#e0f2f1 !important;-webkit-print-color-adjust:exact;font-size:14px;font-weight:900;color:#004d40; }
 .bb-foot-val-due { background:#ffebee !important;-webkit-print-color-adjust:exact;font-size:14px;font-weight:900;color:#b71c1c; }
 .bb-row-total   { background:#f4f4f4 !important;-webkit-print-color-adjust:exact; }
@@ -1138,79 +1196,30 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 .bb-row-net     { background:#e0f2f1 !important;-webkit-print-color-adjust:exact; }
 .bb-row-advance { background:#f0fff4 !important;-webkit-print-color-adjust:exact; }
 .bb-row-due     { background:#ffebee !important;-webkit-print-color-adjust:exact; }
-
-/* ── DETAILS STRIP ── */
-.bb-details-strip {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 5px 12px 4px;
-    border-top: 1.5px solid #aaa;
-    border-bottom: 1px solid #ddd;
-    background: #f4fff8 !important;
-    -webkit-print-color-adjust: exact;
-    gap: 2px 14px;
-}
+.bb-details-strip { display:flex;flex-wrap:wrap;padding:5px 12px 4px;border-top:1.5px solid #aaa;border-bottom:1px solid #ddd;background:#f4fff8 !important;-webkit-print-color-adjust:exact;gap:2px 14px; }
 .bb-detail-item { display:flex;align-items:baseline;gap:4px;flex:1;min-width:120px;padding:2px 2px; }
 .bb-detail-label { font-size:10.5px;font-weight:700;color:#444;white-space:nowrap; }
 .bb-detail-value { font-size:11px;color:#111;border-bottom:1px dotted #999;flex:1;padding:0 2px 1px; }
-
-/* ── NOTES ── */
-.bb-notes {
-    padding: 4px 14px;
-    min-height: 16px;
-    font-size:11px;
-    color:#444;
-    border-bottom:1px dashed #ccc;
-    white-space:pre-wrap;
-}
-
-/* ── STATUS BAR ── */
-.bb-status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px 14px;
-    border-bottom: 1px solid #e0e0e0;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-.bb-pending-badge {
-    background: #fff3e0 !important;
-    -webkit-print-color-adjust: exact;
-    color: #e65100;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 3px;
-    border: 1px solid #ffcc80;
-}
+.bb-notes { padding:4px 14px;min-height:16px;font-size:11px;color:#444;border-bottom:1px dashed #ccc;white-space:pre-wrap; }
+.bb-status-bar { display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-bottom:1px solid #e0e0e0;flex-wrap:wrap;gap:4px; }
+.bb-pending-badge { background:#fff3e0 !important;-webkit-print-color-adjust:exact;color:#e65100;font-size:11px;font-weight:700;padding:2px 10px;border-radius:3px;border:1px solid #ffcc80; }
 .bb-gen-info { font-size:10px;color:#777; }
-
-/* ── SIGNATURE ── */
-.bb-signature-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 24px 44px 16px;
-    border-top: 1px solid #e0e0e0;
-}
-.bb-sig { width: 38%; }
-.bb-sig-right { text-align: right; }
-.bb-sig-line  { border-bottom: 1px solid #333; margin-bottom: 6px; height: 30px; }
-.bb-sig-label { font-size: 10px; color: #666; text-align: center; }
+.bb-signature-row { display:flex;justify-content:space-between;padding:24px 44px 16px;border-top:1px solid #e0e0e0; }
+.bb-sig { width:38%; }
+.bb-sig-right { text-align:right; }
+.bb-sig-line { border-bottom:1px solid #333;margin-bottom:6px;height:30px; }
+.bb-sig-label { font-size:10px;color:#666;text-align:center; }
 
 /* ── PRINT ── */
 @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body * { visibility: hidden !important; }
-    #release-print-area, #release-print-area * { visibility: visible !important; }
-    #release-print-area {
-        position: fixed; top: 0; left: 0; width: 100%;
-        background: white !important; padding: 0 !important;
-    }
-    .bill-book-wrapper { border: none !important; max-width: 100% !important; box-shadow: none !important; }
-    .patient-sticky-bar { display: none !important; }
-    .bb-header { -webkit-print-color-adjust: exact !important; }
-    .bb-row-net, .bb-row-due, .bb-foot-val-net, .bb-foot-val-due { -webkit-print-color-adjust: exact !important; }
+    * { -webkit-print-color-adjust:exact !important;print-color-adjust:exact !important; }
+    body * { visibility:hidden !important; }
+    #release-print-area, #release-print-area * { visibility:visible !important; }
+    #release-print-area { position:fixed;top:0;left:0;width:100%;background:white !important;padding:0 !important; }
+    .bill-book-wrapper { border:none !important;max-width:100% !important;box-shadow:none !important; }
+    .gov-toolbar,.gov-panel-titlebar { display:none !important; }
+    .bb-header { -webkit-print-color-adjust:exact !important; }
+    .bb-row-net,.bb-row-due,.bb-foot-val-net,.bb-foot-val-due { -webkit-print-color-adjust:exact !important; }
 }
 </style>
 @stop
@@ -1219,9 +1228,9 @@ body, .content-wrapper { background:#f0f0f6 !important; font-family:var(--font-b
 <script>
 var CSRF_TOKEN        = '{{ csrf_token() }}';
 var RELEASE_STORE_URL = '{{ url("/nursing/releasepatients/store") }}';
-var PATIENT_DATA_URL  = '{{ url("/nursing/releasepatients/patient-data") }}'; // ✅ fixed URL
+var PATIENT_DATA_URL  = '{{ url("/nursing/releasepatients/patient-data") }}';
 
-// ══ UPDATED: All 16 charge items matching the physical Professor Clinic bill book ══
+// ══ All 16 charge items matching the physical Professor Clinic bill book ══
 var DEFAULT_BILL_ITEMS = [
     { description:'Operation Charge',              qty:1, unit_price:0 },
     { description:'Assistance Charge',             qty:1, unit_price:0 },
@@ -1262,31 +1271,11 @@ function showAlert(type,msg){
 function showToast(msg,type){
     var bg=type==='success'?'#00695C':(type==='error'?'#c62828':'#1565C0');
     var t=document.createElement('div');
-    t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;background:'+bg+';color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:320px;';
+    t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:9999;background:'+bg+';color:#fff;padding:12px 20px;border-radius:4px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:320px;';
     t.innerHTML='<i class="fas fa-check-circle mr-2"></i>'+msg;
     document.body.appendChild(t);
     setTimeout(function(){ t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(function(){ t.remove(); },300); },3000);
 }
-
-/* ══ STICKY BAR ══ */
-(function initStickyBar(){
-    var bar    = document.getElementById('patient-sticky-bar');
-    var spacer = document.getElementById('sticky-bar-spacer');
-    if(!bar||!spacer) return;
-    var NAVBAR_H=57, barOffsetTop=0, barHeight=0;
-    function measure(){
-        bar.classList.remove('is-sticky'); spacer.classList.remove('active'); spacer.style.height='';
-        barOffsetTop=bar.getBoundingClientRect().top+window.scrollY; barHeight=bar.offsetHeight;
-    }
-    function onScroll(){
-        if(document.getElementById('panel-step1').style.display==='none') return;
-        if(window.scrollY+NAVBAR_H>=barOffsetTop){ bar.classList.add('is-sticky'); spacer.classList.add('active'); spacer.style.height=barHeight+'px'; }
-        else { bar.classList.remove('is-sticky'); spacer.classList.remove('active'); spacer.style.height=''; }
-    }
-    window.addEventListener('load', function(){ measure(); onScroll(); });
-    window.addEventListener('scroll', onScroll, {passive:true});
-    window.addEventListener('resize', function(){ measure(); onScroll(); });
-})();
 
 /* ══ BILL TABLE ══ */
 function renderBillTable(){
@@ -1389,7 +1378,7 @@ function selectPatient(btn){
 
 /* ══ LOAD PATIENT DATA (AJAX) ══ */
 function loadPatientData(patientId){
-    fetch(PATIENT_DATA_URL+'/'+patientId, { // ✅ fixed URL
+    fetch(PATIENT_DATA_URL+'/'+patientId, {
         headers:{'Accept':'application/json','X-CSRF-TOKEN':CSRF_TOKEN}
     })
     .then(function(r){ return r.json(); })
@@ -1471,7 +1460,6 @@ function processRelease(){
         if(data.success){
             showToast(data.message||'Release request submitted! Waiting for manager approval.','success');
             showAlert('success','<i class="fas fa-check-circle mr-2"></i>'+(data.message||'Submitted for approval. Manager approval এর পর patient released হবে।'));
-            // ✅ Show summary then go back after 3s
             generateReleaseSummary(billData, doctorName);
             setTimeout(function(){ backToStep1(); }, 4000);
         } else {
@@ -1499,7 +1487,6 @@ function generateReleaseSummary(billData, doctorName){
     setText('ib-total', taka(billData.grand)); setText('ib-due', taka(billData.due));
     setText('rx-badge-name', pName);
 
-    // ── bill-book print fields ──
     setText('print-code',         pCode);
     setText('print-name',         pName);
     setText('print-age',          pAge);
@@ -1511,14 +1498,12 @@ function generateReleaseSummary(billData, doctorName){
     setText('print-condition',    condText);
     setText('print-doctor',       doctorName||'—');
 
-    // ── bill totals ──
     setText('print-subtotal',     taka(billData.subtotal));
     setText('print-discount-val', taka(billData.discountAmt));
     setText('print-grand-total',  taka(billData.grand));
     setText('print-advance-val',  taka(billData.advance));
     setText('print-due-val',      taka(billData.due));
 
-    // ── bill rows: show all items that have a description ──
     var allItems = billItems.filter(function(item){ return item.description.trim() !== ''; });
     document.getElementById('print-bill-tbody').innerHTML = allItems.length
         ? allItems.map(function(item, i){
@@ -1587,7 +1572,10 @@ function filterTable(){
         row.style.display=row.textContent.toLowerCase().includes(q)?'':'none';
     });
 }
-document.getElementById('patientSearch').addEventListener('keyup', filterTable);
+document.getElementById('patientSearch').addEventListener('keyup', function(e){
+    if(e.key === 'Enter') filterTable();
+    else filterTable();
+});
 document.getElementById('f-release-date').addEventListener('change', function(){
     calcDays(); setText('sum-release', fmtDateBD(this.value));
 });

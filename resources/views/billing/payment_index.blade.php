@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Billing ? Payment')
+@section('title', 'Billing — Payment')
 
 @section('content_header')
 <div class="d-flex align-items-center justify-content-between">
     <h1 class="m-0" style="font-size:18px; font-weight:600; color:#222;">
-        Billing ? Payment
+        Billing — Payment
     </h1>
     <ol class="breadcrumb float-sm-right mb-0" style="font-size:12px;">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
@@ -17,18 +17,18 @@
 @section('content')
 
 {{-- ============================================================
-     TOP ROW ? Pay Due Amount Form (LEFT) + Summary Cards (RIGHT)
+     TOP ROW — Pay Due Amount Form (LEFT) + Summary Cards (RIGHT)
 ============================================================= --}}
-<div style="display:flex; gap:16px; padding:4px 0 14px; align-items:flex-start;">
+<div class="top-row-wrap">
 
-    {{-- LEFT ? Pay Due Amount --}}
-    <div style="flex:0 0 38%; border:2px solid #00bfa5; border-radius:6px; background:#fff; overflow:hidden;">
+    {{-- LEFT — Pay Due Amount --}}
+    <div class="pay-form-card">
 
-        <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; font-size:15px; font-weight:600; color:#222;">
+        <div class="card-header-bar">
             Pay Due Amount
         </div>
 
-        <div style="padding:12px 14px; display:flex; flex-direction:column; gap:9px;">
+        <div class="card-body-pad">
 
             {{-- Invoice Search --}}
             <div class="ci-row">
@@ -36,7 +36,7 @@
                 <div class="ci-colon">:</div>
                 <div class="ci-control">
                     <select id="invoiceSelect" style="width:100%;">
-                        <option value="">? Type bill no / name / mobile ?</option>
+                        <option value="">— Type bill no / name / mobile —</option>
                     </select>
                 </div>
             </div>
@@ -45,27 +45,27 @@
             <div id="invoiceInfoBox" style="display:none; background:#e8f5e9; border-radius:5px; padding:8px 10px; font-size:12px;">
                 <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; margin-bottom:6px;">
                     <div>
-                        <span style="background:#00bfa5;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600;" id="infoBillNo">?</span>
-                        <strong id="infoPatientName" style="margin-left:6px; font-size:13px;">?</strong>
+                        <span style="background:#00bfa5;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600;" id="infoBillNo">—</span>
+                        <strong id="infoPatientName" style="margin-left:6px; font-size:13px;">—</strong>
                         <span id="infoTypeBadge" style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block;"></span>
                     </div>
                     <button type="button" id="btnClearInvoice"
                             style="background:none;border:1px solid #e57373;color:#e57373;border-radius:3px;font-size:11px;padding:1px 8px;cursor:pointer;">
-                        ? Clear
+                        &times; Clear
                     </button>
                 </div>
-                <div style="display:flex; gap:8px;">
-                    <div style="flex:1;background:#fff;border:1px solid #c8e6c9;border-radius:4px;padding:6px 8px;text-align:center;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <div style="flex:1;min-width:70px;background:#fff;border:1px solid #c8e6c9;border-radius:4px;padding:6px 8px;text-align:center;">
                         <div style="font-size:10px;color:#888;">Total Bill</div>
-                        <div style="font-size:14px;font-weight:700;color:#222;" id="infoTotal">? 0</div>
+                        <div style="font-size:14px;font-weight:700;color:#222;" id="infoTotal">&#2547; 0</div>
                     </div>
-                    <div style="flex:1;background:#fff;border:1px solid #c8e6c9;border-radius:4px;padding:6px 8px;text-align:center;">
+                    <div style="flex:1;min-width:70px;background:#fff;border:1px solid #c8e6c9;border-radius:4px;padding:6px 8px;text-align:center;">
                         <div style="font-size:10px;color:#888;">Paid</div>
-                        <div style="font-size:14px;font-weight:700;color:#2e7d32;" id="infoPaid">? 0</div>
+                        <div style="font-size:14px;font-weight:700;color:#2e7d32;" id="infoPaid">&#2547; 0</div>
                     </div>
-                    <div style="flex:1;background:#fff3e0;border:1px solid #ffcc80;border-radius:4px;padding:6px 8px;text-align:center;">
+                    <div style="flex:1;min-width:70px;background:#fff3e0;border:1px solid #ffcc80;border-radius:4px;padding:6px 8px;text-align:center;">
                         <div style="font-size:10px;color:#e65100;">Due</div>
-                        <div style="font-size:14px;font-weight:700;color:#e65100;" id="infoDue">? 0</div>
+                        <div style="font-size:14px;font-weight:700;color:#e65100;" id="infoDue">&#2547; 0</div>
                     </div>
                 </div>
             </div>
@@ -82,7 +82,7 @@
             <div id="paymentFields" style="display:none; flex-direction:column; gap:9px;">
 
                 <div class="ci-row">
-                    <div class="ci-label">Paying Amount (?)</div>
+                    <div class="ci-label">Paying Amount (&#2547;)</div>
                     <div class="ci-colon">:</div>
                     <div class="ci-control">
                         <input type="number" id="payingAmountInput" class="ci-input" placeholder="0" min="1" step="1">
@@ -133,29 +133,27 @@
     </div>{{-- /LEFT --}}
 
 
-    {{-- RIGHT ? Summary Card + Search --}}
-    <div style="flex:1; display:flex; flex-direction:column; gap:12px;">
+    {{-- RIGHT — Summary Card + Search --}}
+    <div class="right-col">
 
         <div style="display:flex; gap:12px;">
-
             <div class="summary-card" style="border-left:4px solid #e65100;">
                 <div class="summary-icon" style="background:#fff3e0; color:#e65100;">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </div>
                 <div>
                     <div class="summary-label">Total Due</div>
-                    <div class="summary-value" id="sumTotalDue">? 0</div>
+                    <div class="summary-value" id="sumTotalDue">&#2547; 0</div>
                     <div class="summary-count" id="sumTotalCount">0 invoices</div>
                 </div>
             </div>
-
         </div>
 
         {{-- Search bar --}}
-        <div style="display:flex; gap:8px; align-items:center;">
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <input type="text" id="listSearchInput" class="ci-input"
-                   placeholder="Search name / bill no / mobile?"
-                   style="flex:1; height:32px;">
+                   placeholder="Search name / bill no / mobile..."
+                   style="flex:1; min-width:160px; height:32px;">
             <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;">
                 <input type="checkbox" id="showAllChk" style="cursor:pointer;">
                 Show Paid Also
@@ -168,18 +166,17 @@
 
 
 {{-- ============================================================
-     BOTTOM ? 3 Category Tabs + Due List Table
+     BOTTOM — Due List Table
 ============================================================= --}}
 <div style="border:2px solid #00bfa5; border-radius:6px; background:#fff; overflow:hidden;">
 
     {{-- Export Toolbar --}}
-    <div style="padding:8px 14px; background:#fafafa; border-bottom:1px solid #eee;
-                display:flex; justify-content:space-between; align-items:center; gap:8px;">
+    <div class="export-toolbar">
         <div style="font-size:12px; color:#555;">
             Due List
             <span id="activeTabDueSummary" style="margin-left:8px; color:#e65100; font-weight:600;"></span>
         </div>
-        <div style="display:flex; gap:6px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button id="btnExportExcel"
                     style="background:#217346;color:#fff;border:none;border-radius:4px;
                            padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;">
@@ -199,17 +196,17 @@
     </div>
 
     {{-- Table --}}
-    <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;" id="dueTable">
+    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px;" id="dueTable">
             <thead>
                 <tr style="background:#f5f5f5;">
                     <th class="inv-th" style="width:28px;">#</th>
                     <th class="inv-th">Bill No</th>
                     <th class="inv-th">Patient</th>
                     <th class="inv-th">Date</th>
-                    <th class="inv-th" style="text-align:right;">Total (?)</th>
-                    <th class="inv-th" style="text-align:right;">Paid (?)</th>
-                    <th class="inv-th" style="text-align:right; color:#e65100;">Due (?)</th>
+                    <th class="inv-th" style="text-align:right;">Total (&#2547;)</th>
+                    <th class="inv-th" style="text-align:right;">Paid (&#2547;)</th>
+                    <th class="inv-th" style="text-align:right; color:#e65100;">Due (&#2547;)</th>
                     <th class="inv-th" style="text-align:center;">Status</th>
                     <th class="inv-th" style="text-align:center;">Action</th>
                 </tr>
@@ -217,16 +214,16 @@
             <tbody id="dueTableBody">
                 <tr>
                     <td colspan="9" style="text-align:center;color:#aaa;padding:30px;font-size:12px;border:1px solid #ddd;">
-                        <i class="fas fa-spinner fa-spin mr-1"></i> Loading?
+                        <i class="fas fa-spinner fa-spin mr-1"></i> Loading...
                     </td>
                 </tr>
             </tbody>
             <tfoot id="dueTableFoot" style="display:none;">
                 <tr style="background:#e8f5e9; font-weight:700;">
                     <td colspan="4" class="inv-th" style="text-align:right;color:#555;">Total (this page):</td>
-                    <td class="inv-th" style="text-align:right;" id="footTotal">? 0</td>
-                    <td class="inv-th" style="text-align:right;color:#2e7d32;" id="footPaid">? 0</td>
-                    <td class="inv-th" style="text-align:right;color:#e65100;font-weight:700;" id="footDue">? 0</td>
+                    <td class="inv-th" style="text-align:right;" id="footTotal">&#2547; 0</td>
+                    <td class="inv-th" style="text-align:right;color:#2e7d32;" id="footPaid">&#2547; 0</td>
+                    <td class="inv-th" style="text-align:right;color:#e65100;font-weight:700;" id="footDue">&#2547; 0</td>
                     <td colspan="2" class="inv-th"></td>
                 </tr>
             </tfoot>
@@ -247,6 +244,53 @@
 <style>
     .content-wrapper { background: #f4f6f8 !important; }
 
+    /* -- Layout -- */
+    .top-row-wrap {
+        display: flex;
+        gap: 16px;
+        padding: 4px 0 14px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .pay-form-card {
+        flex: 0 0 38%;
+        min-width: 280px;
+        border: 2px solid #00bfa5;
+        border-radius: 6px;
+        background: #fff;
+        overflow: hidden;
+    }
+    .right-col {
+        flex: 1;
+        min-width: 240px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .card-header-bar {
+        padding: 10px 14px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 15px;
+        font-weight: 600;
+        color: #222;
+    }
+    .card-body-pad {
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+    .export-toolbar {
+        padding: 8px 14px;
+        background: #fafafa;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
     /* -- Select2 -- */
     .select2-container--default .select2-selection--single {
         border:1px solid #ccc !important; border-radius:4px !important; height:30px !important;
@@ -264,14 +308,15 @@
     .select2-results__option { padding:6px 10px !important; }
 
     /* -- Form rows -- */
-    .ci-row    { display:flex; align-items:center; min-height:28px; }
+    .ci-row    { display:flex; align-items:center; min-height:28px; flex-wrap:wrap; gap:4px; }
     .ci-label  { flex:0 0 120px; font-size:12px; color:#555; }
     .ci-colon  { flex:0 0 12px; color:#888; font-size:12px; }
-    .ci-control{ flex:1; }
+    .ci-control{ flex:1; min-width:140px; }
     .ci-select, .ci-input {
         width:100%; border:1px solid #ccc; border-radius:4px;
         padding:5px 8px; font-size:12px; color:#222; background:#fff;
         height:30px; outline:none; transition:border-color .15s;
+        box-sizing:border-box;
     }
     .ci-select:focus, .ci-input:focus { border-color:#00bfa5; }
     #paymentFields { display:flex; }
@@ -293,7 +338,7 @@
     .summary-count { font-size:10px; color:#aaa; }
 
     /* -- Table -- */
-    .inv-th { border:1px solid #ccc; padding:6px 8px; font-weight:600; font-size:11px; color:#333; }
+    .inv-th { border:1px solid #ccc; padding:6px 8px; font-weight:600; font-size:11px; color:#333; white-space:nowrap; }
     #dueTableBody td { border:1px solid #ddd; padding:5px 8px; font-size:12px; color:#222; vertical-align:middle; }
     #dueTableFoot td { border:1px solid #ccc; padding:5px 8px; font-size:12px; }
 
@@ -307,7 +352,7 @@
     /* -- Action buttons -- */
     .btn-select-inv {
         background:#2979ff;color:#fff;border:none;border-radius:3px;
-        padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600;
+        padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600;white-space:nowrap;
     }
     .btn-print-inv {
         background:#00bfa5;color:#fff;border:none;border-radius:3px;
@@ -318,14 +363,31 @@
     .page-btn { border:1px solid #ddd;background:#fff;padding:3px 9px;border-radius:4px;font-size:12px;cursor:pointer;color:#333; }
     .page-btn.active { background:#00bfa5;color:#fff;border-color:#00bfa5;font-weight:600; }
     .page-btn:hover:not(.active) { background:#f5f5f5; }
+    #paginationWrap { overflow-x:auto; }
+
+    /* -- Mobile: stack columns -- */
+    @media (max-width: 768px) {
+        .top-row-wrap { flex-direction: column; }
+        .pay-form-card { flex: none; width: 100%; }
+        .right-col { width: 100%; }
+        .summary-value { font-size: 15px; }
+        .export-toolbar { flex-direction: column; align-items: flex-start; }
+        .ci-label { flex: 0 0 105px; }
+    }
+
+    @media (max-width: 480px) {
+        .ci-row { flex-direction: column; align-items: flex-start; }
+        .ci-colon { display: none; }
+        .ci-label { flex: none; font-weight: 600; margin-bottom: 2px; }
+        .ci-control { width: 100%; }
+    }
 
     /* -- Print -- */
     @media print {
         .content-header, .main-sidebar, .main-header,
         #btnExportExcel, #btnExportCsv, #btnPrintList,
         .btn-select-inv, .btn-print-inv, #paginationWrap,
-        .tab-btn, div[style*="flex:0 0 38%"],
-        div[style*="flex:1; display:flex; flex-direction:column"] { display:none !important; }
+        .pay-form-card, .right-col { display:none !important; }
         body, .content-wrapper { background:#fff !important; }
         #dueTableFoot { display:table-footer-group !important; }
     }
@@ -351,13 +413,13 @@ $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
 let currentPage     = 1;
 let searchTimer     = null;
 let selectedInvoice = null;
-let allLoadedRows   = [];   // current page rows ? for export
+let allLoadedRows   = [];
 
 // ----------------------------------------------------------
-// 1. Invoice Select2 ? search due invoices (all types)
+// 1. Invoice Select2 — search due invoices
 // ----------------------------------------------------------
 $('#invoiceSelect').select2({
-    placeholder        : 'Type bill no / name / mobile?',
+    placeholder        : 'Type bill no / name / mobile...',
     allowClear         : true,
     minimumInputLength : 0,
     width              : '100%',
@@ -368,23 +430,22 @@ $('#invoiceSelect').select2({
         delay    : 250,
         data     : function(p){ return { q: p.term || '', per_page: 10, show_all: 1 }; },
         processResults: function(data){
-            // Only show invoices that still have due
             const due = (data.data || []).filter(i => parseFloat(i.DueAmount) > 0);
             return {
                 results: due.map(function(inv){
-                    return { id: inv.ID, text: inv.BillNo + ' ? ' + inv.PatientName, data: inv };
+                    return { id: inv.ID, text: inv.BillNo + ' — ' + inv.PatientName, data: inv };
                 })
             };
         },
         cache: false,
     },
     templateResult: function(item){
-        if (item.loading) return $('<span style="color:#00897b;font-size:12px;">Searching?</span>');
+        if (item.loading) return $('<span style="color:#00897b;font-size:12px;">Searching...</span>');
         if (!item.data)   return item.text;
         const inv = item.data;
         const due = parseFloat(inv.DueAmount) || 0;
         return $(
-            `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 0;">
+            `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 0;flex-wrap:wrap;">
                 <div>
                     <span style="font-weight:600;color:#1a3c5e;font-size:12px;">${inv.BillNo}</span>
                     <span style="color:#555;font-size:11px;margin-left:6px;">${inv.PatientName}</span>
@@ -395,19 +456,19 @@ $('#invoiceSelect').select2({
                 </div>
                 <span style="background:#fce4ec;color:#c62828;font-size:10px;font-weight:700;
                              padding:1px 7px;border-radius:10px;white-space:nowrap;">
-                    Due ?${parseInt(due).toLocaleString()}
+                    Due &#2547;${parseInt(due).toLocaleString()}
                 </span>
             </div>`
         );
     },
     templateSelection: function(item){
         if (!item.data) return item.text;
-        return item.data.BillNo + ' ? ' + item.data.PatientName;
+        return item.data.BillNo + ' — ' + item.data.PatientName;
     },
-    language:{ noResults:()=>'No due invoices found', searching:()=>'Searching?' },
+    language:{ noResults:()=>'No due invoices found', searching:()=>'Searching...' },
 });
 
-$('#invoiceSelect').on('select2:select',              function(e){ selectInvoice(e.params.data.data); });
+$('#invoiceSelect').on('select2:select', function(e){ selectInvoice(e.params.data.data); });
 $('#invoiceSelect').on('select2:unselect select2:clear', clearInvoice);
 $('#btnClearInvoice').on('click', function(){ $('#invoiceSelect').val(null).trigger('change'); });
 
@@ -419,12 +480,13 @@ function selectInvoice(inv){
     const net  = parseFloat(inv.TotalBill) - parseFloat(inv.Discount || 0);
     const paid = parseFloat(inv.PaidAmount) || 0;
     const due  = parseFloat(inv.DueAmount)  || 0;
+
     $('#infoBillNo').text(inv.BillNo);
     $('#infoPatientName').text(inv.PatientName);
     $('#infoTypeBadge').text(inv.InvoiceType || '').css({ background: '#e0f2f1', color: '#00695c' });
-    $('#infoTotal').text('? ' + parseInt(net).toLocaleString());
-    $('#infoPaid').text('? '  + parseInt(paid).toLocaleString());
-    $('#infoDue').text('? '   + parseInt(due).toLocaleString());
+    $('#infoTotal').html('&#2547; ' + parseInt(net).toLocaleString());
+    $('#infoPaid').html('&#2547; '  + parseInt(paid).toLocaleString());
+    $('#infoDue').html('&#2547; '   + parseInt(due).toLocaleString());
 
     $('#invoiceInfoBox').slideDown(180);
     $('#invoiceRequiredNotice').hide();
@@ -460,7 +522,7 @@ $('#payingAmountInput').on('input', function(){
     const due    = parseFloat(selectedInvoice.DueAmount) || 0;
     const paying = parseFloat($(this).val()) || 0;
     if (paying > due) {
-        $('#payingError').text('Cannot exceed due ?' + parseInt(due).toLocaleString()).show();
+        $('#payingError').html('Cannot exceed due &#2547;' + parseInt(due).toLocaleString()).show();
         $('#btnPayNow').prop('disabled', true);
     } else if (paying <= 0) {
         $('#payingError').text('Enter a valid amount.').show();
@@ -489,7 +551,7 @@ $('#btnPayNow').on('click', function(){
     };
 
     const $btn = $(this);
-    $btn.prop('disabled', true).text('Processing?');
+    $btn.prop('disabled', true).text('Processing...');
 
     $.ajax({
         url         : '{{ route("billing.payment.store") }}',
@@ -502,8 +564,8 @@ $('#btnPayNow').on('click', function(){
                 window.open('{{ url("Billing/payment") }}/' + res.invoice_id + '/print', '_blank');
                 clearInvoice();
                 $('#invoiceSelect').val(null).trigger('change');
-                loadDueList();       // refresh active tab list
-                loadSummaryCards();  // refresh all 3 summary cards
+                loadDueList();
+                loadSummaryCards();
             } else {
                 toastr.error(res.message || 'Failed.');
             }
@@ -518,7 +580,7 @@ $('#btnPayNow').on('click', function(){
 });
 
 // ----------------------------------------------------------
-// 4. Load Due List (all types)
+// 4. Load Due List
 // ----------------------------------------------------------
 function loadDueList(page){
     page = page || 1;
@@ -529,7 +591,7 @@ function loadDueList(page){
     const $body   = $('#dueTableBody');
 
     $body.html(`<tr><td colspan="9" style="text-align:center;color:#aaa;padding:20px;border:1px solid #ddd;">
-        <i class="fas fa-spinner fa-spin mr-1"></i> Loading?</td></tr>`);
+        <i class="fas fa-spinner fa-spin mr-1"></i> Loading...</td></tr>`);
     $('#dueTableFoot').hide();
 
     $.get('{{ route("billing.invoice.list") }}', {
@@ -540,7 +602,7 @@ function loadDueList(page){
     }, function(res){
         const rows = res.data || [];
         const meta = res.meta || {};
-        allLoadedRows = rows;   // save for export
+        allLoadedRows = rows;
 
         $body.empty();
 
@@ -575,18 +637,18 @@ function loadDueList(page){
             $body.append(`
                 <tr>
                     <td style="color:#888;text-align:center;">${rowNum}</td>
-                    <td style="font-weight:600;">${inv.BillNo}</td>
+                    <td style="font-weight:600;white-space:nowrap;">${inv.BillNo}</td>
                     <td>
                         <div style="font-weight:500;">${inv.PatientName}</div>
                         <div style="font-size:11px;color:#888;">
                             ${inv.PatientCode || ''}
-                            ${inv.MobileNo ? ' ? ' + inv.MobileNo : ''}
+                            ${inv.MobileNo ? ' &middot; ' + inv.MobileNo : ''}
                         </div>
                     </td>
-                    <td style="color:#666;">${inv.PaymentDate || '?'}</td>
-                    <td style="text-align:right;">? ${parseInt(net).toLocaleString()}</td>
-                    <td style="text-align:right;color:#2e7d32;font-weight:600;">? ${parseInt(paid).toLocaleString()}</td>
-                    <td style="text-align:right;color:#e65100;font-weight:700;">? ${parseInt(due).toLocaleString()}</td>
+                    <td style="color:#666;white-space:nowrap;">${inv.PaymentDate || '—'}</td>
+                    <td style="text-align:right;white-space:nowrap;">&#2547; ${parseInt(net).toLocaleString()}</td>
+                    <td style="text-align:right;color:#2e7d32;font-weight:600;white-space:nowrap;">&#2547; ${parseInt(paid).toLocaleString()}</td>
+                    <td style="text-align:right;color:#e65100;font-weight:700;white-space:nowrap;">&#2547; ${parseInt(due).toLocaleString()}</td>
                     <td style="text-align:center;">${badge}</td>
                     <td style="text-align:center;">
                         <div style="display:flex;gap:4px;justify-content:center;">
@@ -603,15 +665,13 @@ function loadDueList(page){
             `);
         });
 
-        // Footer row totals
-        $('#footTotal').text('? ' + parseInt(sumTotal).toLocaleString());
-        $('#footPaid').text('? '  + parseInt(sumPaid).toLocaleString());
-        $('#footDue').text('? '   + parseInt(sumDue).toLocaleString());
+        $('#footTotal').html('&#2547; ' + parseInt(sumTotal).toLocaleString());
+        $('#footPaid').html('&#2547; '  + parseInt(sumPaid).toLocaleString());
+        $('#footDue').html('&#2547; '   + parseInt(sumDue).toLocaleString());
         $('#dueTableFoot').show();
 
-        // Summary line
         $('#activeTabDueSummary').text(
-            '? Page Due: ?' + parseInt(sumDue).toLocaleString()
+            '— Page Due: \u09f3' + parseInt(sumDue).toLocaleString()
             + ' (' + rows.length + ' records)'
         );
 
@@ -623,7 +683,7 @@ function loadDueList(page){
 }
 
 // ----------------------------------------------------------
-// 6. Summary Card ? total due across all types
+// 5. Summary Card
 // ----------------------------------------------------------
 function loadSummaryCards(){
     $.get('{{ route("billing.invoice.list") }}', {
@@ -634,33 +694,33 @@ function loadSummaryCards(){
         const rows     = res.data || [];
         const meta     = res.meta || {};
         const totalDue = rows.reduce((s,i) => s + (parseFloat(i.DueAmount)||0), 0);
-        $('#sumTotalDue').text('? ' + parseInt(totalDue).toLocaleString());
+        $('#sumTotalDue').html('&#2547; ' + parseInt(totalDue).toLocaleString());
         $('#sumTotalCount').text((meta.total || rows.length) + ' invoices');
     });
 }
 
 // ----------------------------------------------------------
-// 7. Pagination
+// 6. Pagination
 // ----------------------------------------------------------
 function renderPagination(meta){
     const $wrap = $('#paginationWrap');
     $wrap.empty();
     if (!meta.last_page || meta.last_page <= 1) return;
 
-    let html = `<div style="display:flex;gap:4px;align-items:center;">`;
+    let html = `<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">`;
     if (meta.current_page > 1)
-        html += `<button class="page-btn" data-page="${meta.current_page - 1}">? Prev</button>`;
+        html += `<button class="page-btn" data-page="${meta.current_page - 1}">&lsaquo; Prev</button>`;
     for (let i = 1; i <= meta.last_page; i++) {
         if (i === meta.current_page)
             html += `<button class="page-btn active" data-page="${i}">${i}</button>`;
         else if (i === 1 || i === meta.last_page || Math.abs(i - meta.current_page) <= 1)
             html += `<button class="page-btn" data-page="${i}">${i}</button>`;
         else if (Math.abs(i - meta.current_page) === 2)
-            html += `<span style="color:#aaa;">?</span>`;
+            html += `<span style="color:#aaa;">&hellip;</span>`;
     }
     if (meta.current_page < meta.last_page)
-        html += `<button class="page-btn" data-page="${meta.current_page + 1}">Next ?</button>`;
-    html += `<span style="margin-left:8px;color:#888;">Showing ${meta.from}?${meta.to} of ${meta.total}</span></div>`;
+        html += `<button class="page-btn" data-page="${meta.current_page + 1}">Next &rsaquo;</button>`;
+    html += `<span style="margin-left:8px;color:#888;">Showing ${meta.from}&ndash;${meta.to} of ${meta.total}</span></div>`;
     $wrap.html(html);
 }
 
@@ -669,7 +729,7 @@ $(document).on('click', '.page-btn', function(){
 });
 
 // ----------------------------------------------------------
-// 8. Row "Pay" button ? auto-select in left form
+// 7. Row "Pay" button
 // ----------------------------------------------------------
 $(document).on('click', '.btn-select-inv', function(){
     selectInvoice($(this).data('inv'));
@@ -677,7 +737,7 @@ $(document).on('click', '.btn-select-inv', function(){
 });
 
 // ----------------------------------------------------------
-// 9. Search & filter
+// 8. Search & filter
 // ----------------------------------------------------------
 $('#listSearchInput').on('input', function(){
     clearTimeout(searchTimer);
@@ -686,7 +746,7 @@ $('#listSearchInput').on('input', function(){
 $('#showAllChk').on('change', function(){ loadDueList(1); });
 
 // ----------------------------------------------------------
-// 10. Export helpers
+// 9. Export helpers
 // ----------------------------------------------------------
 function buildExportRows(){
     return allLoadedRows.map(function(inv, idx){
@@ -708,9 +768,7 @@ function buildExportRows(){
 }
 
 function getFileName(ext){
-    return 'DueList_All'
-        + '_' + new Date().toISOString().slice(0,10)
-        + '.' + ext;
+    return 'DueList_All_' + new Date().toISOString().slice(0,10) + '.' + ext;
 }
 
 // -- Excel --
@@ -719,13 +777,10 @@ $('#btnExportExcel').on('click', function(){
     const data = buildExportRows();
     const ws   = XLSX.utils.json_to_sheet(data);
     const wb   = XLSX.utils.book_new();
-
-    // column widths
     ws['!cols'] = [
         {wch:4},{wch:14},{wch:24},{wch:14},{wch:14},
         {wch:12},{wch:16},{wch:12},{wch:12},{wch:12},{wch:10}
     ];
-
     XLSX.utils.book_append_sheet(wb, ws, 'Due List');
     XLSX.writeFile(wb, getFileName('xlsx'));
     toastr.success('Excel downloaded!');
@@ -742,7 +797,6 @@ $('#btnExportCsv').on('click', function(){
             heads.map(h => '"' + String(row[h]).replace(/"/g,'""') + '"').join(',')
         )
     ].join('\r\n');
-
     const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -767,23 +821,24 @@ $('#btnPrintList').on('click', function(){
             <td><strong>${r['Bill No']}</strong></td>
             <td>
                 ${r['Patient Name']}
-                <br><small>${r['Patient Code']}${r['Mobile'] ? ' ? ' + r['Mobile'] : ''}</small>
+                <br><small>${r['Patient Code']}${r['Mobile'] ? ' &middot; ' + r['Mobile'] : ''}</small>
             </td>
             <td>${r['Date']}</td>
-            <td style="text-align:right;">? ${r['Total (BDT)'].toLocaleString()}</td>
-            <td style="text-align:right;color:#2e7d32;">? ${r['Paid (BDT)'].toLocaleString()}</td>
-            <td style="text-align:right;color:#c62828;font-weight:700;">? ${r['Due (BDT)'].toLocaleString()}</td>
+            <td style="text-align:right;">&#2547; ${r['Total (BDT)'].toLocaleString()}</td>
+            <td style="text-align:right;color:#2e7d32;">&#2547; ${r['Paid (BDT)'].toLocaleString()}</td>
+            <td style="text-align:right;color:#c62828;font-weight:700;">&#2547; ${r['Due (BDT)'].toLocaleString()}</td>
             <td>${r['Status']}</td>
         </tr>`).join('');
 
     const win = window.open('', '_blank', 'width=960,height=720');
     win.document.write(`<!DOCTYPE html><html><head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Due List</title>
         <style>
             * { box-sizing:border-box; margin:0; padding:0; }
             body  { font-family:Arial,sans-serif; font-size:12px; padding:20px; color:#222; }
-            .hdr  { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+            .hdr  { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
             .hdr h2 { font-size:16px; }
             .hdr .sub { font-size:11px; color:#888; margin-top:3px; }
             .hdr .badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px;
@@ -806,13 +861,10 @@ $('#btnPrintList').on('click', function(){
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Bill No</th>
-                    <th>Patient</th>
-                    <th>Date</th>
-                    <th style="text-align:right;">Total (?)</th>
-                    <th style="text-align:right;">Paid (?)</th>
-                    <th style="text-align:right;">Due (?)</th>
+                    <th>#</th><th>Bill No</th><th>Patient</th><th>Date</th>
+                    <th style="text-align:right;">Total (&#2547;)</th>
+                    <th style="text-align:right;">Paid (&#2547;)</th>
+                    <th style="text-align:right;">Due (&#2547;)</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -820,16 +872,14 @@ $('#btnPrintList').on('click', function(){
             <tfoot>
                 <tr>
                     <td colspan="4" style="text-align:right;">Total:</td>
-                    <td style="text-align:right;">? ${totalBill.toLocaleString()}</td>
-                    <td style="text-align:right;color:#2e7d32;">? ${totalPaid.toLocaleString()}</td>
-                    <td style="text-align:right;color:#c62828;">? ${totalDue.toLocaleString()}</td>
+                    <td style="text-align:right;">&#2547; ${totalBill.toLocaleString()}</td>
+                    <td style="text-align:right;color:#2e7d32;">&#2547; ${totalPaid.toLocaleString()}</td>
+                    <td style="text-align:right;color:#c62828;">&#2547; ${totalDue.toLocaleString()}</td>
                     <td></td>
                 </tr>
             </tfoot>
         </table>
-        <script>
-            window.onload = function(){ window.print(); window.close(); };
-        <\/script>
+        <script>window.onload = function(){ window.print(); window.close(); };<\/script>
     </body></html>`);
     win.document.close();
 });

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Nursing;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use App\Models\TemplateMedicine;
 use App\Services\PostSurgeryMedicineService;
@@ -21,10 +20,8 @@ class PostSurgeryController extends Controller
 
     /* ══════════════════════════════════════════
        INDEX — Patient list
-       ✅ শুধু সেই patients যাদের
-          on_admission record আছে এবং
-          status = 'moved_to_postsurgery'
-          (post_surgery_done হলে আর দেখাবে না)
+       শুধু status = 'moved_to_postsurgery'
+       patients দেখাবে
     ══════════════════════════════════════════ */
     public function index(Request $request)
     {
@@ -70,10 +67,9 @@ class PostSurgeryController extends Controller
             });
         }
 
-        $patients  = $query->orderBy('admission_id', 'desc')->paginate(20)->withQueryString();
-        
-        // Query for past post-surgery prescriptions (latest per patient)
-        $postSurgeryQuery = DB::table('nursing_postsurgery_prescriptions')
+        $patients = $query->orderBy('admission_id', 'desc')->paginate(20)->withQueryString();
+
+        $PostSurgeryPatients = DB::table('nursing_postsurgery_prescriptions')
             ->join('patients', 'nursing_postsurgery_prescriptions.patient_id', '=', 'patients.id')
             ->select(
                 'nursing_postsurgery_prescriptions.*',
@@ -87,15 +83,14 @@ class PostSurgeryController extends Controller
                 'patients.blood_group'
             )
             ->whereRaw('nursing_postsurgery_prescriptions.id IN (
-                SELECT MAX(id) 
-                FROM nursing_postsurgery_prescriptions 
+                SELECT MAX(id)
+                FROM nursing_postsurgery_prescriptions
                 GROUP BY patient_id
             )')
-            ->orderBy('nursing_postsurgery_prescriptions.created_at', 'desc');
-        
-        $PostSurgeryPatients = $postSurgeryQuery->paginate(20)->withQueryString();
-        
-        // ✅ Get available medicines from common_medicine table for post surgery
+            ->orderBy('nursing_postsurgery_prescriptions.created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
         $medicines = $this->medicineService->getAvailableMedicinesForPostSurgery();
         $templates = DB::table('tbl_template')
                         ->where('status', 1)
@@ -113,6 +108,7 @@ class PostSurgeryController extends Controller
 
     /* ══════════════════════════════════════════
        GET PATIENT ADMISSION DATA (AJAX)
+       GET /postsurgery/patient/{id}/admission
     ══════════════════════════════════════════ */
     public function getPatientAdmissionData($patientId)
     {
@@ -155,8 +151,9 @@ class PostSurgeryController extends Controller
 
     /* ══════════════════════════════════════════
        STORE POST-SURGERY PRESCRIPTION (AJAX)
-       ✅ Save হলে status = 'post_surgery_done'
-          PostSurgery list থেকে সরে Fresh এ যাবে
+       POST /postsurgery/prescription/store
+       Save হলে status = 'post_surgery_done'
+       Fresh list এ চলে যাবে
     ══════════════════════════════════════════ */
     public function storePrescription(Request $request)
     {
@@ -176,8 +173,6 @@ class PostSurgeryController extends Controller
                 'message' => $validator->errors()->first(),
             ], 422);
         }
-
-        $this->ensureTables();
 
         DB::beginTransaction();
         try {
@@ -217,12 +212,11 @@ class PostSurgeryController extends Controller
                 DB::table('nursing_postsurgery_medicines')->insert($rows);
             }
 
-            // ✅ Fix: 'fresh' → 'post_surgery_done' (consistent status)
             DB::table('nursing_admissions')
                 ->where('patient_id', $request->patient_id)
                 ->where('admission_type', 'on_admission')
                 ->update([
-                    'status'     => 'post_surgery_done', // ✅ match FreshController expectation
+                    'status'     => 'post_surgery_done',
                     'updated_at' => now(),
                 ]);
 
@@ -244,59 +238,47 @@ class PostSurgeryController extends Controller
     }
 
     /* ══════════════════════════════════════════
-       GET PRE-OPERATION MEDICINES FROM TEMPLATES (AJAX)
-       ✅ Fetch all pre-order medicines from all templates
+       GET PRE-OPERATION MEDICINES (AJAX)
     ══════════════════════════════════════════ */
     public function getPreOperationMedicines()
     {
         try {
-            // Get all Pre-Operation medicines directly using the model
             $preOpMeds = TemplateMedicine::where('order_type', 'preorder')
                 ->where('active', 1)
                 ->orderBy('group')
                 ->orderBy('name')
                 ->get();
 
-            \Log::info("Direct query found: " . $preOpMeds->count() . " Pre-Operation medicines");
-
-            // Format the response
-            $allPreOpMeds = [];
-            foreach ($preOpMeds as $med) {
-                $allPreOpMeds[] = [
-                    'id'           => $med->id,
-                    'name'         => $med->name,
-                    'dose'         => $med->dose,
-                    'route'        => $med->route,
-                    'frequency'    => $med->frequency,
-                    'duration'     => $med->duration,
-                    'timing'       => $med->timing,
-                    'order_type'   => $med->order_type,
-                    'templateid'   => $med->templeteid,
-                    'template_name'=> 'Template ' . $med->templeteid
-                ];
-            }
-
-            \Log::info("Final result: " . count($allPreOpMeds) . " Pre-Operation medicines");
+            $allPreOpMeds = $preOpMeds->map(fn($med) => [
+                'id'            => $med->id,
+                'name'          => $med->name,
+                'dose'          => $med->dose,
+                'route'         => $med->route,
+                'frequency'     => $med->frequency,
+                'duration'      => $med->duration,
+                'timing'        => $med->timing,
+                'order_type'    => $med->order_type,
+                'templateid'    => $med->templeteid,
+                'template_name' => 'Template ' . $med->templeteid,
+            ])->values()->toArray();
 
             return response()->json([
                 'success' => true,
                 'count'   => count($allPreOpMeds),
                 'rows'    => $allPreOpMeds,
-                'message' => count($allPreOpMeds) . ' Pre-Operation medicines found'
+                'message' => count($allPreOpMeds) . ' Pre-Operation medicines found',
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error in getPreOperationMedicines: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error fetching Pre-Operation medicines: ' . $e->getMessage()
+                'message' => 'Error fetching Pre-Operation medicines: ' . $e->getMessage(),
             ], 500);
         }
     }
 
     /* ══════════════════════════════════════════
-       TEMPLATE DATA & APPLY TEMPLATE
-       (UNCHANGED LOGIC)
+       TEMPLATE DATA (AJAX GET)
     ══════════════════════════════════════════ */
     public function getTemplateData($id)
     {
@@ -318,6 +300,9 @@ class PostSurgeryController extends Controller
         ]);
     }
 
+    /* ══════════════════════════════════════════
+       APPLY TEMPLATE (AJAX POST)
+    ══════════════════════════════════════════ */
     public function applyTemplate(Request $request)
     {
         $templateId = $request->get('template_id');
@@ -325,7 +310,6 @@ class PostSurgeryController extends Controller
             return response()->json(['success' => false, 'message' => 'Template ID is required'], 422);
         }
 
-        // Find template row in tbl_template
         $template = DB::table('tbl_template')->where('ID', $templateId)->first()
                  ?? DB::table('tbl_template')->where('id', $templateId)->first()
                  ?? DB::table('tbl_template')->where('templateid', $templateId)->first();
@@ -334,97 +318,65 @@ class PostSurgeryController extends Controller
             return response()->json(['success' => false, 'message' => 'Template not found'], 404);
         }
 
-        $tplCode = $template->templateid;
+        $tplCode = !empty($template->templateid) ? $template->templateid : $templateId;
 
-        if (empty($tplCode)) {
-            $tplCode = $templateId;
-        }
-
-        // ✅ Use the new medicine service to apply template with common medicine mapping
-        $templateData = $this->medicineService->applyTemplateWithCommonMedicines($tplCode);
-        $mappedMedicines = $templateData['template_medicines'];
+        $templateData       = $this->medicineService->applyTemplateWithCommonMedicines($tplCode);
+        $mappedMedicines    = $templateData['template_medicines'];
         $availableMedicines = $templateData['available_medicines'];
 
         return response()->json([
-            'success'        => true,
-            'message'        => 'Template applied successfully',
-            'template'       => $template,
-            'medicines'      => $mappedMedicines,
+            'success'             => true,
+            'message'             => 'Template applied successfully',
+            'template'            => $template,
+            'medicines'           => $mappedMedicines,
             'available_medicines' => $availableMedicines,
-            'debug_info'     => [
-                'template_id'            => $templateId,
-                'template_templateid'    => $template->templateid,
-                'tplCode_used'           => $tplCode,
-                'template_medicines_count' => $templateData['template_medicines_count'],
-                'available_medicines_count' => $templateData['available_medicines_count'],
+        ]);
+    }
+
+    /* ══════════════════════════════════════════
+       DETAIL — prescription details (AJAX)
+       GET /postsurgery/detail/{id}
+    ══════════════════════════════════════════ */
+    public function detail($id)
+    {
+        $prescription = DB::table('nursing_postsurgery_prescriptions')->where('id', $id)->first();
+
+        if (!$prescription) {
+            return response()->json(['success' => false, 'message' => 'Post-surgery prescription not found.'], 404);
+        }
+
+        $medicines            = DB::table('nursing_postsurgery_medicines')
+                                    ->where('postsurgery_prescription_id', $id)
+                                    ->get();
+        $patient              = DB::table('patients')->where('id', $prescription->patient_id)->first();
+        $patientPrescriptions = DB::table('nursing_postsurgery_prescriptions')
+                                    ->where('patient_id', $prescription->patient_id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'id'                  => $prescription->id,
+                'patient_name'        => $prescription->patient_name,
+                'patient_age'         => $prescription->patient_age,
+                'prescription_date'   => $prescription->prescription_date,
+                'post_op_time'        => $prescription->post_op_time,
+                'notes'               => $prescription->notes,
+                'created_at'          => $prescription->created_at,
+                'medicines'           => $medicines,
+                'patient'             => $patient,
+                'patientPrescriptions' => $patientPrescriptions,
             ],
         ]);
     }
 
     /* ══════════════════════════════════════════
-       DETAIL — Show post-surgery prescription details
-       GET /postsurgery/detail/{id}
-    ══════════════════════════════════════════ */
-    public function detail($id)
-    {
-        // Debug: Log the ID being requested
-        \Log::info('PostSurgery detail requested for ID: ' . $id);
-        
-        $prescription = DB::table('nursing_postsurgery_prescriptions')->where('id', $id)->first();
-        
-        // Debug: Check if prescription exists
-        if (!$prescription) {
-            \Log::warning('PostSurgery prescription not found for ID: ' . $id);
-            
-            // Check if there are any prescriptions at all
-            $allPrescriptions = DB::table('nursing_postsurgery_prescriptions')->get();
-            \Log::info('Total post-surgery prescriptions in DB: ' . $allPrescriptions->count());
-            
-            return response()->json(['success' => false, 'message' => 'Post-surgery prescription not found.'], 404);
-        }
-        
-        \Log::info('PostSurgery prescription found: ' . json_encode($prescription));
-
-        $medicines = DB::table('nursing_postsurgery_medicines')
-            ->where('postsurgery_prescription_id', $id)
-            ->get();
-
-        // Get patient information
-        $patient = DB::table('patients')->where('id', $prescription->patient_id)->first();
-
-        // Get all patient post-surgery prescriptions for history
-        $patientPrescriptions = DB::table('nursing_postsurgery_prescriptions')
-            ->where('patient_id', $prescription->patient_id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'id' => $prescription->id,
-                'patient_name' => $prescription->patient_name,
-                'patient_age' => $prescription->patient_age,
-                'prescription_date' => $prescription->prescription_date,
-                'post_op_time' => $prescription->post_op_time,
-                'notes' => $prescription->notes,
-                'created_at' => $prescription->created_at,
-                'medicines' => $medicines,
-                'patient' => $patient,
-                'patientPrescriptions' => $patientPrescriptions
-            ]
-        ]);
-    }
-
-    /* ══════════════════════════════════════════
        PRIVATE HELPERS
-       (UNCHANGED LOGIC)
     ══════════════════════════════════════════ */
 
     private function getPreviousAdmissionPrescriptions($patientId): array
     {
-        $result = [];
-        if (!Schema::hasTable('nursing_admissions')) return $result;
-
         $rows = DB::table('nursing_admissions')
             ->where('patient_id', $patientId)
             ->where('admission_type', 'on_admission')
@@ -432,28 +384,29 @@ class PostSurgeryController extends Controller
             ->limit(5)
             ->get();
 
+        $result = [];
         foreach ($rows as $row) {
             $lines = [];
-            if (Schema::hasTable('nursing_admission_medicines')) {
-                $meds = DB::table('nursing_admission_medicines')
-                    ->where('nursing_admission_id', $row->id)
-                    ->get();
+            $meds  = DB::table('nursing_admission_medicines')
+                        ->where('nursing_admission_id', $row->id)
+                        ->get();
 
-                foreach ($meds as $m) {
-                    $parts = array_filter([
-                        $m->medicine_name ?? $m->name ?? null,
-                        $m->dose      ?? null,
-                        $m->route     ?? null,
-                        $m->frequency ?? null,
-                        !empty($m->duration) ? ('× ' . $m->duration) : null,
-                        !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
-                    ]);
-                    if (!empty($parts)) $lines[] = implode(' ', $parts);
-                }
+            foreach ($meds as $m) {
+                $parts = array_filter([
+                    $m->medicine_name ?? $m->name ?? null,
+                    $m->dose      ?? null,
+                    $m->route     ?? null,
+                    $m->frequency ?? null,
+                    !empty($m->duration) ? ('× ' . $m->duration) : null,
+                    !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
+                ]);
+                if (!empty($parts)) $lines[] = implode(' ', $parts);
             }
 
             if (empty($lines) && !empty($row->notes)) {
-                $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->notes)));
+                $lines = array_values(array_filter(
+                    preg_split('/\r\n|\r|\n/', trim((string) $row->notes))
+                ));
             }
 
             $result[] = [
@@ -470,8 +423,6 @@ class PostSurgeryController extends Controller
 
     private function getFreshPrescriptions($patientId): array
     {
-        if (!Schema::hasTable('nursing_fresh_prescriptions')) return [];
-
         $rows = DB::table('nursing_fresh_prescriptions')
             ->where('patient_id', $patientId)
             ->orderByDesc('id')
@@ -481,25 +432,25 @@ class PostSurgeryController extends Controller
         $result = [];
         foreach ($rows as $row) {
             $lines = [];
-            if (Schema::hasTable('nursing_fresh_medicines')) {
-                $meds = DB::table('nursing_fresh_medicines')
-                    ->where('fresh_prescription_id', $row->id)
-                    ->get();
+            $meds  = DB::table('nursing_fresh_medicines')
+                        ->where('fresh_prescription_id', $row->id)
+                        ->get();
 
-                foreach ($meds as $m) {
-                    $parts = array_filter([
-                        $m->medicine_name ?? null,
-                        $m->dose      ?? null,
-                        $m->route     ?? null,
-                        $m->frequency ?? null,
-                        !empty($m->duration) ? ('× ' . $m->duration) : null,
-                    ]);
-                    if (!empty($parts)) $lines[] = implode(' ', $parts);
-                }
+            foreach ($meds as $m) {
+                $parts = array_filter([
+                    $m->medicine_name ?? null,
+                    $m->dose      ?? null,
+                    $m->route     ?? null,
+                    $m->frequency ?? null,
+                    !empty($m->duration) ? ('× ' . $m->duration) : null,
+                ]);
+                if (!empty($parts)) $lines[] = implode(' ', $parts);
             }
 
             if (empty($lines) && !empty($row->rx_text)) {
-                $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->rx_text)));
+                $lines = array_values(array_filter(
+                    preg_split('/\r\n|\r|\n/', trim((string) $row->rx_text))
+                ));
             }
 
             $result[] = [
@@ -516,8 +467,6 @@ class PostSurgeryController extends Controller
 
     private function getPostSurgeryPrescriptions($patientId): array
     {
-        if (!Schema::hasTable('nursing_postsurgery_prescriptions')) return [];
-
         $rows = DB::table('nursing_postsurgery_prescriptions')
             ->where('patient_id', $patientId)
             ->orderByDesc('id')
@@ -527,27 +476,27 @@ class PostSurgeryController extends Controller
         $result = [];
         foreach ($rows as $row) {
             $lines = [];
-            if (Schema::hasTable('nursing_postsurgery_medicines')) {
-                $meds = DB::table('nursing_postsurgery_medicines')
-                    ->where('postsurgery_prescription_id', $row->id)
-                    ->get();
+            $meds  = DB::table('nursing_postsurgery_medicines')
+                        ->where('postsurgery_prescription_id', $row->id)
+                        ->get();
 
-                foreach ($meds as $m) {
-                    $parts = array_filter([
-                        $m->medicine_name ?? null,
-                        $m->strength  ?? null,
-                        $m->dose      ?? null,
-                        $m->route     ?? null,
-                        $m->frequency ?? null,
-                        !empty($m->duration) ? ('× ' . $m->duration) : null,
-                        !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
-                    ]);
-                    if (!empty($parts)) $lines[] = implode(' ', $parts);
-                }
+            foreach ($meds as $m) {
+                $parts = array_filter([
+                    $m->medicine_name ?? null,
+                    $m->strength  ?? null,
+                    $m->dose      ?? null,
+                    $m->route     ?? null,
+                    $m->frequency ?? null,
+                    !empty($m->duration) ? ('× ' . $m->duration) : null,
+                    !empty($m->timing)   ? ('(' . $m->timing . ')') : null,
+                ]);
+                if (!empty($parts)) $lines[] = implode(' ', $parts);
             }
 
             if (empty($lines) && !empty($row->notes)) {
-                $lines = array_filter(preg_split('/\r\n|\r|\n/', trim((string) $row->notes)));
+                $lines = array_values(array_filter(
+                    preg_split('/\r\n|\r|\n/', trim((string) $row->notes))
+                ));
             }
 
             $result[] = [
@@ -560,46 +509,6 @@ class PostSurgeryController extends Controller
         }
 
         return $result;
-    }
-
-    private function ensureTables(): void
-    {
-        if (!Schema::hasTable('nursing_postsurgery_prescriptions')) {
-            DB::statement("
-                CREATE TABLE nursing_postsurgery_prescriptions (
-                    id                BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    patient_id        BIGINT UNSIGNED NOT NULL,
-                    patient_name      VARCHAR(255)    NULL,
-                    patient_age       VARCHAR(100)    NULL,
-                    prescription_date DATE            NULL,
-                    post_op_time      TIME            NULL,
-                    notes             TEXT            NULL,
-                    created_by        BIGINT UNSIGNED NULL,
-                    created_at        TIMESTAMP       NULL,
-                    updated_at        TIMESTAMP       NULL
-                )
-            ");
-        }
-
-        if (!Schema::hasTable('nursing_postsurgery_medicines')) {
-            DB::statement("
-                CREATE TABLE nursing_postsurgery_medicines (
-                    id                           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    postsurgery_prescription_id  BIGINT UNSIGNED NOT NULL,
-                    medicine_name                VARCHAR(255)    NULL,
-                    strength                     VARCHAR(100)    NULL,
-                    dose                         VARCHAR(100)    NULL,
-                    route                        VARCHAR(100)    NULL,
-                    frequency                    VARCHAR(100)    NULL,
-                    duration                     VARCHAR(100)    NULL,
-                    timing                       VARCHAR(100)    NULL,
-                    note                         TEXT            NULL,
-                    created_at                   TIMESTAMP       NULL,
-                    updated_at                   TIMESTAMP       NULL,
-                    INDEX idx_rx_id (postsurgery_prescription_id)
-                )
-            ");
-        }
     }
 
     private function safeFetch(string $table, $tplCode, string $orderBy = 'id')

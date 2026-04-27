@@ -27,191 +27,199 @@
 
 <div id="save-alert" class="alert d-none mb-3 modern-alert" role="alert"></div>
 
-<div class="modern-card">
-    <div class="modern-card-header">
-        <div class="modern-card-title">
-            <span class="card-title-icon bg-orange-soft"><i class="fas fa-hourglass-half text-orange"></i></span>
+{{-- ══ GOV PANEL ══ --}}
+<div class="gov-panel gov-panel-orange">
+
+    {{-- Panel Title Bar --}}
+    <div class="gov-panel-titlebar gov-panel-titlebar-orange">
+        <div class="gov-panel-titlebar-left">
+            <div class="gov-panel-icon gov-panel-icon-orange">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
             <div>
-                <h5 class="mb-0 font-weight-bold">Pending Release Approvals</h5>
-                <small class="text-muted">Nurse submitted — waiting for manager approval</small>
+                <div class="gov-panel-title">Pending Release Approvals</div>
+                <div class="gov-panel-subtitle">Nurse submitted — waiting for manager approval</div>
             </div>
         </div>
-        <span class="release-count-badge release-count-badge-orange">
-            <i class="fas fa-clock mr-1"></i>
-            {{ $patients->total() }} Pending
-        </span>
+        <div class="gov-panel-titlebar-right">
+            <span class="gov-counter-badge gov-counter-badge-orange" id="pending-count-badge">
+                <i class="fas fa-clock mr-1"></i>
+                Pending: <strong>{{ $patients->total() }}</strong>
+            </span>
+        </div>
     </div>
 
-    {{-- ✅ STICKY BAR — on admission exact pattern --}}
-    <div class="patient-sticky-bar" id="patient-sticky-bar">
-        <div class="row align-items-center">
-            <div class="col-md-7">
-                <div class="search-input-group">
-                    <span class="search-icon"><i class="fas fa-search"></i></span>
-                    <input type="text" id="patientSearch" class="search-input"
-                        placeholder="Search by name, code, or mobile number...">
-                    <button class="search-btn search-btn-orange" type="button" onclick="filterTable()">
-                        Search
-                    </button>
-                </div>
+    {{-- Search Toolbar --}}
+    <div class="gov-toolbar gov-toolbar-orange">
+        <div class="gov-toolbar-inner">
+            <div class="gov-toolbar-label gov-toolbar-label-orange">
+                <i class="fas fa-search mr-1"></i> SEARCH FILTER
             </div>
-            <div class="col-md-5 mt-2 mt-md-0">
-                <div class="d-flex align-items-center justify-content-md-end">
-                    <span class="sticky-bar-info sticky-bar-info-orange">
-                        <i class="fas fa-hourglass-half mr-1"></i>
-                        <strong>{{ $patients->total() }}</strong> pending approvals
-                    </span>
-                </div>
+            <div class="gov-search-group">
+                <input type="text" id="patientSearch" class="gov-search-input gov-search-input-orange"
+                       placeholder="Search by Name / Patient Code / Mobile Number…"
+                       onkeyup="filterTable()">
+                <button class="gov-search-btn gov-search-btn-orange" type="button" onclick="filterTable()">
+                    <i class="fas fa-search mr-1"></i> Search
+                </button>
+                <button class="gov-clear-btn" type="button"
+                        onclick="document.getElementById('patientSearch').value=''; filterTable();">
+                    <i class="fas fa-times mr-1"></i> Clear
+                </button>
+            </div>
+            <div class="gov-toolbar-hint">
+                <i class="fas fa-info-circle mr-1"></i>
+                Press <kbd>Enter</kbd> or click Search to filter
             </div>
         </div>
     </div>
-    {{-- ✅ Spacer — on admission exact pattern --}}
-    <div class="sticky-bar-spacer" id="sticky-bar-spacer"></div>
 
-    <div class="modern-card-body pt-0">
-        <div class="table-responsive">
-            <table class="table modern-table" id="patientTable">
-                <thead>
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th style="width:80px;">Code</th>
-                        <th>Name</th>
-                        <th style="width:65px;">Age</th>
-                        <th style="width:55px;">Gender</th>
-                        <th style="width:130px;">Mobile</th>
-                        <th>Address / Upazila</th>
-                        <th style="width:110px;">Admission Date</th>
-                        <th style="width:120px;">Submitted At</th>
-                        <th style="width:100px;">Status</th>
-                        <th style="width:150px; text-align:center;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($patients as $patient)
-                        <tr id="row-{{ $patient->admission_id }}">
-                            <td class="text-muted small">{{ $patient->id }}</td>
-                            <td><span class="patient-code-badge">{{ $patient->patientcode ?? '—' }}</span></td>
-                            <td>
-                                <div class="patient-name-cell">
-                                    <div class="patient-mini-avatar patient-mini-avatar-orange">
-                                        {{ strtoupper(substr($patient->patientname ?? 'P', 0, 1)) }}
-                                    </div>
-                                    <div>
-                                        <strong>{{ $patient->patientname ?? '—' }}</strong>
-                                        @if($patient->patientfather ?? null)
-                                            <br><small class="text-muted">
-                                                <i class="fas fa-user-tie fa-xs"></i> {{ $patient->patientfather }}
-                                            </small>
-                                        @endif
-                                    </div>
+    {{-- Data Table --}}
+    <div class="gov-table-wrap">
+        <table class="gov-table" id="patientTable">
+            <thead>
+                <tr>
+                    <th class="gov-th" style="width:46px;">SL#</th>
+                    <th class="gov-th" style="width:88px;">Pt. Code</th>
+                    <th class="gov-th">Patient Name</th>
+                    <th class="gov-th" style="width:52px;">Age</th>
+                    <th class="gov-th" style="width:50px;">Sex</th>
+                    <th class="gov-th" style="width:128px;">Mobile</th>
+                    <th class="gov-th">Address / Upazila</th>
+                    <th class="gov-th" style="width:112px;">Admission Date</th>
+                    <th class="gov-th" style="width:128px;">Submitted At</th>
+                    <th class="gov-th" style="width:80px;">Status</th>
+                    <th class="gov-th gov-th-action" style="width:160px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($patients as $patient)
+                    @php
+                        $g = strtolower($patient->gender ?? '');
+                    @endphp
+                    <tr class="gov-tr" id="row-{{ $patient->admission_id }}">
+                        <td class="gov-td gov-td-sl">{{ $patient->id }}</td>
+                        <td class="gov-td">
+                            <span class="gov-code-badge gov-code-badge-orange">{{ $patient->patientcode ?? '—' }}</span>
+                        </td>
+                        <td class="gov-td">
+                            <div class="gov-name-cell">
+                                <div class="gov-avatar gov-avatar-orange">
+                                    {{ strtoupper(substr($patient->patientname ?? 'P', 0, 1)) }}
                                 </div>
-                            </td>
-                            <td>{{ $patient->age ?? '—' }}</td>
-                            <td>
-                                @php $g = strtolower($patient->gender ?? ''); @endphp
-                                @if($g === 'male')
-                                    <span class="gender-badge gender-male"><i class="fas fa-mars mr-1"></i>M</span>
-                                @elseif($g === 'female')
-                                    <span class="gender-badge gender-female"><i class="fas fa-venus mr-1"></i>F</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-monospace small">{{ $patient->mobile_no ?? '—' }}</td>
-                            <td class="text-muted small">
-                                {{ $patient->address ?? '' }}
-                                @if($patient->upozila ?? null)
-                                    <span class="text-muted">, {{ $patient->upozila }}</span>
-                                @endif
-                            </td>
-                            <td class="small">
-                                @if($patient->admission_date ?? null)
-                                    <span class="date-badge">
-                                        <i class="fas fa-calendar-alt mr-1"></i>
-                                        {{ \Carbon\Carbon::parse($patient->admission_date)->format('d M Y') }}
-                                    </span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="small">
-                                @if($patient->submitted_at ?? null)
-                                    <span class="date-badge text-orange">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        {{ \Carbon\Carbon::parse($patient->submitted_at)->format('d M, h:i A') }}
-                                    </span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="status-badge status-pending">
-                                    <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
-                                    Pending
+                                <div class="gov-name-info">
+                                    <span class="gov-name-text">{{ $patient->patientname ?? '—' }}</span>
+                                    @if($patient->patientfather ?? null)
+                                        <span class="gov-father-text">
+                                            <i class="fas fa-user-tie fa-xs mr-1"></i>{{ $patient->patientfather }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td class="gov-td gov-td-center">{{ $patient->age ?? '—' }}</td>
+                        <td class="gov-td gov-td-center">
+                            @if($g === 'male')
+                                <span class="gov-gender gov-gender-m">M</span>
+                            @elseif($g === 'female')
+                                <span class="gov-gender gov-gender-f">F</span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-mono">{{ $patient->mobile_no ?? '—' }}</td>
+                        <td class="gov-td gov-td-muted">
+                            {{ $patient->address ?? '' }}{{ ($patient->upozila ?? null) ? ', '.$patient->upozila : '' }}
+                        </td>
+                        <td class="gov-td">
+                            @if($patient->admission_date ?? null)
+                                <span class="gov-date-text">
+                                    <i class="fas fa-calendar-alt mr-1" style="color:var(--gov-orange-hdr);font-size:10px;"></i>
+                                    {{ \Carbon\Carbon::parse($patient->admission_date)->format('d M Y') }}
                                 </span>
-                            </td>
-                            <td class="text-center">
-                                <button type="button"
-                                    class="btn-action-sm btn-approve-btn mr-1"
-                                    onclick="confirmAction('approve', {{ $patient->admission_id }}, {{ $patient->id }}, '{{ addslashes($patient->patientname ?? '') }}')"
-                                    title="Approve Release">
-                                    <i class="fas fa-check mr-1"></i> Approve
-                                </button>
-                                <button type="button"
-                                    class="btn-action-sm btn-reject-btn"
-                                    onclick="confirmAction('reject', {{ $patient->admission_id }}, {{ $patient->id }}, '{{ addslashes($patient->patientname ?? '') }}')"
-                                    title="Reject Release">
-                                    <i class="fas fa-times mr-1"></i> Reject
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="11">
-                                <div class="empty-state">
-                                    <i class="fas fa-check-double" style="color:#00897b;"></i>
-                                    <p>No pending release approvals. All caught up!</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td">
+                            @if($patient->submitted_at ?? null)
+                                <span class="gov-date-text">
+                                    <i class="fas fa-clock mr-1" style="color:var(--gov-orange-hdr);font-size:10px;"></i>
+                                    {{ \Carbon\Carbon::parse($patient->submitted_at)->format('d M, h:i A') }}
+                                </span>
+                            @else
+                                <span class="gov-muted">—</span>
+                            @endif
+                        </td>
+                        <td class="gov-td gov-td-center">
+                            <span class="gov-status-badge gov-status-pending">
+                                <i class="fas fa-circle" style="font-size:6px; margin-right:4px;"></i>
+                                Pending
+                            </span>
+                        </td>
+                        <td class="gov-td gov-td-action">
+                            <button type="button"
+                                class="gov-approve-btn"
+                                onclick="confirmAction('approve', {{ $patient->admission_id }}, {{ $patient->id }}, '{{ addslashes($patient->patientname ?? '') }}')"
+                                title="Approve Release">
+                                <i class="fas fa-check mr-1"></i> Approve
+                            </button>
+                            <button type="button"
+                                class="gov-reject-btn"
+                                onclick="confirmAction('reject', {{ $patient->admission_id }}, {{ $patient->id }}, '{{ addslashes($patient->patientname ?? '') }}')"
+                                title="Reject Release">
+                                <i class="fas fa-times mr-1"></i> Reject
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="11">
+                            <div class="gov-empty-state">
+                                <i class="fas fa-check-double" style="color:#00897b;"></i>
+                                <p>No pending release approvals. All caught up!</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-        @if(method_exists($patients, 'links'))
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-            <small class="text-muted">
-                <i class="fas fa-list-ul mr-1"></i>
-                Showing {{ $patients->firstItem() ?? 0 }}–{{ $patients->lastItem() ?? 0 }}
-                of <strong>{{ $patients->total() }}</strong> pending
-            </small>
+    {{-- Panel Footer / Pagination --}}
+    @if(method_exists($patients, 'links'))
+    <div class="gov-panel-footer">
+        <div class="gov-footer-info">
+            <i class="fas fa-list-ul mr-1"></i>
+            Showing <strong>{{ $patients->firstItem() ?? 0 }}</strong>
+            to <strong>{{ $patients->lastItem() ?? 0 }}</strong>
+            of <strong>{{ $patients->total() }}</strong> pending
+        </div>
+        <div class="gov-pagination-wrap">
             {{ $patients->links('pagination::bootstrap-4') }}
         </div>
-        @endif
-    </div>
-
-    <div class="modern-card-footer">
-        <small class="text-muted">
-            <i class="fas fa-info-circle mr-1 text-orange"></i>
+        <div class="gov-footer-hint">
+            <i class="fas fa-info-circle mr-1" style="color:var(--gov-orange-hdr);"></i>
             <strong>Approve</strong> করলে patient released হবে।
             <strong>Reject</strong> করলে nurse-এর discharge list এ ফিরে যাবে।
-        </small>
+        </div>
     </div>
+    @endif
+
 </div>
 
 {{-- ══ CONFIRM MODAL ══ --}}
 <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
-        <div class="modal-content" style="border-radius:14px;border:none;box-shadow:0 8px 32px rgba(0,0,0,.18);overflow:hidden;">
+        <div class="modal-content" style="border-radius:4px; border:none; box-shadow:0 8px 32px rgba(0,0,0,.22); overflow:hidden; border-top:3px solid var(--gov-orange-hdr);">
 
-            <div class="modal-header border-0 pb-0" style="padding:20px 24px 10px;">
+            <div class="modal-header border-0 pb-0" style="padding:18px 22px 10px; background:#fafbfd; border-bottom:1px solid #e8ecf4;">
                 <div class="d-flex align-items-center" style="gap:12px;">
                     <div class="modal-icon-wrap" id="modal-icon-wrap">
                         <i class="fas fa-check" id="modal-header-icon"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title mb-0 font-weight-bold" id="modal-title">Confirm Action</h5>
+                        <h5 class="modal-title mb-0 font-weight-bold" id="modal-title" style="font-size:15px;">Confirm Action</h5>
                         <small class="text-muted" id="modal-subtitle">Please review before proceeding</small>
                     </div>
                 </div>
@@ -228,10 +236,10 @@
                 </div>
 
                 <div id="reject-reason-wrap" style="display:none; margin-top:14px;">
-                    <label class="modern-label">
-                        Rejection Reason <span class="text-muted">(optional)</span>
+                    <label class="gov-field-label">
+                        Rejection Reason <span class="text-muted font-weight-normal">(optional)</span>
                     </label>
-                    <textarea class="modern-input" id="reject-reason" rows="2"
+                    <textarea class="gov-textarea" id="reject-reason" rows="2"
                         placeholder="কেন reject করছেন লিখুন (optional)..."></textarea>
                 </div>
             </div>
@@ -254,34 +262,37 @@
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════
-   ROOT
+   ROOT VARIABLES
 ═══════════════════════════════════════════════════════ */
 :root {
-    --teal-deep:    #00695C;
-    --teal-mid:     #00897B;
-    --teal-light:   #E0F2F1;
-    --teal-soft:    #B2DFDB;
-    --orange:       #E65100;
-    --orange-light: #FFF3E0;
-    --orange-soft:  #FFCCBC;
-    --blue-deep:    #1565C0;
-    --blue-mid:     #1976D2;
-    --blue-light:   #E3F2FD;
-    --blue-soft:    #BBDEFB;
-    --red-mid:      #c62828;
-    --text-primary: #1a2332;
-    --text-muted:   #6b7a90;
-    --border:       #e4e9f0;
-    --radius-sm:    6px;
-    --radius-md:    10px;
-    --radius-lg:    16px;
-    --shadow-sm:    0 1px 4px rgba(0,0,0,.06);
-    --shadow-md:    0 4px 16px rgba(0,0,0,.08);
-    --font-base:    'DM Sans', 'Hind Siliguri', Arial, sans-serif;
+    --blue-deep:  #1565C0; --blue-mid: #1976D2; --blue-light: #E3F2FD;
+    --teal-deep:  #00695C; --teal-mid: #00796B; --teal-light: #E0F2F1; --teal-soft: #B2DFDB;
+    --text-primary: #1a2332; --text-muted: #6b7a90; --border: #e4e9f0;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,.06); --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+    --font-base: 'DM Sans','Hind Siliguri',Arial,sans-serif;
+
+    /* Gov palette */
+    --gov-bg:           #f2f4f7;
+    --gov-header:       #1a3a5c;
+    --gov-header2:      #1e4976;
+    --gov-accent:       #c9972a;
+    --gov-border:       #c8cdd6;
+    --gov-row-odd:      #ffffff;
+    --gov-row-even:     #f6f8fb;
+    --gov-row-hover:    #fff4ec;
+    --gov-text:         #1c2b3a;
+    --gov-muted:        #6b7890;
+
+    /* Orange gov palette */
+    --gov-orange-hdr:   #b84b00;
+    --gov-orange-hdr2:  #d05500;
+    --gov-orange-accent:#e65100;
+    --gov-orange-light: #fff4ec;
+    --gov-orange-soft:  #ffe0cc;
+    --gov-orange-border:#f0c090;
 }
-body, .content-wrapper { background: #f0f0f6 !important; font-family: var(--font-base); }
-.text-orange { color: var(--orange) !important; }
-.text-teal   { color: var(--teal-mid) !important; }
+body, .content-wrapper { background: var(--gov-bg) !important; font-family: var(--font-base); }
 
 /* ═══════════════════════════════════════════════════════
    PAGE HEADER
@@ -293,9 +304,9 @@ body, .content-wrapper { background: #f0f0f6 !important; font-family: var(--font
 }
 .page-title-icon {
     width: 38px; height: 38px; border-radius: 10px;
-    background: var(--orange-light);
+    background: var(--gov-orange-light);
     display: inline-flex; align-items: center; justify-content: center;
-    color: var(--orange); font-size: 17px;
+    color: var(--gov-orange-accent); font-size: 17px;
 }
 .btn-back-modern {
     background: #fff; border: 1.5px solid var(--border);
@@ -303,11 +314,7 @@ body, .content-wrapper { background: #f0f0f6 !important; font-family: var(--font
     font-weight: 500; padding: 6px 14px; font-size: 13px;
     transition: all .2s; text-decoration: none;
 }
-.btn-back-modern:hover { background: var(--orange-light); border-color: var(--orange); color: var(--orange); }
-
-/* BADGE */
-.release-count-badge { border-radius: 20px; padding: 5px 14px; font-size: 12.5px; font-weight: 700; }
-.release-count-badge-orange { background: var(--orange-light); color: var(--orange); border: 1.5px solid var(--orange-soft); }
+.btn-back-modern:hover { background: var(--gov-orange-light); border-color: var(--gov-orange-accent); color: var(--gov-orange-accent); }
 
 /* ═══════════════════════════════════════════════════════
    ALERT
@@ -315,184 +322,300 @@ body, .content-wrapper { background: #f0f0f6 !important; font-family: var(--font
 .modern-alert { border-radius: var(--radius-md); border: none; font-size: 13.5px; font-weight: 500; box-shadow: var(--shadow-sm); }
 
 /* ═══════════════════════════════════════════════════════
-   MODERN CARD
+   GOV PANEL — ORANGE VARIANT
 ═══════════════════════════════════════════════════════ */
-.modern-card {
-    background: #fff; border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md); border: 1px solid var(--border);
-    overflow: hidden; margin-bottom: 24px;
-}
-.modern-card-header {
-    padding: 18px 24px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    background: #fafbfd;
-}
-.modern-card-title { display: flex; align-items: center; gap: 12px; }
-.card-title-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; flex-shrink: 0;
-}
-.bg-orange-soft { background: var(--orange-light); }
-.modern-card-body { padding: 24px; }
-.modern-card-footer {
-    padding: 14px 24px; border-top: 1px solid var(--border);
-    background: #fafbfd;
-    display: flex; align-items: center; justify-content: space-between;
-}
-
-/* ═══════════════════════════════════════════════════════
-   ✅ STICKY BAR — on admission exact same pattern
-═══════════════════════════════════════════════════════ */
-.patient-sticky-bar {
-    padding: 14px 24px;
+.gov-panel {
     background: #fff;
-    border-bottom: 2px solid var(--orange-soft);
-    z-index: 999;
-    transition: box-shadow .25s, border-color .25s;
+    border: 1px solid var(--gov-border);
+    border-top: 3px solid var(--gov-header);
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    margin-bottom: 16px;
+    overflow: hidden;
 }
-.patient-sticky-bar.is-sticky {
-    position: fixed;
-    top: 57px;               /* AdminLTE navbar height */
-    left: 0;
-    right: 0;
-    border-bottom-color: var(--orange);
-    box-shadow: 0 4px 18px rgba(230,81,0,.13);
+.gov-panel-orange {
+    border-top-color: var(--gov-orange-hdr);
 }
-.sticky-bar-spacer { display: none; }
-.sticky-bar-spacer.active { display: block; }
 
-.sticky-bar-info {
-    font-size: 13px; padding: 6px 14px;
-    border-radius: 20px; font-weight: 500;
+/* Title bar */
+.gov-panel-titlebar {
+    background: linear-gradient(90deg, var(--gov-header) 0%, var(--gov-header2) 100%);
+    padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+    border-bottom: 2px solid var(--gov-accent);
 }
-.sticky-bar-info-orange { background: var(--orange-light); color: var(--orange); }
-.sticky-bar-info-orange strong { color: var(--orange); }
+.gov-panel-titlebar-orange {
+    background: linear-gradient(90deg, var(--gov-orange-hdr) 0%, var(--gov-orange-hdr2) 100%);
+    border-bottom-color: var(--gov-accent);
+}
+.gov-panel-titlebar-left  { display: flex; align-items: center; gap: 10px; }
+.gov-panel-titlebar-right { display: flex; align-items: center; gap: 10px; }
+
+.gov-panel-icon {
+    width: 34px; height: 34px; border-radius: 4px;
+    background: rgba(255,255,255,.15);
+    color: #fff; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; border: 1px solid rgba(255,255,255,.2);
+}
+.gov-panel-icon-orange { background: rgba(255,255,255,.12); }
+.gov-panel-title    { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; letter-spacing: .2px; }
+.gov-panel-subtitle { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 1px; }
+
+.gov-counter-badge {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 3px; padding: 4px 12px;
+    font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.gov-counter-badge-orange { background: rgba(255,255,255,.12); }
+
+/* Toolbar */
+.gov-toolbar {
+    background: #f0f3f8;
+    border-bottom: 1.5px solid var(--gov-border);
+    padding: 8px 16px;
+}
+.gov-toolbar-orange { background: #fef6f0; border-bottom-color: var(--gov-orange-border); }
+.gov-toolbar-inner  { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.gov-toolbar-label {
+    font-size: 11px; font-weight: 800; color: var(--gov-header);
+    text-transform: uppercase; letter-spacing: .8px;
+    white-space: nowrap; flex-shrink: 0;
+}
+.gov-toolbar-label-orange { color: var(--gov-orange-hdr); }
+.gov-toolbar-hint { font-size: 11px; color: var(--gov-muted); white-space: nowrap; }
+.gov-toolbar-hint kbd {
+    background: #fff; border: 1px solid var(--gov-border);
+    border-radius: 3px; padding: 1px 5px;
+    font-size: 10px; color: var(--gov-header);
+}
+.gov-search-group { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 260px; }
+.gov-search-input {
+    flex: 1; border: 1.5px solid var(--gov-border);
+    border-radius: 3px; padding: 6px 10px;
+    font-size: 13px; color: var(--gov-text); background: #fff;
+    outline: none; transition: border-color .2s;
+    font-family: var(--font-base); height: 32px;
+}
+.gov-search-input-orange:focus { border-color: var(--gov-orange-hdr); box-shadow: 0 0 0 2px rgba(184,75,0,.12); }
+.gov-search-btn {
+    border: none; border-radius: 3px; padding: 0 14px;
+    height: 32px; font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: background .2s;
+    background: var(--gov-header); color: #fff;
+    display: inline-flex; align-items: center;
+    white-space: nowrap; letter-spacing: .2px;
+}
+.gov-search-btn-orange { background: var(--gov-orange-hdr); }
+.gov-search-btn-orange:hover { background: var(--gov-orange-hdr2); }
+.gov-clear-btn {
+    border: 1.5px solid var(--gov-border); border-radius: 3px;
+    padding: 0 10px; height: 32px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+    background: #fff; color: var(--gov-muted);
+    display: inline-flex; align-items: center; white-space: nowrap;
+}
+.gov-clear-btn:hover { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
 
 /* ═══════════════════════════════════════════════════════
-   SEARCH
+   GOV TABLE
 ═══════════════════════════════════════════════════════ */
-.search-input-group {
-    display: flex; align-items: center;
-    background: #fff; border: 2px solid var(--border);
-    border-radius: 10px; overflow: hidden;
-    transition: border-color .2s; box-shadow: var(--shadow-sm);
+.gov-table-wrap { overflow-x: auto; }
+.gov-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.gov-th {
+    background: #fdf0e8;
+    color: var(--gov-orange-hdr);
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .6px;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--gov-orange-border);
+    border-right: 1px solid #f0d0b8;
+    white-space: nowrap; position: sticky; top: 0; z-index: 5;
 }
-.search-input-group:focus-within { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(230,81,0,.1); }
-.search-icon { padding: 0 12px; color: #aab; font-size: 15px; }
-.search-input {
-    flex: 1; border: none; outline: none; padding: 10px 6px;
-    font-size: 14px; background: transparent; color: var(--text-primary);
-}
-.search-btn { border: none; padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: background .2s; }
-.search-btn-orange { background: var(--orange); color: #fff; }
-.search-btn-orange:hover { background: #bf360c; }
+.gov-th:last-child { border-right: none; }
+.gov-th-action { text-align: center; }
 
-/* ═══════════════════════════════════════════════════════
-   PATIENT TABLE
-═══════════════════════════════════════════════════════ */
-.modern-table { border-collapse: separate; border-spacing: 0; width: 100%; }
-.modern-table thead tr th {
-    background: #fff8f0; color: var(--text-primary);
-    font-size: 12px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .6px; padding: 11px 14px;
-    border-bottom: 2px solid var(--orange-soft);
-    white-space: nowrap; position: sticky; top: 0; z-index: 10;
+.gov-tr { transition: background .12s; }
+.gov-tr:nth-child(odd)  { background: var(--gov-row-odd); }
+.gov-tr:nth-child(even) { background: #fdf9f6; }
+.gov-tr:hover { background: #fff4ec !important; }
+
+.gov-td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #eaedf2;
+    border-right: 1px solid #f0f2f6;
+    vertical-align: middle; color: var(--gov-text);
 }
-.modern-table tbody tr { transition: background .15s; }
-.modern-table tbody tr:hover { background: #fff8f0; }
-.modern-table tbody td {
-    padding: 10px 14px; border-bottom: 1px solid var(--border);
-    font-size: 13px; color: var(--text-primary); vertical-align: middle;
+.gov-td:last-child { border-right: none; }
+.gov-td-sl     { color: var(--gov-muted); font-size: 11.5px; text-align: center; }
+.gov-td-center { text-align: center; }
+.gov-td-mono   { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: .3px; }
+.gov-td-muted  { color: var(--gov-muted); font-size: 12px; }
+.gov-td-action { text-align: center; }
+
+/* Name cell */
+.gov-name-cell { display: flex; align-items: center; gap: 7px; }
+.gov-avatar {
+    width: 26px; height: 26px; border-radius: 3px;
+    background: var(--gov-header); color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
 }
-.patient-code-badge {
-    background: var(--orange-light); color: var(--orange);
-    border-radius: 5px; padding: 2px 8px;
-    font-size: 11.5px; font-weight: 700; font-family: monospace;
+.gov-avatar-orange { background: linear-gradient(135deg, var(--gov-orange-hdr), #e65100); }
+.gov-name-info  { display: flex; flex-direction: column; gap: 1px; }
+.gov-name-text  { font-weight: 600; font-size: 13px; color: var(--gov-text); line-height: 1.2; }
+.gov-father-text{ font-size: 10.5px; color: var(--gov-muted); }
+
+/* Badges */
+.gov-code-badge {
+    background: #e8ecf4; color: var(--gov-header);
+    border: 1px solid #c8cdd6; border-radius: 2px;
+    padding: 1px 7px; font-size: 11.5px; font-weight: 700;
+    font-family: 'Courier New', monospace; letter-spacing: .3px;
 }
-.patient-name-cell { display: flex; align-items: center; gap: 8px; }
-.patient-mini-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    color: #fff; font-size: 12px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+.gov-code-badge-orange { background: #fdf0e8; color: var(--gov-orange-hdr); border-color: var(--gov-orange-border); }
+
+.gov-gender {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    font-size: 11px; font-weight: 800;
 }
-.patient-mini-avatar-orange { background: linear-gradient(135deg, var(--orange), #ff7043); }
-.gender-badge { display: inline-flex; align-items: center; border-radius: 5px; padding: 2px 8px; font-size: 11.5px; font-weight: 700; }
-.gender-male   { background: #e3f2fd; color: var(--blue-deep); }
-.gender-female { background: #fce4ec; color: #880e4f; }
-.date-badge { font-size: 12px; color: var(--text-muted); }
-.status-badge { display: inline-flex; align-items: center; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
-.status-pending { background: var(--orange-light); color: var(--orange); }
-.empty-state { text-align: center; padding: 40px; color: #b0bec5; }
-.empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
-.empty-state p { font-size: 14px; margin: 0; }
+.gov-gender-m { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+.gov-gender-f { background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; }
+
+.gov-date-text { display: block; font-size: 12.5px; font-weight: 600; color: var(--gov-text); }
+.gov-muted     { color: var(--gov-muted); font-size: 12px; }
+
+/* Status badge */
+.gov-status-badge {
+    display: inline-flex; align-items: center;
+    border-radius: 3px; padding: 2px 9px;
+    font-size: 11px; font-weight: 700;
+}
+.gov-status-pending {
+    background: var(--gov-orange-light);
+    color: var(--gov-orange-hdr);
+    border: 1px solid var(--gov-orange-border);
+}
 
 /* ═══════════════════════════════════════════════════════
    ACTION BUTTONS
 ═══════════════════════════════════════════════════════ */
-.btn-action-sm {
-    border-radius: var(--radius-sm); padding: 5px 11px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
-    transition: all .2s; display: inline-flex; align-items: center;
-    border: 1.5px solid transparent;
+.gov-approve-btn {
+    background: var(--gov-orange-hdr);
+    color: #fff; border: none; border-radius: 3px;
+    padding: 5px 11px; font-size: 11.5px; font-weight: 700;
+    cursor: pointer; transition: all .18s;
+    display: inline-flex; align-items: center;
+    white-space: nowrap; letter-spacing: .2px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.18);
+    margin-right: 4px;
 }
-.btn-approve-btn { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
-.btn-approve-btn:hover { background: #2e7d32; color: #fff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(46,125,50,.3); }
-.btn-reject-btn  { background: #ffebee; color: var(--red-mid); border-color: #ef9a9a; }
-.btn-reject-btn:hover  { background: var(--red-mid); color: #fff; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(198,40,40,.3); }
+.gov-approve-btn:hover {
+    background: #2e7d32; transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(46,125,50,.3);
+}
+.gov-reject-btn {
+    background: #fff; color: #c62828;
+    border: 1.5px solid #ffcdd2; border-radius: 3px;
+    padding: 4px 11px; font-size: 11.5px; font-weight: 700;
+    cursor: pointer; transition: all .18s;
+    display: inline-flex; align-items: center;
+    white-space: nowrap; letter-spacing: .2px;
+}
+.gov-reject-btn:hover {
+    background: #c62828; color: #fff; border-color: #c62828;
+    transform: translateY(-1px); box-shadow: 0 3px 8px rgba(198,40,40,.3);
+}
+
+/* Empty state */
+.gov-empty-state { text-align: center; padding: 44px; color: #b0bec5; }
+.gov-empty-state i { font-size: 36px; margin-bottom: 10px; display: block; }
+.gov-empty-state p { font-size: 14px; margin: 0; }
 
 /* ═══════════════════════════════════════════════════════
-   FORM (modal textarea)
+   PANEL FOOTER / PAGINATION
 ═══════════════════════════════════════════════════════ */
-.modern-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-.modern-input {
-    width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-    padding: 9px 12px; font-size: 13.5px; color: var(--text-primary);
-    background: #fff; transition: border-color .2s, box-shadow .2s;
-    outline: none; font-family: var(--font-base);
+.gov-panel-footer {
+    background: #fef6f0;
+    border-top: 1.5px solid var(--gov-orange-border);
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
 }
-.modern-input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(230,81,0,.1); }
+.gov-footer-info  { font-size: 12px; color: var(--gov-muted); white-space: nowrap; }
+.gov-footer-hint  { font-size: 11.5px; color: var(--gov-muted); }
+.gov-footer-hint strong { color: var(--gov-orange-hdr); }
+.gov-pagination-wrap .pagination { margin-bottom: 0; }
+.gov-pagination-wrap .page-link  {
+    border-radius: 3px !important; border-color: var(--gov-border);
+    color: var(--gov-orange-hdr); font-size: 12.5px; padding: 5px 10px;
+}
+.gov-pagination-wrap .page-item.active .page-link {
+    background: var(--gov-orange-hdr); border-color: var(--gov-orange-hdr);
+}
 
 /* ═══════════════════════════════════════════════════════
    MODAL
 ═══════════════════════════════════════════════════════ */
-.modal-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.modal-icon-wrap {
+    width: 38px; height: 38px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0;
+}
 .modal-icon-approve { background: #e8f5e9; color: #2e7d32; }
-.modal-icon-reject  { background: #ffebee; color: var(--red-mid); }
+.modal-icon-reject  { background: #ffebee; color: #c62828; }
+
 .modal-patient-bar {
     display: flex; align-items: center; gap: 12px;
-    background: #fafbfd; border-radius: var(--radius-md);
-    border: 1.5px solid var(--border); padding: 12px 16px;
+    background: var(--gov-orange-light);
+    border-radius: 4px;
+    border: 1.5px solid var(--gov-orange-border);
+    padding: 10px 14px;
 }
 .modal-patient-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--orange), #ff7043);
-    color: #fff; font-size: 16px; font-weight: 700;
+    width: 36px; height: 36px; border-radius: 3px;
+    background: linear-gradient(135deg, var(--gov-orange-hdr), #e65100);
+    color: #fff; font-size: 15px; font-weight: 700;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.modal-patient-name { font-weight: 700; font-size: 14px; color: var(--text-primary); }
-.modal-patient-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.modal-patient-name { font-weight: 700; font-size: 14px; color: var(--gov-text); }
+.modal-patient-sub  { font-size: 12px; color: var(--gov-muted); margin-top: 2px; }
+
+.gov-field-label {
+    display: block; font-size: 11px; font-weight: 800;
+    color: var(--gov-muted); text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 6px;
+}
+.gov-textarea {
+    width: 100%; border: 1.5px solid var(--gov-border);
+    border-radius: 3px; padding: 8px 10px;
+    font-size: 13px; color: var(--gov-text);
+    background: #fff; outline: none;
+    transition: border-color .2s; font-family: var(--font-base);
+    resize: vertical;
+}
+.gov-textarea:focus { border-color: var(--gov-orange-hdr); box-shadow: 0 0 0 2px rgba(184,75,0,.1); }
+
 .btn-modal-action {
-    border-radius: var(--radius-sm); padding: 10px 22px;
-    font-size: 13.5px; font-weight: 700; border: none;
+    border-radius: 3px; padding: 9px 22px;
+    font-size: 13px; font-weight: 700; border: none;
     cursor: pointer; transition: all .2s;
     display: inline-flex; align-items: center; justify-content: center;
+    letter-spacing: .2px;
 }
-.btn-modal-cancel { background: #fff; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-modal-cancel { background: #fff; color: var(--gov-muted); border: 1.5px solid var(--gov-border); }
 .btn-modal-cancel:hover { background: #f0f4f8; }
-.btn-confirm-approve { background: linear-gradient(135deg, #2e7d32, #388e3c); color: #fff; box-shadow: 0 4px 12px rgba(46,125,50,.28); }
+.btn-confirm-approve { background: linear-gradient(135deg, #2e7d32, #388e3c); color: #fff; box-shadow: 0 3px 10px rgba(46,125,50,.28); }
 .btn-confirm-approve:hover { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
-.btn-confirm-reject  { background: linear-gradient(135deg, #c62828, #e53935); color: #fff; box-shadow: 0 4px 12px rgba(198,40,40,.28); }
+.btn-confirm-reject  { background: linear-gradient(135deg, #c62828, #e53935); color: #fff; box-shadow: 0 3px 10px rgba(198,40,40,.28); }
 .btn-confirm-reject:hover  { background: linear-gradient(135deg, #b71c1c, #c62828); }
 
-/* ═══════════════════════════════════════════════════════
-   PAGINATION
-═══════════════════════════════════════════════════════ */
-.pagination { margin-bottom: 0; }
-.page-link { border-radius: var(--radius-sm) !important; border-color: var(--border); color: var(--orange); font-size: 13px; }
-.page-item.active .page-link { background: var(--orange); border-color: var(--orange); }
-
-@media print { .patient-sticky-bar { display: none !important; } }
+@media print { .gov-toolbar, .gov-panel-titlebar { display: none !important; } }
 </style>
 @stop
 
@@ -520,9 +643,9 @@ function showAlert(type, msg){
 }
 
 function showToast(msg, type){
-    var bg = type === 'success' ? '#2e7d32' : (type === 'error' ? '#c62828' : '#1565C0');
+    var bg = type === 'success' ? '#2e7d32' : (type === 'error' ? '#c62828' : '#b84b00');
     var t = document.createElement('div');
-    t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:'+bg+';color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:320px;';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:'+bg+';color:#fff;padding:12px 20px;border-radius:4px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:320px;';
     t.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + msg;
     document.body.appendChild(t);
     setTimeout(function(){
@@ -531,43 +654,6 @@ function showToast(msg, type){
         setTimeout(function(){ t.remove(); }, 300);
     }, 3000);
 }
-
-/* ══════════════════════════════════════════
-   ✅ STICKY BAR — on admission exact same JS
-══════════════════════════════════════════ */
-(function initStickyBar(){
-    var bar    = document.getElementById('patient-sticky-bar');
-    var spacer = document.getElementById('sticky-bar-spacer');
-    if(!bar || !spacer) return;
-
-    var NAVBAR_H     = 57;
-    var barOffsetTop = 0;
-    var barHeight    = 0;
-
-    function measure(){
-        bar.classList.remove('is-sticky');
-        spacer.classList.remove('active');
-        spacer.style.height = '';
-        barOffsetTop = bar.getBoundingClientRect().top + window.scrollY;
-        barHeight    = bar.offsetHeight;
-    }
-
-    function onScroll(){
-        if(window.scrollY + NAVBAR_H >= barOffsetTop){
-            bar.classList.add('is-sticky');
-            spacer.classList.add('active');
-            spacer.style.height = barHeight + 'px';
-        } else {
-            bar.classList.remove('is-sticky');
-            spacer.classList.remove('active');
-            spacer.style.height = '';
-        }
-    }
-
-    window.addEventListener('load',   function(){ measure(); onScroll(); });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function(){ measure(); onScroll(); });
-})();
 
 /* ══════════════════════════════════════════
    CONFIRM MODAL
@@ -663,11 +749,11 @@ function submitAction(){
 ══════════════════════════════════════════ */
 function updatePendingCount(){
     var rows  = document.querySelectorAll('#patientTable tbody tr[id]');
-    var badge = document.querySelector('.release-count-badge-orange');
-    if(badge) badge.innerHTML = '<i class="fas fa-clock mr-1"></i> ' + rows.length + ' Pending';
+    var badge = document.getElementById('pending-count-badge');
+    if(badge) badge.innerHTML = '<i class="fas fa-clock mr-1"></i> Pending: <strong>' + rows.length + '</strong>';
     if(rows.length === 0){
         document.querySelector('#patientTable tbody').innerHTML =
-            '<tr><td colspan="11"><div class="empty-state">' +
+            '<tr><td colspan="11"><div class="gov-empty-state">' +
             '<i class="fas fa-check-double" style="color:#00897b;"></i>' +
             '<p>No pending release approvals. All caught up!</p>' +
             '</div></td></tr>';
@@ -683,6 +769,8 @@ function filterTable(){
         row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }
-document.getElementById('patientSearch').addEventListener('keyup', filterTable);
+document.getElementById('patientSearch').addEventListener('keyup', function(e){
+    if(e.key === 'Enter') filterTable();
+});
 </script>
 @stop
