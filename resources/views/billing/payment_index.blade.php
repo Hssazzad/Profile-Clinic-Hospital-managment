@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Billing ï¿½ Payment')
+@section('title', 'Billing — Payment')
 
 @section('content_header')
 <div class="d-flex align-items-center justify-content-between">
     <h1 class="m-0" style="font-size:18px; font-weight:600; color:#222;">
-        Billing ï¿½ Payment
+        Billing — Payment
     </h1>
     <ol class="breadcrumb float-sm-right mb-0" style="font-size:12px;">
         <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Home</a></li>
@@ -17,11 +17,11 @@
 @section('content')
 
 {{-- ============================================================
-     TOP ROW ï¿½ Pay Due Amount Form (LEFT) + Summary Cards (RIGHT)
+     TOP ROW — Pay Due Amount Form (LEFT) + Summary Cards (RIGHT)
 ============================================================= --}}
 <div class="top-row-wrap">
 
-    {{-- LEFT ï¿½ Pay Due Amount --}}
+    {{-- LEFT — Pay Due Amount --}}
     <div class="pay-form-card">
 
         <div class="card-header-bar">
@@ -36,7 +36,7 @@
                 <div class="ci-colon">:</div>
                 <div class="ci-control">
                     <select id="invoiceSelect" style="width:100%;">
-                        <option value="">ï¿½ Type bill no / name / mobile ï¿½</option>
+                        <option value="">— Type bill no / name / mobile —</option>
                     </select>
                 </div>
             </div>
@@ -45,8 +45,8 @@
             <div id="invoiceInfoBox" style="display:none; background:#e8f5e9; border-radius:5px; padding:8px 10px; font-size:12px;">
                 <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px; margin-bottom:6px;">
                     <div>
-                        <span style="background:#00bfa5;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600;" id="infoBillNo">ï¿½</span>
-                        <strong id="infoPatientName" style="margin-left:6px; font-size:13px;">ï¿½</strong>
+                        <span style="background:#00bfa5;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;font-weight:600;" id="infoBillNo">—</span>
+                        <strong id="infoPatientName" style="margin-left:6px; font-size:13px;">—</strong>
                         <span id="infoTypeBadge" style="margin-left:6px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;display:inline-block;"></span>
                     </div>
                     <button type="button" id="btnClearInvoice"
@@ -133,7 +133,7 @@
     </div>{{-- /LEFT --}}
 
 
-    {{-- RIGHT ï¿½ Summary Card + Search --}}
+    {{-- RIGHT — Summary Card + Search --}}
     <div class="right-col">
 
         <div style="display:flex; gap:12px;">
@@ -166,7 +166,7 @@
 
 
 {{-- ============================================================
-     BOTTOM ï¿½ Due List Table
+     BOTTOM — Due List Table
 ============================================================= --}}
 <div style="border:2px solid #00bfa5; border-radius:6px; background:#fff; overflow:hidden;">
 
@@ -416,7 +416,7 @@ let selectedInvoice = null;
 let allLoadedRows   = [];
 
 // ----------------------------------------------------------
-// 1. Invoice Select2 ï¿½ search due invoices
+// 1. Invoice Select2 — search due invoices
 // ----------------------------------------------------------
 $('#invoiceSelect').select2({
     placeholder        : 'Type bill no / name / mobile...',
@@ -428,18 +428,13 @@ $('#invoiceSelect').select2({
         url      : '{{ route("billing.invoice.list") }}',
         dataType : 'json',
         delay    : 250,
-        data     : function(p){ return { q: p.term || '', page: p.page || 1, per_page: 10, show_all: 1 }; },
+        data     : function(p){ return { q: p.term || '', per_page: 10, show_all: 1 }; },
         processResults: function(data){
             const due = (data.data || []).filter(i => parseFloat(i.DueAmount) > 0);
-            const meta = data.meta || {};
-            const hasMore = meta.current_page < meta.last_page;
             return {
                 results: due.map(function(inv){
-                    return { id: inv.ID, text: inv.BillNo + ' â€“ ' + inv.PatientName, data: inv };
-                }),
-                pagination: {
-                    more: hasMore
-                }
+                    return { id: inv.ID, text: inv.BillNo + ' — ' + inv.PatientName, data: inv };
+                })
             };
         },
         cache: false,
@@ -468,7 +463,7 @@ $('#invoiceSelect').select2({
     },
     templateSelection: function(item){
         if (!item.data) return item.text;
-        return item.data.BillNo + ' ï¿½ ' + item.data.PatientName;
+        return item.data.BillNo + ' — ' + item.data.PatientName;
     },
     language:{ noResults:()=>'No due invoices found', searching:()=>'Searching...' },
 });
@@ -650,7 +645,7 @@ function loadDueList(page){
                             ${inv.MobileNo ? ' &middot; ' + inv.MobileNo : ''}
                         </div>
                     </td>
-                    <td style="color:#666;white-space:nowrap;">${inv.PaymentDate || 'ï¿½'}</td>
+                    <td style="color:#666;white-space:nowrap;">${inv.PaymentDate || '—'}</td>
                     <td style="text-align:right;white-space:nowrap;">&#2547; ${parseInt(net).toLocaleString()}</td>
                     <td style="text-align:right;color:#2e7d32;font-weight:600;white-space:nowrap;">&#2547; ${parseInt(paid).toLocaleString()}</td>
                     <td style="text-align:right;color:#e65100;font-weight:700;white-space:nowrap;">&#2547; ${parseInt(due).toLocaleString()}</td>
@@ -676,7 +671,7 @@ function loadDueList(page){
         $('#dueTableFoot').show();
 
         $('#activeTabDueSummary').text(
-            'ï¿½ Page Due: \u09f3' + parseInt(sumDue).toLocaleString()
+            '— Page Due: \u09f3' + parseInt(sumDue).toLocaleString()
             + ' (' + rows.length + ' records)'
         );
 
