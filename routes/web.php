@@ -8,42 +8,26 @@ use App\Http\Controllers\BroadcastSmsController;
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\SystemController;
 
-/*
-|--------------------------------------------------------------------------
-| Public / Landing
-|--------------------------------------------------------------------------
-*/
+// Public / Landing
 Route::get('/', function () {
     return auth()->check()
         ? redirect()->route('admin.dashboard')
         : redirect()->route('login');
 })->name('home');
 
-/*
-|--------------------------------------------------------------------------
-| Admin (Protected by Auth)
-|--------------------------------------------------------------------------
-*/
+// Admin (Protected by Auth)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('doctors', DoctorController::class);
     Route::resource('appointments', AppointmentController::class);
 });
 
-/*
-|--------------------------------------------------------------------------
-| Compatibility alias: route('dashboard')
-|--------------------------------------------------------------------------
-*/
+// Compatibility alias: route('dashboard')
 Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->middleware('auth')->name('dashboard');
 
-/*
-|--------------------------------------------------------------------------
-| SMS + User Menu (Protected)
-|--------------------------------------------------------------------------
-*/
+// SMS + User Menu (Protected)
 Route::middleware(['auth'])->group(function () {
     Route::get('/sms/broadcast', [BroadcastSmsController::class, 'create'])->name('sms.broadcast.create');
     Route::post('/sms/broadcast', [BroadcastSmsController::class, 'send'])->name('sms.broadcast.send');
@@ -76,24 +60,14 @@ Route::get('/test-payments', function () {
     }
 });
 
-/*
-|--------------------------------------------------------------------------
-| Auto-load other route files (auth.php, patient.php, etc.)
-| ⚠ Make sure NO other file in routes/ contains toggleSub pointing
-|   to UserCreateController — check with: grep -r "toggleSub" routes/
-|--------------------------------------------------------------------------
-*/
+// Auto-load other route files (auth.php, patient.php, etc.)
 foreach (glob(__DIR__ . '/*.php') as $file) {
     if (basename($file) !== 'web.php') {
         require $file;
     }
 }
 
-/*
-|--------------------------------------------------------------------------
-| Fallback (keep last)
-|--------------------------------------------------------------------------
-*/
+// Fallback (keep last)
 Route::fallback(function () {
     abort(404);
 });

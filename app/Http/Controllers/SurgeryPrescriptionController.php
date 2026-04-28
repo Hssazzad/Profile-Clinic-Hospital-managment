@@ -635,25 +635,12 @@ class SurgeryPrescriptionController extends Controller
     /**
      * Search fresh prescriptions from existing records
      * Route: GET /prescriptions/SurgeryPrescription/search-fresh-prescriptions
-     *
-     * NOTE: যদি আপনার DB-তে dedicated fresh_prescriptions table থাকে তাহলে
-     *       নিচের hardcoded array-টি DB query দিয়ে replace করুন।
      */
     public function searchFreshPrescriptions(Request $request)
     {
         try {
             $search = $request->get('q', '');
 
-            // ---- Option A: DB table থাকলে এটি uncomment করুন ----
-            // $query = DB::table('template_fresh_prescriptions');
-            // if (!empty($search)) {
-            //     $query->where('name', 'LIKE', "%{$search}%")
-            //           ->orWhere('details', 'LIKE', "%{$search}%");
-            // }
-            // $data = $query->select('id', 'name', 'details')->limit(20)->get();
-            // return response()->json(['success' => true, 'data' => $data]);
-
-            // ---- Option B: Static fallback (DB table না থাকলে) ----
             $items = collect([
                 ['id' => 1, 'name' => 'Continue current medications', 'details' => ''],
                 ['id' => 2, 'name' => 'Start new antibiotics',        'details' => ''],
@@ -679,16 +666,12 @@ class SurgeryPrescriptionController extends Controller
     /**
      * Search discharge summaries from existing records
      * Route: GET /prescriptions/SurgeryPrescription/search-discharge-summaries
-     *
-     * NOTE: যদি template_discharge table থেকে data আনতে চান তাহলে
-     *       নিচে Option A uncomment করুন।
      */
     public function searchDischargeSummaries(Request $request)
     {
         try {
             $search = $request->get('q', '');
 
-            // ---- Option A: template_discharge table থেকে ----
             if (DB::getSchemaBuilder()->hasTable('template_discharge')) {
                 $query = TemplateDischarge::where('active', 1);
 
@@ -712,7 +695,6 @@ class SurgeryPrescriptionController extends Controller
                 return response()->json(['success' => true, 'data' => $data]);
             }
 
-            // ---- Option B: Static fallback ----
             $items = collect([
                 ['id' => 1, 'treatment' => 'Surgery completed successfully',    'condition' => 'Stable and improving',    'follow_up' => 'Follow up in 1 week'],
                 ['id' => 2, 'treatment' => 'Laparoscopic procedure performed',  'condition' => 'Afebrile and comfortable','follow_up' => 'Follow up in 2 weeks'],
