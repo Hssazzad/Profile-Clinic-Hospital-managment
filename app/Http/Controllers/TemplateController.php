@@ -713,8 +713,6 @@ class TemplateController extends Controller
         return response()->json(['oe' => null]);
     }
 
-    // ✅ NOTE: prescriptionView() method সরানো হয়েছে (removed as requested)
-
     /**
      * হেল্পার মেথড
      */
