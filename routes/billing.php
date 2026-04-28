@@ -25,8 +25,8 @@ Route::middleware(['auth'])->prefix('Billing')->name('billing.')->group(function
     Route::post('CreateInvoice/ajax/clear-tmp',       [CreateInvoiceController::class, 'clearTmp'])->name('invoice.clearTmp');
     Route::get('CreateInvoice/ajax/get-collectors',   [CreateInvoiceController::class, 'getCollectors'])->name('invoice.getCollectors');
 
-    Route::get('CreateInvoice/{id}/print',            [CreateInvoiceController::class, 'printInvoice'])->whereNumber('id')->name('invoice.print');
-    Route::get('CreateInvoice/{patientId}',           [CreateInvoiceController::class, 'show'])->whereNumber('patientId')->name('invoice.show');
+    Route::get('CreateInvoice/{id}/print',            [CreateInvoiceController::class, 'printInvoice'])->name('invoice.print');
+    Route::get('CreateInvoice/{patientId}',           [CreateInvoiceController::class, 'show'])->name('invoice.show');
 
     // Payment
     Route::get('payment',                             [PaymentController::class, 'index'])->name('payment.index');
