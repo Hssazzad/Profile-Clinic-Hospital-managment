@@ -1,0 +1,21 @@
+reviews:
+  tone_instructions: "You are a highly experienced senior developer. Review the code with a polite, encouraging, and constructive tone. Keep your comments concise and focus on best practices."
+
+  auto_title: true
+  auto_title_instructions: "Generate a concise and descriptive PR title using the imperative mood (e.g., 'Add feature' instead of 'Added feature'). Keep it under 50 characters. Start with the relevant Conventional Commits prefix (like feat:, fix:, docs:, chore:)."
+
+  settings:
+    max_comments: 100
+    analyze_all_files: true
+
+  path_instructions:
+    - path: "**/*"
+      instructions: "Perform a deep and comprehensive review of this entire file. Look for security vulnerabilities, performance bottlenecks, bad practices, and bugs. Check architecture, security, and adherence to best practices. Provide detailed suggestions for improvement."
+    - path: "**/*.ts"
+      instructions: "Ensure strict TypeScript typing is used. Warn if 'any' type is used. Suggest modern ES6+ syntax and best practices for asynchronous code."
+    - path: "**/*.tsx"
+      instructions: "Check for proper React hooks usage. Ensure components are functional and avoid unnecessary re-renders. Verify that prop types or TypeScript interfaces are defined for all components."
+    - path: "**/*.js"
+      instructions: "Ensure ES6+ syntax is used. Check for proper error handling and avoid mutating states directly."
+    - path: "**/*.php"
+      instructions: "Review for security vulnerabilities such as SQL injection, XSS, and CSRF issues. Ensure proper validation and sanitization of inputs. Check for adherence to Laravel best practices."

@@ -12,3 +12,5 @@ export default defineConfig({
         }),
     ],
 });
+
+// Triggering CodeRabbit full review
