@@ -4,7 +4,29 @@ namespace App\Enums;
 
 enum PatientAdmissionStatus: string
 {
-
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS VALUES
+    |--------------------------------------------------------------------------
+    | Full flow:
+    |
+    |   admitted
+    |      ?
+    |   post_surgery_done
+    |      ?
+    |   fresh_done
+    |      ?
+    |   discharged          ? Nurse discharge note ????
+    |      ?
+    |   release_pending     ? Nurse release submit ???
+    |      ? (approve)      ? (reject)
+    |   released            discharged  ? Nurse ???? submit ???? ?????
+    |
+    | Round Prescription ?? flow-? ????
+    | admitted / post_surgery_done / fresh_done — ?? ??? status-?
+    | ?????? ???? Round ?????? ?????
+    |--------------------------------------------------------------------------
+    */
 
     case ADMITTED          = 'admitted';
     case POST_SURGERY_DONE = 'post_surgery_done';
@@ -13,7 +35,16 @@ enum PatientAdmissionStatus: string
     case RELEASE_PENDING   = 'release_pending';
     case RELEASED          = 'released';
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | FORWARD TRANSITION RULES
+    |--------------------------------------------------------------------------
+    | Normal flow-? ??? status ???? ??????? ?????? allowed?
+    | Reject (release_pending ? discharged) backward transition —
+    | ???? canTransitionTo-?? ???, ReleaseApprovalController-?
+    | ????????? handle ??? intentionally?
+    |--------------------------------------------------------------------------
+    */
 
     public function canTransitionTo(self $next): bool
     {
@@ -27,6 +58,15 @@ enum PatientAdmissionStatus: string
         };
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | REJECT — Backward transition
+    |--------------------------------------------------------------------------
+    | Manager reject ???? release_pending ???? discharged-? ?????
+    | ??? canTransitionTo-? ????? ???? ??? intentional backward move?
+    | ReleaseApprovalController-?? reject() method ??? use ?????
+    |--------------------------------------------------------------------------
+    */
 
     public function canRejectBackTo(self $previous): bool
     {
@@ -36,39 +76,43 @@ enum PatientAdmissionStatus: string
         };
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | PAGE QUEUES
+    |--------------------------------------------------------------------------
+    */
 
-
-    // PostSurgery page ï¿½ ???? list-? ????
+    // PostSurgery page — ???? list-? ????
     public static function postSurgeryQueue(): string
     {
         return self::ADMITTED->value;
     }
 
-    // Fresh page ï¿½ ???? list-? ????
+    // Fresh page — ???? list-? ????
     public static function freshQueue(): string
     {
         return self::POST_SURGERY_DONE->value;
     }
 
-    // Discharge page ï¿½ ???? list-? ????
+    // Discharge page — ???? list-? ????
     public static function dischargeQueue(): string
     {
         return self::FRESH_DONE->value;
     }
 
-    // Release page (Nurse submit ????) ï¿½ ???? list-? ????
+    // Release page (Nurse submit ????) — ???? list-? ????
     public static function releaseQueue(): string
     {
         return self::DISCHARGED->value;
     }
 
-    // Manager Approval page ï¿½ ???? list-? ????
+    // Manager Approval page — ???? list-? ????
     public static function managerApprovalQueue(): string
     {
         return self::RELEASE_PENDING->value;
     }
 
-    // Round Prescription page ï¿½ discharged/release_pending/released ???? ????
+    // Round Prescription page — discharged/release_pending/released ???? ????
     public static function roundQueue(): array
     {
         return [
@@ -78,25 +122,34 @@ enum PatientAdmissionStatus: string
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | HELPERS
+    |--------------------------------------------------------------------------
+    */
 
-    // Patient  hospital
+    // Patient ?? ???? hospital-? ????
     public function isActive(): bool
     {
         return $this !== self::RELEASED;
     }
 
-    // Patient hospital
+    // Patient ?? ??? ?????
     public function isGone(): bool
     {
         return $this === self::RELEASED;
     }
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | LABEL — ????? ???
+    |--------------------------------------------------------------------------
+    */
 
     public function label(): string
     {
         return match($this) {
-            self::ADMITTED          => '????? ???????',
+            self::ADMITTED          => '?????',
             self::POST_SURGERY_DONE => '?????-???????? ???????',
             self::FRESH_DONE        => '????? ???????????? ???????',
             self::DISCHARGED        => '???????? ?????? ??????',
