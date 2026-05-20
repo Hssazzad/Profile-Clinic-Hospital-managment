@@ -96,9 +96,9 @@ class OnAdmissionMedicineService
                 'medicine_code' => $commonMed->code ?? '',
                 'group_name'    => $commonMed->GroupName ?? '',
                 'strength'      => $commonMed->strength ?? '',
-                'is_from_common' => !is_null($commonMed)
+                'is_from_common' => true // Fix: Ensure all template medicines load regardless of common medicine match
             ];
-        })->filter()->values();
+        })->values();
         
         return [
             'template_medicines' => $mappedMedicines,
@@ -203,7 +203,7 @@ class OnAdmissionMedicineService
                 'timing' => $med->timing,
                 'remarks' => $med->note,
                 'common_medicine_id' => $commonMed->id ?? null,
-                'is_from_common' => !is_null($commonMed)
+                'is_from_common' => true
             ];
         });
         
