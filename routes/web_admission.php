@@ -1,0 +1,140 @@
+<?php
+use App\Http\Controllers\PatientAdmitController;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware(['auth'])->group(function () {
+
+    // --- Admission for select templete Routes ---
+    Route::get('admission/admitpatient', [PatientAdmitController::class, 'admitpatient'])
+        ->name('admission.admitpatient');
+	  
+    Route::post('admission/admitpatient', [PatientAdmitController::class, 'storeadmitpatient'])
+        ->name('admission.admitpatient.store');
+
+    Route::get('admission/admit-patient/medicine-rows', [PatientAdmitController::class, 'medicineRowsHtml'])
+        ->name('admission.admitpatient.medicine_rows');
+		
+	Route::get('admission/show-admission-slip', [PatientAdmitController::class, 'showAdmissionSlip'])
+    ->name('admission.showAdmissionSlip');
+		
+	Route::get('admission/insmedicine', [PatientAdmitController::class, 'insmedicine'])
+        ->name('admission.admedicine');	
+		
+	Route::post('/admission/showinsMedicine', [PatientAdmitController::class, 'showinsMedicine'])
+    ->name('admission.showinsMedicine');
+	
+	
+	Route::post('/admission/insmedicineList/list', [PatientAdmitController::class, 'insmedicineList'])
+    ->name('admission.insmedicineList.list');
+
+	Route::post('/admission/insmedicineSave/save', [PatientAdmitController::class, 'insmedicineSave'])
+		->name('admission.insmedicineSave.save');
+
+	Route::post('/admission/insmedicineDelete/delete', [PatientAdmitController::class, 'admedicineDelete'])
+		->name('admission.insmedicine.delete');
+		
+		
+	 // --- Admission for select Admission Medicine---	
+	Route::get('admission/admedicine', [PatientAdmitController::class, 'admedicine'])
+        ->name('admission.admedicine');	
+		
+	Route::post('/admission/showadMedicine', [PatientAdmitController::class, 'showadMedicine'])
+    ->name('admission.showadMedicine');
+	
+	
+	Route::post('/admission/admedicineList/list', [PatientAdmitController::class, 'admedicineList'])
+    ->name('admission.admedicineList.list');
+
+	Route::post('/admission/admedicineSave/save', [PatientAdmitController::class, 'admedicineSave'])
+		->name('admission.admedicineSave.save');
+
+	Route::post('/admission/admedicine-save-all-admit', [PatientAdmitController::class, 'admedicineSaveAllAdmit'])
+		->name('admission.admedicineSaveAllAdmit');
+
+	Route::post('/admission/admedicineDelete/delete', [PatientAdmitController::class, 'admedicineDelete'])
+		->name('admission.admedicine.delete');
+		
+	 // --- Admission for select Pre surgery Medicine---	
+	
+	Route::get('admission/presurgery', [PatientAdmitController::class, 'premedicine'])
+        ->name('admission.presurgery');		
+	Route::post('/admission/showpreMedicine', [PatientAdmitController::class, 'showpreMedicine'])
+    ->name('admission.showpreMedicine');	
+	Route::post('/admission/premedicineList/list', [PatientAdmitController::class, 'premedicineList'])
+    ->name('admission.premedicineList.list');
+	Route::post('/admission/premedicineSave/save', [PatientAdmitController::class, 'premedicineSave'])
+		->name('admission.premedicineSave.save');
+	Route::post('/admission/premedicine-save-all-preorder', [PatientAdmitController::class, 'premedicineSaveAllPreorder'])
+		->name('admission.premedicineSaveAllPreorder');
+	Route::post('/admission/premedicineDelete/delete', [PatientAdmitController::class, 'premedicineDelete'])
+		->name('admission.premedicine.delete');
+		
+     // --- Admission for select Post surgery Medicine---	
+	
+	Route::get('admission/postsurgery', [PatientAdmitController::class, 'postmedicine'])
+        ->name('admission.postsurgery');		
+	Route::post('/admission/showpostMedicine', [PatientAdmitController::class, 'showpostMedicine'])
+    ->name('admission.showpostMedicine');	
+	Route::post('/admission/postmedicineList/list', [PatientAdmitController::class, 'postmedicineList'])
+    ->name('admission.postmedicineList.list');
+	Route::post('/admission/postmedicineSave/save', [PatientAdmitController::class, 'postmedicineSave'])
+		->name('admission.postmedicineSave.save');
+	Route::post('/admission/postmedicine-save-all-postorder', [PatientAdmitController::class, 'postmedicineSaveAllPostorder'])
+		->name('admission.postmedicineSaveAllPostorder');
+	Route::post('/admission/postmedicineDelete/delete', [PatientAdmitController::class, 'postmedicineDelete'])
+		->name('admission.postmedicine.delete');
+		
+
+    /* -------------------------------------------------------------------------- */
+    /* 🏥 ROUND PATIENT ROUTES (ইউআরএল ফিক্স করা হয়েছে)                             */
+    /* -------------------------------------------------------------------------- */    
+  
+    Route::get('admission/roundpatient', [PatientAdmitController::class, 'roundmedicine'])
+        ->name('admission.roundmedicine');		
+	Route::post('/admission/showroundMedicine', [PatientAdmitController::class, 'showroundMedicine'])
+    ->name('admission.showroundMedicine');	
+	Route::post('/admission/roundmedicineList/list', [PatientAdmitController::class, 'roundmedicineList'])
+    ->name('admission.roundmedicineList.list');
+	Route::post('/admission/roundmedicineSave/save', [PatientAdmitController::class, 'roundmedicineSave'])
+		->name('admission.roundmedicineSave.save');
+	Route::post('/admission/roundmedicineDelete/delete', [PatientAdmitController::class, 'roundmedicineDelete'])
+		->name('admission.roundmedicine.delete');
+	Route::post('/admission/round-medicine-save-all', [PatientAdmitController::class, 'roundmedicineSaveAll'])
+    ->name('admission.roundmedicineSaveAll.save');	
+		
+	// --- Admission for select Fresh Medicine---	
+	
+	Route::get('admission/freshprescription', [PatientAdmitController::class, 'freshprescription'])
+        ->name('admission.freshprescription');		
+	Route::post('/admission/showfreshMedicine', [PatientAdmitController::class, 'showfreshMedicine'])
+    ->name('admission.showfreshMedicine');	
+	Route::post('/admission/freshmedicineList/list', [PatientAdmitController::class, 'freshmedicineList'])
+    ->name('admission.freshmedicineList.list');
+	Route::post('/admission/freshmedicineSave/save', [PatientAdmitController::class, 'freshmedicineSave'])
+		->name('admission.freshmedicineSave.save');
+	Route::post('/admission/freshmedicineDelete/delete', [PatientAdmitController::class, 'freshmedicineDelete'])
+		->name('admission.freshmedicine.delete');
+		
+	// --- Admission for Release Patient---	
+	
+	Route::get('admission/releasepatient', [PatientAdmitController::class, 'releasepatient'])
+        ->name('admission.releasepatient');
+
+    Route::get('admission/Discharge', [PatientAdmitController::class, 'dischargeList'])
+        ->name('admission.discharge');
+
+    Route::post('/admission/showdischargeMedicine', [PatientAdmitController::class, 'showdischargeMedicine'])
+        ->name('admission.showdischargeMedicine');
+
+    Route::post('/admission/discharge-do', [PatientAdmitController::class, 'doDischarge'])
+        ->name('admission.discharge.do');
+
+	// --- Next Stage (move patient to next status) ---
+	Route::post('/admission/next-stage', [PatientAdmitController::class, 'nextStage'])
+		->name('admission.nextStage');
+
+	// --- Get Patient Current Status ---
+	Route::post('/admission/get-patient-status', [PatientAdmitController::class, 'getPatientStatus'])
+		->name('admission.getPatientStatus');
+
+});
