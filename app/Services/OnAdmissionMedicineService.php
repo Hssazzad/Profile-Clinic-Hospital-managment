@@ -49,7 +49,6 @@ class OnAdmissionMedicineService
         return DB::table('template_medicine')
             ->where('templeteid', $templateId)
             ->where('active', 1)
-            ->where('order_type', 'admit')  // ✅ Only load medicines with order_type = 'admit' for auto-loading
             ->orderBy('group')
             ->orderBy('name')
             ->get();
