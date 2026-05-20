@@ -96,9 +96,9 @@ class OnAdmissionMedicineService
                 'medicine_code' => $commonMed->code ?? '',
                 'group_name'    => $commonMed->GroupName ?? '',
                 'strength'      => $commonMed->strength ?? '',
-                'is_from_common' => !is_null($commonMed)
+                'is_from_common' => true
             ];
-        })->filter()->values();
+        })->values();
         
         return [
             'template_medicines' => $mappedMedicines,
